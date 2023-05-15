@@ -6,12 +6,9 @@
 #define TINYCOMPILER_TOKENS_H
 
 // TODO: add tokens here
-enum Token{
+enum Token {
     UNKNOWN = 256,
-    ID,
-    NUMBER,
-    WORD
-
 };
+
 
 #endif //TINYCOMPILER_TOKENS_H

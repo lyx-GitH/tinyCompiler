@@ -5,9 +5,9 @@
 #ifndef TINYCOMPILER_AST_H
 #define TINYCOMPILER_AST_H
 
-#include "stddef.h"
-#include "stdlib.h"
-#include "string.h"
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 #include "ast_node_type.h"
 
 
@@ -35,5 +35,29 @@ pAstNode initAstNode();
 pAstNode createAstNode(enum AstNodeType type, char* value, int len);
 
 void freeAstNode(pAstNode node);
+
+inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
+    //TODO: change this to return real names
+    switch (type) {
+
+        case kNULL:
+            return "kNull";
+        case kROOT:
+            return "kRoot";
+        case kNUMBER:
+            return "kNumber";
+        case kBINOP:
+            return "kBiOp";
+        case kUOP:
+            return "KUop";
+        default:
+            return "Unsupported";
+    }
+}
+
+/*=========== Specialized functions for binary ops ======== */
+pAstNode createBinaryOpTree(const char * op, pAstNode lhs, pAstNode rhs);
+
+pAstNode createUnaryOpTree(const char* op, pAstNode hs);
 
 #endif //TINYCOMPILER_AST_H

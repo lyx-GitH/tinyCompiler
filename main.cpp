@@ -4,7 +4,14 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "lexer/tcLexer.h"
+#include "parser/TCParser.h"
 
+
+extern "C" {
+#include "parser/tiny_compiler_yacc.h"
+#include "lexer/tiny_compiler_lex.h"
+int yyparse(void);
+}
 using namespace llvm;
 
 // This function tests that if your llvm is correctly configured
@@ -39,11 +46,17 @@ void llvm_test() {
 }
 
 int main() {
-    std::cout << "hello, world!" << std::endl;
-    TCLexer tcLexer{"/Users/liuyuxuan/CLionProjects/tinyCompiler/test/a.txt"};
-    tcLexer.parse();
-    for(const auto& tup : tcLexer.getParsedTokenStream()) {
-        std::cout << std::get<0>(tup) << " " << std::get<1>(tup) << std::endl;
-    }
+//    std::cout << "hello, world!" << std::endl;
+//    TCLexer tcLexer{"/Users/liuyuxuan/CLionProjects/tinyCompiler/test/a.txt"};
+//    tcLexer.parse();
+//    for(const auto& tup : tcLexer.getParsedTokenStream()) {
+//        std::cout << std::get<0>(tup) << " " << std::get<1>(tup) << std::endl;
+//    }
+    TinyParserSetRoot(createAstNode(kROOT, nullptr, 0));
+    auto parser = TCParser("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
+    parser.parse();
+    std::cout << "end parsing" << std::endl;
+    parser.visualize();
+
 
 }

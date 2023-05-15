@@ -4,9 +4,10 @@
 
 #include "ast.h"
 
-extern int tiny_parser_node_cnt;
-extern int tiny_parser_line_cnt;
-extern int tiny_parser_col_cnt;
+
+static int parser_node_cnt = 0;
+extern int parser_line_no;
+extern int parser_col_no;
 
 
 void addChild(pAstNode target, pAstNode child) {
@@ -38,20 +39,20 @@ void addNext(pAstNode target, pAstNode next) {
 
 pAstNode initAstNode() {
     pAstNode node = (pAstNode) malloc(sizeof(struct AstNode));
-    node->id_ = -1;
+    node->id_ = parser_node_cnt++;
     node->child_ = NULL;
     node->next_ = NULL;
     node->type_ = kNULL;
     node->col_no_ = -1;
     node->line_no_ = -1;
+    return node;
 }
 
 pAstNode createAstNode(enum AstNodeType type, char *value, int len) {
     pAstNode node = initAstNode();
     node->type_ = type;
-    node->id_ = tiny_parser_node_cnt;
-    node->line_no_ = tiny_parser_line_cnt;
-    node->col_no_ = tiny_parser_col_cnt;
+    node->line_no_ = parser_line_no;
+    node->col_no_ = parser_col_no;
     if (value) {
         node->val_ = malloc(len + 1);
         memset(node->val_, 0, len + 1);
@@ -68,4 +69,17 @@ void freeAstNode(pAstNode node) {
     freeAstNode(node->next_);
     freeAstNode(node->child_);
     free(node);
+}
+
+pAstNode createBinaryOpTree(const char *op, pAstNode lhs, pAstNode rhs) {
+    pAstNode node = createAstNode(kBINOP, op, strlen(op));
+    addChild(node, lhs);
+    addChild(node, rhs);
+    return node;
+}
+
+pAstNode createUnaryOpTree(const char* op, pAstNode hs) {
+    pAstNode node = createAstNode(kUOP, op, strlen(op));
+    addChild(node, hs);
+    return node;
 }

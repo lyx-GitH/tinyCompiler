@@ -1,29 +1,33 @@
-%option c++
-
 %{
-
-#include <string>
-#include <iostream>
-#include "tokens.h"
-
+    #define MOVE TinyParserMove(yylineno, yytext)
+    #include <stdio.h>
+    #include "../ast/ast.h"
+    #include "../parser/parser.h"
+    #include "../parser/tiny_compiler_yacc.h"
+    extern YYSTYPE yylval;
 %}
 
-WhiteSpace          [ \t]
+%option yylineno
+%option noyywrap
+
+
+NUM 0|[1-9]+[0-9]*|[1-9]+[0-9]*"."[0-9]*|"."[0-9]+
+
+%%
+{NUM} {
+    MOVE;
+    yylval.ast_node = createAstNode(kNUMBER, yytext, yyleng);
+    return NUMBER;}
+"+" {MOVE; return ADD;};
+"-" {MOVE; return SUB;};
+"*" {MOVE; return MULT;};
+"/" {MOVE; return DIV;};
+"^" {MOVE; return EXPO;};
+"(" {MOVE; return LB;};
+")" {MOVE; return RB;};
+"_" {MOVE; return US;};
+"\n" {MOVE; return CR;};
+.
 
 %%
 
-
-[A-Za-z]+           {return Token::WORD;}
-[0-9]+              {return Token::NUMBER;}
-
-{WhiteSpace}+       {/*IgnoreSpace*/}
-
-.                   {return Token::UNKNOWN;}
-
-
-%%
-
-int yyFlexLexer::yywrap()
-{
-    return true;
-}
