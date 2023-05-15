@@ -14,16 +14,29 @@
 }
 
 %token <ast_node> NUMBER
-%token  ADD SUB MULT DIV EXPO LB RB US CR
+%token  ADD SUB MULT DIV LB RB US CR
+%token LOGIC_AND LOGIC_OR LOGIC_NOT BIT_OR BIT_AND BIT_XOR
 
 %left ADD SUB
 %left MULT DIV
-%right EXPO
-%nonassoc UMINUS
+%nonassoc UMINUS BIT_NOT LOGIC_NOT
 
-%type <ast_node> expression term factor single line
+%type <ast_node> expression term factor line program block
+%type <asi_node> func_delr func_impl glbl_var_def glbl_var_assign scope
+
 
 %%
+/* program:
+    | program block
+    ;
+
+block: func_delr
+    | func_impl
+    | glbl_var_def
+    | glbl_var_assign
+    ; */
+
+
 input:
     | input line
     ;
@@ -42,13 +55,12 @@ term: factor
     | term DIV factor { $$ = createBinaryOpTree("/", $1, $3);}
     ;
 
-factor: single
-    | factor EXPO factor { $$ = createBinaryOpTree("exp", $1, $3);}
-    ;
 
-single: NUMBER
+factor: NUMBER
     | LB expression RB { $$ = $2; }
-    | SUB single %prec UMINUS { $$ = createUnaryOpTree("-", $2);}
+    | SUB factor %prec UMINUS { $$ = createUnaryOpTree("-", $2);}
+    | LOGIC_NOT factor %prec LOGIC_NOT {printf("LOGIC NOT\n");$$ = createUnaryOpTree("!", $2);}
+    | BIT_NOT factor %prec BIT_NOT {printf("BIT NOT\n"); $$ = createUnaryOpTree("~", $2);}
     | US { $$ = initAstNode(); }
     ;
 

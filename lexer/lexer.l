@@ -22,11 +22,20 @@ NUM 0|[1-9]+[0-9]*|[1-9]+[0-9]*"."[0-9]*|"."[0-9]+
 "-" {MOVE; return SUB;};
 "*" {MOVE; return MULT;};
 "/" {MOVE; return DIV;};
-"^" {MOVE; return EXPO;};
 "(" {MOVE; return LB;};
 ")" {MOVE; return RB;};
 "_" {MOVE; return US;};
 "\n" {MOVE; return CR;};
+"!" {MOVE; return LOGIC_NOT;};
+"||" {MOVE; return LOGIC_OR;};
+"&&" {MOVE; return LOGIC_AND;};
+
+"~" {MOVE; return BIT_NOT;};
+"|" {MOVE; return BIT_OR;};
+"&" {MOVE; return BIT_AND;};
+"^" {MOVE; return BIT_XOR;};
+
+"\t" {MOVE;};
 .
 
 %%
