@@ -14,7 +14,7 @@ include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
 # Now build our tools
-add_executable(tinyCompiler main.cpp ast/ast.h lexer/tokens.h lexer/base_lexer.h lexer/base_lexer.cpp lexer/tcLexer.cpp lexer/tcLexer.h)
+add_executable(tinyCompiler main.cpp ast/ast.h lexer/tokens.h lexer/base_lexer.h lexer/base_lexer.cpp lexer/tcLexer.cpp lexer/tcLexer.h code_gen/CodeGenerator.cpp code_gen/CodeGenerator.h ast/ast_node_type.h ast/ast.c)
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use

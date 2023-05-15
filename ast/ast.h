@@ -5,32 +5,35 @@
 #ifndef TINYCOMPILER_AST_H
 #define TINYCOMPILER_AST_H
 
-#include <memory>
-#include <utility>
+#include "stddef.h"
+#include "stdlib.h"
+#include "string.h"
+#include "ast_node_type.h"
 
-/**
- * This file describes all ast structures used in the TinyCompiler
- */
 
-// base for all asts
-class ExprAst {
-public:
-    using UniqueAstPtr = std::unique_ptr<ExprAst>;
-
-    ExprAst() = default;
-
-    virtual ~ExprAst() = default;
+struct AstNode {
+    int id_;
+    enum AstNodeType type_;
+    int line_no_;
+    int col_no_;
+    char *val_;
+    struct AstNode *child_;
+    struct AstNode *next_;
 };
 
-// Example of an extended Ast
-class IfStmtAst : public ExprAst {
-public:
-    IfStmtAst() = default;
 
-private:
-    UniqueAstPtr condition_;
-    UniqueAstPtr cond_true_expr_;
-    UniqueAstPtr cond_false_expr_;
-};
+
+typedef struct AstNode *pAstNode;
+
+void addChild(pAstNode target, pAstNode child);
+
+void addNext(pAstNode target, pAstNode next);
+
+
+pAstNode initAstNode();
+
+pAstNode createAstNode(enum AstNodeType type, char* value, int len);
+
+void freeAstNode(pAstNode node);
 
 #endif //TINYCOMPILER_AST_H
