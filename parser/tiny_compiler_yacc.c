@@ -1345,7 +1345,7 @@ yyreduce:
     {
         case 5:
 #line 32 "parser.y"
-    {(yyval.ast_node) = (yyvsp[(1) - (2)].ast_node); TinyParserAppendBlock((yyval.ast_node));}
+    {(yyval.ast_node) = createExprTree((yyvsp[(1) - (2)].ast_node)); TinyParserAppendBlock((yyval.ast_node)); }
     break;
 
   case 7:
@@ -1607,7 +1607,7 @@ yyreturn:
 #line 56 "parser.y"
 
 int yyerror(char* s) {
-    fprintf(stderr, "Error: %s at %s\n", s, yytext);
+    fprintf(stderr, "Error: %s at %d, %d\n", s, yytext);
     return 1;
 }
 

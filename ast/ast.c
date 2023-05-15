@@ -72,14 +72,23 @@ void freeAstNode(pAstNode node) {
 }
 
 pAstNode createBinaryOpTree(const char *op, pAstNode lhs, pAstNode rhs) {
-    pAstNode node = createAstNode(kBINOP, op, strlen(op));
+    pAstNode node = createAstNode(kBinOp, op, strlen(op));
     addChild(node, lhs);
     addChild(node, rhs);
     return node;
 }
 
 pAstNode createUnaryOpTree(const char* op, pAstNode hs) {
-    pAstNode node = createAstNode(kUOP, op, strlen(op));
+    pAstNode node = createAstNode(kUop, op, strlen(op));
     addChild(node, hs);
     return node;
 }
+
+pAstNode createExprTree(pAstNode expr_top) {
+    assert(expr_top != NULL);
+    pAstNode node = createAstNode(kExpr, NULL, 0);
+    addChild(node,expr_top);
+    return node;
+}
+
+

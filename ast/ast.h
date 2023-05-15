@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "ast_node_type.h"
 
 
@@ -42,14 +43,16 @@ inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
 
         case kNULL:
             return "kNull";
-        case kROOT:
+        case kRoot:
             return "kRoot";
-        case kNUMBER:
+        case kNumber:
             return "kNumber";
-        case kBINOP:
+        case kBinOp:
             return "kBiOp";
-        case kUOP:
+        case kUop:
             return "KUop";
+        case kExpr:
+            return "kExpr";
         default:
             return "Unsupported";
     }
@@ -59,5 +62,7 @@ inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
 pAstNode createBinaryOpTree(const char * op, pAstNode lhs, pAstNode rhs);
 
 pAstNode createUnaryOpTree(const char* op, pAstNode hs);
+
+pAstNode createExprTree(pAstNode expr_top);
 
 #endif //TINYCOMPILER_AST_H

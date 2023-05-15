@@ -38,6 +38,3 @@ void SyntaxTreePrinter::PrintTreeLow(pAstNode node, std::ostream &out) {
 
 }
 
-void visualize() {
-//    SyntaxTreePrinter()
-}

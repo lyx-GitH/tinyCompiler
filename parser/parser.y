@@ -29,7 +29,7 @@ input:
     ;
 
 line: CR
-    | expression CR {$$ = $1; TinyParserAppendBlock($$);}
+    | expression CR {$$ = createExprTree($1); TinyParserAppendBlock($$); }
     ;
 
 expression: term

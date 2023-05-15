@@ -7,11 +7,11 @@
 
 enum AstNodeType {
     kNULL = 0,
-    kROOT,
-    kNUMBER,
-    kBINOP,
-    kUOP
-
+    kRoot,
+    kNumber,
+    kBinOp,
+    kUop,
+    kExpr
 };
 
 

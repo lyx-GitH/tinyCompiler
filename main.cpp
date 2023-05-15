@@ -52,7 +52,7 @@ int main() {
 //    for(const auto& tup : tcLexer.getParsedTokenStream()) {
 //        std::cout << std::get<0>(tup) << " " << std::get<1>(tup) << std::endl;
 //    }
-    TinyParserSetRoot(createAstNode(kROOT, nullptr, 0));
+    TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
     auto parser = TCParser("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
     parser.parse();
     std::cout << "end parsing" << std::endl;

@@ -35,7 +35,7 @@ void TinyParserMove(int line, char *text) {
 void TinyParserBegin() {
     parser_col_no = 0;
     parser_line_no = 0;
-    parser_root_node = createAstNode(kROOT, NULL, 0);
+    parser_root_node = createAstNode(kRoot, NULL, 0);
     assert(parser_root_node != NULL);
 }
 
@@ -54,9 +54,10 @@ void TinyParserEnd() {
     freeAstNode(parser_root_node);
 }
 
-void TinyParserAppendBlock(pAstNode node) {
+pAstNode TinyParserAppendBlock(pAstNode node) {
     assert(parser_root_node != NULL);
     addChild(parser_root_node, node);
+    return parser_root_node;
 }
 
 pAstNode TinyParserGetRoot() {
@@ -65,6 +66,7 @@ pAstNode TinyParserGetRoot() {
 
 pAstNode TinyParserSetRoot(pAstNode node) {
     parser_root_node = node;
+    return node;
 }
 
 int TinyParserGetLine() {

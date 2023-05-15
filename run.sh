@@ -3,9 +3,7 @@ if ! [[ -e build ]]; then
 fi
 
 
-cd lexer
-flex --header-file=base_lexer.h -t Lexer.l  > base_lexer.cpp
-cd ..
+./conf_yacc_lex.sh
 
 cd build
 cmake ..

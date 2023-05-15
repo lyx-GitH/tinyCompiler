@@ -15,7 +15,7 @@ void TinyParserParse(const char *file_name);
 
 void TinyParserEnd();
 
-void TinyParserAppendBlock(pAstNode block);
+pAstNode TinyParserAppendBlock(pAstNode block);
 
 pAstNode TinyParserGetRoot();
 

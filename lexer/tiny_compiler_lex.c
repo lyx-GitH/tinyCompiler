@@ -778,7 +778,7 @@ YY_RULE_SETUP
 #line 17 "./lexer.l"
 {
     MOVE;
-    yylval.ast_node = createAstNode(kNUMBER, yytext, yyleng);
+    yylval.ast_node = createAstNode(kNumber, yytext, yyleng);
     return NUMBER;}
 	YY_BREAK
 case 2:

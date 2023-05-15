@@ -16,7 +16,7 @@ NUM 0|[1-9]+[0-9]*|[1-9]+[0-9]*"."[0-9]*|"."[0-9]+
 %%
 {NUM} {
     MOVE;
-    yylval.ast_node = createAstNode(kNUMBER, yytext, yyleng);
+    yylval.ast_node = createAstNode(kNumber, yytext, yyleng);
     return NUMBER;}
 "+" {MOVE; return ADD;};
 "-" {MOVE; return SUB;};
