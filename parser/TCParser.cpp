@@ -7,6 +7,7 @@
 #include <iostream>
 
 void TCParser::parse() {
+    TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
     TinyParserBegin();
     TinyParserParse(file_path_.c_str());
     ast_root_ = TinyParserGetRoot();

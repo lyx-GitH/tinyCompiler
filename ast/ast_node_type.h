@@ -9,10 +9,26 @@ enum AstNodeType {
     kNULL = 0,
     kRoot,
     kNumber,
+    kDemNumber = 4,
+    kHexNumber = 5,
+    kOctNumber = 6,
+    kFloatNumber = 7,
     kBinOp,
+    kTriOp,
     kUop,
-    kExpr
+    kExpr,
+    kId,
+    kArgList,
+    kFuncCall,
+    kSubScript,
+    kType,
+    kTypeQualifier,
+    kAssign,
+    kVarDecl,
+    kFuncDelc
 };
+
+#define IS_NUMBER(TYPE) ((TYPE) >> 2 == 1)
 
 
 

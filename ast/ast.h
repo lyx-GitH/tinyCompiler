@@ -45,24 +45,59 @@ inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
             return "kNull";
         case kRoot:
             return "kRoot";
-        case kNumber:
-            return "kNumber";
+        case kDemNumber:
+            return "kDemNumber";
+        case kHexNumber:
+            return "kHexNumber";
+        case kOctNumber:
+            return "kOctNumber";
+        case kFloatNumber:
+            return "kFloatNumber";
         case kBinOp:
-            return "kBiOp";
+            return "kBinOp";
         case kUop:
             return "KUop";
         case kExpr:
             return "kExpr";
+        case kTriOp:
+            return "kTriOp";
+        case kId:
+            return "kId";
+        case kFuncCall:
+            return "kFuncCall";
+        case kArgList:
+            return "kArgList";
+        case kSubScript:
+            return "kSubScript";
+        case kType:
+            return "kType";
+        case kAssign:
+            return "kAssign";
+        case kVarDecl:
+            return "kVarDecl";
+        case kTypeQualifier:
+            return "kTypeQualifier";
+        case kFuncDelc:
+            return "kFuncDelc";
         default:
             return "Unsupported";
     }
 }
 
 /*=========== Specialized functions for binary ops ======== */
+
+pAstNode createBinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode right);
+
 pAstNode createBinaryOpTree(const char * op, pAstNode lhs, pAstNode rhs);
 
 pAstNode createUnaryOpTree(const char* op, pAstNode hs);
 
+pAstNode createTrinaryOpTree(pAstNode condition, pAstNode true_exp, pAstNode false_exp);
+
 pAstNode createExprTree(pAstNode expr_top);
+
+pAstNode createArgList(pAstNode args);
+
+pAstNode createFunctionCallTree(pAstNode function_name, pAstNode arg_list);
 
 #endif //TINYCOMPILER_AST_H

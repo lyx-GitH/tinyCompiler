@@ -40,30 +40,82 @@
       know about them.  */
    enum yytokentype {
      NUMBER = 258,
-     ADD = 259,
-     SUB = 260,
-     MULT = 261,
-     DIV = 262,
-     EXPO = 263,
-     LB = 264,
-     RB = 265,
-     US = 266,
-     CR = 267,
-     UMINUS = 268
+     ID = 259,
+     TYPE = 260,
+     TYPE_QUALI = 261,
+     SEMI = 262,
+     ADD = 263,
+     SUB = 264,
+     MULT = 265,
+     DIV = 266,
+     MOD = 267,
+     COMMA = 268,
+     LB = 269,
+     RB = 270,
+     LOGIC_AND = 271,
+     LOGIC_OR = 272,
+     LOGIC_NOT = 273,
+     BIT_OR = 274,
+     BIT_AND = 275,
+     BIT_XOR = 276,
+     LSHIFT = 277,
+     RSHIFT = 278,
+     LSBSCRPT = 279,
+     RSBSCRPT = 280,
+     LSCOPE = 281,
+     RSCOPE = 282,
+     GT = 283,
+     LT = 284,
+     GE = 285,
+     LE = 286,
+     EQ = 287,
+     NEQ = 288,
+     ASSIGN = 289,
+     T1 = 290,
+     T2 = 291,
+     BIT_NOT = 292,
+     UPOSITIVE = 293,
+     UMINUS = 294
    };
 #endif
 /* Tokens.  */
 #define NUMBER 258
-#define ADD 259
-#define SUB 260
-#define MULT 261
-#define DIV 262
-#define EXPO 263
-#define LB 264
-#define RB 265
-#define US 266
-#define CR 267
-#define UMINUS 268
+#define ID 259
+#define TYPE 260
+#define TYPE_QUALI 261
+#define SEMI 262
+#define ADD 263
+#define SUB 264
+#define MULT 265
+#define DIV 266
+#define MOD 267
+#define COMMA 268
+#define LB 269
+#define RB 270
+#define LOGIC_AND 271
+#define LOGIC_OR 272
+#define LOGIC_NOT 273
+#define BIT_OR 274
+#define BIT_AND 275
+#define BIT_XOR 276
+#define LSHIFT 277
+#define RSHIFT 278
+#define LSBSCRPT 279
+#define RSBSCRPT 280
+#define LSCOPE 281
+#define RSCOPE 282
+#define GT 283
+#define LT 284
+#define GE 285
+#define LE 286
+#define EQ 287
+#define NEQ 288
+#define ASSIGN 289
+#define T1 290
+#define T2 291
+#define BIT_NOT 292
+#define UPOSITIVE 293
+#define UMINUS 294
 
 
 
@@ -75,7 +127,7 @@ typedef union YYSTYPE
     struct AstNode* ast_node;
 }
 /* Line 1529 of yacc.c.  */
-#line 79 "./tiny_compiler_yacc.h"
+#line 131 "./tiny_compiler_yacc.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

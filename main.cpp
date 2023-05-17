@@ -45,19 +45,11 @@ void llvm_test() {
     delete module;
 }
 
+
 int main() {
-//    std::cout << "hello, world!" << std::endl;
-//    TCLexer tcLexer{"/Users/liuyuxuan/CLionProjects/tinyCompiler/test/a.txt"};
-//    tcLexer.parse();
-//    for(const auto& tup : tcLexer.getParsedTokenStream()) {
-//        std::cout << std::get<0>(tup) << " " << std::get<1>(tup) << std::endl;
-//    }
-    TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
     auto parser = TCParser("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
     parser.parse();
     std::cout << "end parsing" << std::endl;
     parser.visualize();
-
-
-
+    return 0;
 }

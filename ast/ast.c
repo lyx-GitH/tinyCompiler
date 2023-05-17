@@ -4,41 +4,37 @@
 
 #include "ast.h"
 
+#include "stdio.h"
 
 static int parser_node_cnt = 0;
 extern int parser_line_no;
 extern int parser_col_no;
 
-
 void addChild(pAstNode target, pAstNode child) {
-    if (!target || !child)
-        return;
+    if (!target || !child) return;
     if (!target->child_) {
         target->child_ = child;
         return;
     }
 
     pAstNode c = target->child_;
-    while (c->next_)
-        c = c->next_;
+    while (c->next_) c = c->next_;
     c->next_ = child;
 }
 
 void addNext(pAstNode target, pAstNode next) {
-    if (!target && !next)
-        return;
+    if (!target && !next) return;
     if (!target->next_) {
         target->next_ = next;
         return;
     }
     pAstNode n = target->next_;
-    while (n->next_)
-        n = n->next_;
+    while (n->next_) n = n->next_;
     n->next_ = next;
 }
 
 pAstNode initAstNode() {
-    pAstNode node = (pAstNode) malloc(sizeof(struct AstNode));
+    pAstNode node = (pAstNode)malloc(sizeof(struct AstNode));
     node->id_ = parser_node_cnt++;
     node->child_ = NULL;
     node->next_ = NULL;
@@ -62,10 +58,8 @@ pAstNode createAstNode(enum AstNodeType type, char *value, int len) {
 }
 
 void freeAstNode(pAstNode node) {
-    if (!node)
-        return;
-    if (node->val_)
-        free(node->val_);
+    if (!node) return;
+    if (node->val_) free(node->val_);
     freeAstNode(node->next_);
     freeAstNode(node->child_);
     free(node);
@@ -78,17 +72,48 @@ pAstNode createBinaryOpTree(const char *op, pAstNode lhs, pAstNode rhs) {
     return node;
 }
 
-pAstNode createUnaryOpTree(const char* op, pAstNode hs) {
+pAstNode createUnaryOpTree(const char *op, pAstNode hs) {
     pAstNode node = createAstNode(kUop, op, strlen(op));
     addChild(node, hs);
     return node;
 }
 
-pAstNode createExprTree(pAstNode expr_top) {
-    assert(expr_top != NULL);
-    pAstNode node = createAstNode(kExpr, NULL, 0);
-    addChild(node,expr_top);
+pAstNode createTrinaryOpTree(pAstNode condition, pAstNode true_exp,
+                             pAstNode false_exp) {
+    pAstNode node = createAstNode(kTriOp, "?:", 2);
+    addChild(node, condition);
+    addChild(node, true_exp);
+    addChild(node, false_exp);
     return node;
 }
 
+pAstNode createExprTree(pAstNode expr_top) {
+    assert(expr_top != NULL);
+    if(IS_NUMBER(expr_top->type_))
+        return expr_top;
+    pAstNode node = createAstNode(kExpr, NULL, 0);
+    addChild(node, expr_top);
+    return node;
+}
 
+pAstNode createArgList(pAstNode args) {
+    pAstNode node = createAstNode(kArgList, NULL, 0);
+    addChild(node, args);
+    return node;
+}
+
+pAstNode createFunctionCallTree(pAstNode function_name, pAstNode arg_list) {
+    pAstNode node = createAstNode(kFuncCall, NULL, 0);
+    assert(function_name->type_ == kId);
+    assert(arg_list == NULL || arg_list->type_ == kArgList);
+    addChild(node, function_name);
+    addChild(node, arg_list);
+    return node;
+}
+
+pAstNode createBinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode right){
+    pAstNode node = createAstNode(type, NULL, 0);
+    addChild(node, left);
+    addChild(node, right);
+    return node;
+}

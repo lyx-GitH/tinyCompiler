@@ -31,7 +31,6 @@ private:
 
 };
 
-void visualize();
 
 
 #endif //TINYCOMPILER_TCPARSER_H
