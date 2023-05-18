@@ -49,7 +49,6 @@ void llvm_test() {
 int main() {
     auto parser = TCParser("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
     parser.parse();
-    std::cout << "end parsing" << std::endl;
     parser.visualize();
     return 0;
 }

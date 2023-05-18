@@ -34,7 +34,7 @@ void addNext(pAstNode target, pAstNode next) {
 }
 
 pAstNode initAstNode() {
-    pAstNode node = (pAstNode)malloc(sizeof(struct AstNode));
+    pAstNode node = (pAstNode) malloc(sizeof(struct AstNode));
     node->id_ = parser_node_cnt++;
     node->child_ = NULL;
     node->next_ = NULL;
@@ -89,7 +89,7 @@ pAstNode createTrinaryOpTree(pAstNode condition, pAstNode true_exp,
 
 pAstNode createExprTree(pAstNode expr_top) {
     assert(expr_top != NULL);
-    if(IS_NUMBER(expr_top->type_))
+    if (IS_NUMBER(expr_top->type_))
         return expr_top;
     pAstNode node = createAstNode(kExpr, NULL, 0);
     addChild(node, expr_top);
@@ -111,9 +111,34 @@ pAstNode createFunctionCallTree(pAstNode function_name, pAstNode arg_list) {
     return node;
 }
 
-pAstNode createBinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode right){
+pAstNode createBinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode right) {
     pAstNode node = createAstNode(type, NULL, 0);
     addChild(node, left);
     addChild(node, right);
     return node;
+}
+
+pAstNode createQualifiedVar(pAstNode qualifiers, pAstNode type, pAstNode Id) {
+    assert(qualifiers->type_ == kTypeQualifier);
+    assert(type->type_ == kType);
+    assert(Id->type_ == kId);
+
+    // pAstNode type_node = createBinaryTreeNode(kTypeFeature, type, qualifiers);
+    pAstNode type_node = createFeaturedType(qualifiers, type);
+    pAstNode node = createBinaryTreeNode(kVarDecl, type_node, Id);
+    return node;
+}
+
+pAstNode createFeaturedType(pAstNode features, pAstNode type){
+    assert(features->type_ == kTypeQualifier);
+    assert(type->type_ == kType);
+    return createBinaryTreeNode(kTypeFeature, type, features);
+}
+
+pAstNode createFunctionDelcTree(pAstNode var_delc, pAstNode placeholders){
+    var_delc->type_ = kFuncDelc;
+    pAstNode node = createAstNode(kFuncPlaceHolds, NULL, 0);
+    addChild(node, placeholders);
+    addChild(var_delc,node);
+    return var_delc;
 }

@@ -2,6 +2,7 @@
 %{
   #include <stdio.h>
   #include "parser.h"
+  #include "../exceptions/parser_error.h"
 
   extern char *yytext;
   extern int yylex(void);
@@ -13,8 +14,9 @@
     struct AstNode* ast_node;
 }
 
-%token <ast_node> NUMBER ID
-%token <ast_node> TYPE TYPE_QUALI CONST
+%token <ast_node> NUMBER ID VOID
+%token <ast_node> TYPE 
+%token <ast_node> CONST STATIC SIGNED
 %token SEMI
 %token ADD SUB MULT DIV MOD COMMA
 %token LB RB
@@ -34,8 +36,9 @@
 %nonassoc UMINUS UPOSITIVE BIT_NOT LOGIC_NOT
 
 %type <ast_node> var_declare var_impl
-%type <ast_node> func_declare func_delr_list func_impl
-%type <ast_node> type_qualifier
+%type <ast_node> func_declare f_args_plchld arg_placeholder 
+%type <ast_node> type_qualifier type_qualifiers
+%type <ast_node> ftype_qualifiers f_var_declare ftype_qualifier
 %type <ast_node> left_value
 %type <ast_node> init_list
 %type <ast_node> function_call args_list
@@ -62,28 +65,39 @@ input:
     | input line
     ;
 
-line: var_declare SEMI  { TinyParserAppendBlock($1);}
-    | var_impl SEMI     { TinyParserAppendBlock($1);}
-    | func_declare      { TinyParserAppendBlock($1);}
-    | func_impl         { TinyParserAppendBlock($1);}
+line: var_declare SEMI      { TinyParserAppendBlock($1);}
+    | var_impl SEMI         { TinyParserAppendBlock($1);}
+    | func_declare SEMI     { TinyParserAppendBlock($1);}
     ;
 
 var_declare : TYPE ID           { $$ = createBinaryTreeNode(kVarDecl, $1, $2);}
-    | type_qualifier TYPE ID    { $$ = createBinaryTreeNode(kTypeQualifier, $1, $2); $$ = createBinaryTreeNode(kVarDecl, $3, $$);}
+    | type_qualifiers TYPE ID    { $$ = createQualifiedVar($1, $2, $3); }
     ;
 
 // TODO : implement this
-func_declare: var_declare LB RB SEMI
-    | var_declare LB func_delr_list RB SEMI
+func_declare: f_var_declare LB RB {$$ = createFunctionDelcTree($1, NULL); }
+    | f_var_declare LB f_args_plchld RB  {$$ = createFunctionDelcTree($1, $3); }
+    ;
+
+f_var_declare : var_declare
+    | VOID ID { $$ = createBinaryTreeNode(kVarDecl, $1, $2);}
     ;
 
 var_impl : var_declare ASSIGN expression {$$ = createBinaryTreeNode(kAssign, $1, $3); }
 
-type_qualifier: TYPE_QUALI {$$ = $1; }
-    | CONST {$$ = $1; }
-    | type_qualifier TYPE_QUALI {addNext($1, $2);}
-    | type_qualifier CONST {addNext($1, $2); }
+
+type_qualifiers : type_qualifier
+    | type_qualifiers type_qualifier {addNext($1, $2);}
     ;
+
+type_qualifier : CONST | STATIC | SIGNED;
+
+ftype_qualifiers : type_qualifier
+    | ftype_qualifiers ftype_qualifier {addNext($1, $2);}
+    ;
+
+ftype_qualifier : CONST | SIGNED;
+
 
 expression : expression9
     | expression9 T1 expression9 T2 expression9 {$$ = createTrinaryOpTree($1, $3, $5);}
@@ -166,10 +180,14 @@ args_list : expression {$$ = createArgList($1); }
     ;
 
 // TODO: implement this
-func_delr_list : TYPE ID
-    | CONST TYPE ID
-    | func_delr_list COMMA TYPE ID
-    | func_delr_list COMMA CONST TYPE ID
+f_args_plchld : arg_placeholder
+    | f_args_plchld COMMA arg_placeholder {addNext($1, $3); }
+    ;
+
+arg_placeholder: VOID       {$$ = $1;}
+    | ftype_qualifiers TYPE {$$ = createFeaturedType($1, $2); }
+    | TYPE ID               {$$ = $1;}
+    | ftype_qualifiers TYPE ID {$$ = createFeaturedType($1, $2);}
     ;
 
 left_value: ID { $$ = $1;}
@@ -181,7 +199,8 @@ init_list: LSCOPE RSCOPE
 
 %%
 int yyerror(char* s) {
-    fprintf(stderr, "Error: %s at %s\n", s, yytext);
+    printf("tinyParser: \033[31merror:\033[0m %s at %s:%d:%d\n", s, TinyParserGetPwd(), TinyParserGetLine(), TinyParserGetColumn() - TinyParserGetCurTokLen());
+    show_lexer_error(TinyParserGetPwd(), TinyParserGetColumn() - TinyParserGetCurTokLen(), TinyParserGetLine());
     return 1;
 }
 

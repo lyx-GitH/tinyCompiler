@@ -23,9 +23,12 @@ enum AstNodeType {
     kSubScript,
     kType,
     kTypeQualifier,
+    kTypeFeature,
+    kArgPlaceholders,
     kAssign,
     kVarDecl,
-    kFuncDelc
+    kFuncDelc,
+    kFuncPlaceHolds
 };
 
 #define IS_NUMBER(TYPE) ((TYPE) >> 2 == 1)

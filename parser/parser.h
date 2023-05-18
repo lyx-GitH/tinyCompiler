@@ -15,6 +15,10 @@ void TinyParserParse(const char *file_name);
 
 void TinyParserEnd();
 
+void TinyParserRaiseError();
+
+const char* TinyParserGetPwd();
+
 pAstNode TinyParserAppendBlock(pAstNode block);
 
 pAstNode TinyParserGetRoot();
@@ -24,6 +28,8 @@ pAstNode TinyParserSetRoot(pAstNode node);
 int TinyParserGetLine();
 
 int TinyParserGetColumn();
+
+int TinyParserGetCurTokLen();
 
 
 #endif //TINYCOMPILER_PARSER_H

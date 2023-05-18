@@ -79,6 +79,10 @@ inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
             return "kTypeQualifier";
         case kFuncDelc:
             return "kFuncDelc";
+        case kFuncPlaceHolds:
+            return "kFuncPlaceHolds";
+        case kTypeFeature:
+            return "kTypeFeature";
         default:
             return "Unsupported";
     }
@@ -99,5 +103,11 @@ pAstNode createExprTree(pAstNode expr_top);
 pAstNode createArgList(pAstNode args);
 
 pAstNode createFunctionCallTree(pAstNode function_name, pAstNode arg_list);
+
+pAstNode createFeaturedType(pAstNode features, pAstNode type);
+
+pAstNode createQualifiedVar(pAstNode qualifiers, pAstNode type, pAstNode Id);
+
+pAstNode createFunctionDelcTree(pAstNode var_decl, pAstNode placeholders);
 
 #endif //TINYCOMPILER_AST_H

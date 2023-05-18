@@ -9,8 +9,16 @@
 void TCParser::parse() {
     TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
     TinyParserBegin();
-    TinyParserParse(file_path_.c_str());
+    try{
+        TinyParserParse(file_path_.c_str());
+    } catch(std::runtime_error e) {
+        std::printf("\033[31m failed \033[0m\n");
+        is_ok_ = false;
+        return;
+    }
+    is_ok_ = true;
     ast_root_ = TinyParserGetRoot();
+    std::printf("\033[32m done \033[0m\n");
     assert(ast_root_ != nullptr);
 }
 

@@ -41,93 +41,99 @@
    enum yytokentype {
      NUMBER = 258,
      ID = 259,
-     TYPE = 260,
-     TYPE_QUALI = 261,
-     SEMI = 262,
-     ADD = 263,
-     SUB = 264,
-     MULT = 265,
-     DIV = 266,
-     MOD = 267,
-     COMMA = 268,
-     LB = 269,
-     RB = 270,
-     LOGIC_AND = 271,
-     LOGIC_OR = 272,
-     LOGIC_NOT = 273,
-     BIT_OR = 274,
-     BIT_AND = 275,
-     BIT_XOR = 276,
-     LSHIFT = 277,
-     RSHIFT = 278,
-     LSBSCRPT = 279,
-     RSBSCRPT = 280,
-     LSCOPE = 281,
-     RSCOPE = 282,
-     GT = 283,
-     LT = 284,
-     GE = 285,
-     LE = 286,
-     EQ = 287,
-     NEQ = 288,
-     ASSIGN = 289,
-     T1 = 290,
-     T2 = 291,
-     BIT_NOT = 292,
-     UPOSITIVE = 293,
-     UMINUS = 294
+     VOID = 260,
+     TYPE = 261,
+     CONST = 262,
+     STATIC = 263,
+     SIGNED = 264,
+     SEMI = 265,
+     ADD = 266,
+     SUB = 267,
+     MULT = 268,
+     DIV = 269,
+     MOD = 270,
+     COMMA = 271,
+     LB = 272,
+     RB = 273,
+     LOGIC_AND = 274,
+     LOGIC_OR = 275,
+     LOGIC_NOT = 276,
+     BIT_OR = 277,
+     BIT_AND = 278,
+     BIT_XOR = 279,
+     LSHIFT = 280,
+     RSHIFT = 281,
+     LSBSCRPT = 282,
+     RSBSCRPT = 283,
+     LSCOPE = 284,
+     RSCOPE = 285,
+     GT = 286,
+     LT = 287,
+     GE = 288,
+     LE = 289,
+     EQ = 290,
+     NEQ = 291,
+     ASSIGN = 292,
+     T1 = 293,
+     T2 = 294,
+     BIT_NOT = 295,
+     UPOSITIVE = 296,
+     UMINUS = 297
    };
 #endif
 /* Tokens.  */
 #define NUMBER 258
 #define ID 259
-#define TYPE 260
-#define TYPE_QUALI 261
-#define SEMI 262
-#define ADD 263
-#define SUB 264
-#define MULT 265
-#define DIV 266
-#define MOD 267
-#define COMMA 268
-#define LB 269
-#define RB 270
-#define LOGIC_AND 271
-#define LOGIC_OR 272
-#define LOGIC_NOT 273
-#define BIT_OR 274
-#define BIT_AND 275
-#define BIT_XOR 276
-#define LSHIFT 277
-#define RSHIFT 278
-#define LSBSCRPT 279
-#define RSBSCRPT 280
-#define LSCOPE 281
-#define RSCOPE 282
-#define GT 283
-#define LT 284
-#define GE 285
-#define LE 286
-#define EQ 287
-#define NEQ 288
-#define ASSIGN 289
-#define T1 290
-#define T2 291
-#define BIT_NOT 292
-#define UPOSITIVE 293
-#define UMINUS 294
+#define VOID 260
+#define TYPE 261
+#define CONST 262
+#define STATIC 263
+#define SIGNED 264
+#define SEMI 265
+#define ADD 266
+#define SUB 267
+#define MULT 268
+#define DIV 269
+#define MOD 270
+#define COMMA 271
+#define LB 272
+#define RB 273
+#define LOGIC_AND 274
+#define LOGIC_OR 275
+#define LOGIC_NOT 276
+#define BIT_OR 277
+#define BIT_AND 278
+#define BIT_XOR 279
+#define LSHIFT 280
+#define RSHIFT 281
+#define LSBSCRPT 282
+#define RSBSCRPT 283
+#define LSCOPE 284
+#define RSCOPE 285
+#define GT 286
+#define LT 287
+#define GE 288
+#define LE 289
+#define EQ 290
+#define NEQ 291
+#define ASSIGN 292
+#define T1 293
+#define T2 294
+#define BIT_NOT 295
+#define UPOSITIVE 296
+#define UMINUS 297
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 12 "parser.y"
+#line 13 "parser.y"
 {
     struct AstNode* ast_node;
 }
 /* Line 1529 of yacc.c.  */
-#line 131 "./tiny_compiler_yacc.h"
+#line 137 "./tiny_compiler_yacc.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

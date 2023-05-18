@@ -32,10 +32,16 @@ ID {LITERAL}+{ID_C}*
     return TYPE;
 }
 
-"static"|"signed" {
+"void" {
+    MOVE;
+    NODE(kType);
+    return VOID;
+}
+
+"signed" {
     MOVE;
     NODE(kTypeQualifier);
-    return TYPE_QUALI;
+    return SIGNED;
 }
 
 "const" {
@@ -43,6 +49,13 @@ ID {LITERAL}+{ID_C}*
     NODE(kTypeQualifier);
     return CONST;
 }
+
+"static" {
+    MOVE;
+    NODE(kTypeQualifier);
+    return STATIC;
+}
+
 
 
 {DEM_NUM} {
@@ -122,7 +135,7 @@ ID {LITERAL}+{ID_C}*
 
 "\n" {MOVE;};
 "\t" {MOVE;};
-.
+. {MOVE;};
 
 %%
 

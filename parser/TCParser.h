@@ -17,15 +17,18 @@ extern "C" {
 
 class TCParser {
 public:
-    TCParser(std::string file_path) : file_path_(std::move(file_path)), ast_root_{nullptr} {}
+    explicit TCParser(std::string file_path) : file_path_(std::move(file_path)), ast_root_{nullptr}, is_ok_{false} {}
 
     void parse();
 
     void visualize(bool to_file = false, const std::string &out_file_path = "");
 
+    const pAstNode getSyntaxTree();
+
     ~TCParser() { freeAstNode(ast_root_); }
 
 private:
+    bool is_ok_;
     std::string file_path_;
     pAstNode ast_root_;
 
