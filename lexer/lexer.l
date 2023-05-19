@@ -26,23 +26,23 @@ ID {LITERAL}+{ID_C}*
 
 
 %%
-"char"|"short"|"int"|"long"|"float"|"double" {
+
+";" {MOVE; return SEMI;}
+
+"char"|"short"|"int"|"long"|"float"|"double"|"void" {
     MOVE;
     NODE(kType);
     return TYPE;
 }
 
-"void" {
-    MOVE;
-    NODE(kType);
-    return VOID;
-}
 
 "signed" {
     MOVE;
     NODE(kTypeQualifier);
     return SIGNED;
 }
+
+"unsigned" {MOVE; NODE(kTypeQualifier); return UNSIGNED; }
 
 "const" {
     MOVE;
@@ -55,6 +55,49 @@ ID {LITERAL}+{ID_C}*
     NODE(kTypeQualifier);
     return STATIC;
 }
+
+"struct" {
+    MOVE;
+    return STRUCT;
+}
+
+"enum" {
+    MOVE;
+    return ENUM;
+}
+
+"union" {
+    MOVE;
+    return UNION;
+}
+
+"sizeof" {
+    MOVE;
+    return SIZE_OF;
+}
+
+"typedef" {
+    MOVE; 
+    return TYPE_DEF;
+}
+
+"if"    {MOVE; return IF;}
+"else"  {MOVE; return ELSE;}
+
+"for"   {MOVE; return FOR;}
+"while" {MOVE; return WHILE;}
+"do"    {MOVE; return DO; }
+
+"switch"    {MOVE; return SWITCH; }
+"case"      {MOVE; return CASE;}
+"defualt"   {MOVE; return DEFAULT; }
+
+"goto"      {MOVE; return GOTO;}
+"break"     {MOVE; return BREAK;}
+"continue"  {MOVE; return CONTINUE;}
+
+"..." {MOVE; return VARGS; }
+"return" {MOVE; return RET;}
 
 
 
@@ -78,22 +121,44 @@ ID {LITERAL}+{ID_C}*
 
 {FLT_NUM} {
     MOVE;
-    yylval.ast_node = createAstNode(kFloatNumber, yytext, yyleng);
+    NODE(kFloatNumber);
     return NUMBER;
 }
 
 {ID} {
+    printf("got id : %s\n", yytext);
     MOVE;
-    yylval.ast_node = createAstNode(kId, yytext, yyleng);
+    NODE(kId);
     return ID;
 }
 
-";" {MOVE; return SEMI;}
 
-"=" {MOVE; return ASSIGN;};
+
+
+
+"\." {MOVE; return DOT;}
+"->" {MOVE; return ARROW;}
+
+
+
+
+"=" { MOVE; return ASSIGN;};
+"+=" {MOVE; return A_PLUS;};
+"-=" {MOVE; return A_SUB;};
+"*=" {MOVE; return A_MULT;};
+"/=" {MOVE; return A_DIV;};
+"%=" {MOVE; return A_MOD;};
+"<<=" {MOVE; return A_LS;};
+">>=" {MOVE; return A_RS;};
+"|=" {MOVE; return A_OR;};
+"&=" {MOVE; return A_AND;};
+"^=" {MOVE; return A_XOR;};
 
 "(" {MOVE; return LB;};
 ")" {MOVE; return RB;};
+
+"++" {MOVE; return PP;};
+"--" {MOVE; return SS; }
 
 "[" {MOVE; return LSBSCRPT;};
 "]" {MOVE; return RSBSCRPT;};
@@ -135,6 +200,11 @@ ID {LITERAL}+{ID_C}*
 
 "\n" {MOVE;};
 "\t" {MOVE;};
+
+"//"(\\.|[^\n])*[\n]																						{MOVE;};
+[/][*]([^*]|[*]*[^*/])*[*]+[/]                                                                              {MOVE;};
+\"(\\.|[^\"])*\"																							{MOVE; NODE(kStrLiteral); return STR; }
+"'"."'"                                                                                                     {MOVE; NODE(kCharLiteral); return NUMBER;}
 . {MOVE;};
 
 %%

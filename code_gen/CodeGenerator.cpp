@@ -3,3 +3,13 @@
 //
 
 #include "CodeGenerator.h"
+
+void CodeGenerator::generate() {
+    assert(root_ != nullptr && root_->type_ == kRoot);
+    auto start = root_->child_;
+    while(start) {
+        generators[start->type_]();
+        start = start->next_;
+    }
+
+}

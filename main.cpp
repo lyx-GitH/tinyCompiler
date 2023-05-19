@@ -11,6 +11,7 @@ extern "C" {
 #include "parser/tiny_compiler_yacc.h"
 #include "lexer/tiny_compiler_lex.h"
 int yyparse(void);
+extern int yydebug;
 }
 using namespace llvm;
 
@@ -47,8 +48,9 @@ void llvm_test() {
 
 
 int main() {
+    yydebug = 1;
     auto parser = TCParser("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
     parser.parse();
-    parser.visualize();
+    parser.visualize(false);
     return 0;
 }

@@ -13,25 +13,44 @@ enum AstNodeType {
     kHexNumber = 5,
     kOctNumber = 6,
     kFloatNumber = 7,
+    kType = 16,
+    kPtrType,
+    kArrType,
+    kFuncType,
     kBinOp,
     kTriOp,
     kUop,
     kExpr,
+    kInitList,
     kId,
     kArgList,
     kFuncCall,
     kSubScript,
-    kType,
     kTypeQualifier,
     kTypeFeature,
+    kTypeFeatureEmpty,
     kArgPlaceholders,
     kAssign,
+    KUAsign,
+    kCast,
+    kAssignOp,
     kVarDecl,
+    kVarInit,
+    kTypeDef,
     kFuncDelc,
-    kFuncPlaceHolds
+    kFuncParams,
+    kStructMember,
+    kScope,
+    kIfStmt,
+    kForStmt,
+    kWhileStmt,
+    kDoWhileStmt,
+    kCharLiteral,
+    kStrLiteral
 };
 
 #define IS_NUMBER(TYPE) ((TYPE) >> 2 == 1)
+#define IS_TYPE(t) ((t) >> 2 == 4)
 
 
 

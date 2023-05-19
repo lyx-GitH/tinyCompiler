@@ -1,0 +1,3265 @@
+Useless nonterminals
+
+   line
+
+
+Terminals which are not used
+
+   SIGNED
+   UNSIGNED
+   RET
+   TYPE_DEF
+   IF
+   ELSE
+   WHILE
+   DO
+   FOR
+   SWITCH
+   GOTO
+   BREAK
+   CASE
+   DEFAULT
+   CONTINUE
+   RETURN
+   "then"
+
+
+Useless rules
+
+  134 line: decl_list
+
+
+State 172 conflicts: 1 shift/reduce
+State 202 conflicts: 1 shift/reduce
+
+
+Grammar
+
+    0 $accept: input $end
+
+    1 input: decl_list
+
+    2 decl_list: decl
+    3          | decl_list decl
+
+    4 decl: decl_specs init_declarator_list SEMI
+
+    5 decl_specs: storage_class_spec decl_specs
+    6           | storage_class_spec
+    7           | type_spec decl_specs
+    8           | type_spec
+    9           | type_qualifier decl_specs
+   10           | type_qualifier
+
+   11 storage_class_spec: STATIC
+
+   12 type_spec: type_name
+
+   13 type_qualifier: CONST
+
+   14 init_declarator_list: init_declarator
+   15                     | init_declarator_list COMMA init_declarator
+
+   16 init_declarator: declarator
+   17                | declarator ASSIGN initializer
+
+   18 declarator: pointer direct_declarator
+   19           | direct_declarator
+
+   20 direct_declarator: ID
+   21                  | LB declarator RB
+   22                  | direct_declarator LSBSCRPT expression10 RSBSCRPT
+   23                  | direct_declarator LSBSCRPT RSBSCRPT
+   24                  | direct_declarator LB param_type_list RB
+   25                  | direct_declarator LB RB
+
+   26 abstract_declarator: pointer
+   27                    | pointer direct_abstract_declarator
+   28                    | direct_abstract_declarator
+
+   29 direct_abstract_declarator: LB abstract_declarator RB
+   30                           | direct_abstract_declarator LSBSCRPT expression10 RSBSCRPT
+   31                           | LSBSCRPT expression10 RSBSCRPT
+   32                           | direct_abstract_declarator LSBSCRPT RSBSCRPT
+   33                           | LSBSCRPT RSBSCRPT
+   34                           | direct_abstract_declarator LB param_type_list RB
+   35                           | LB param_type_list RB
+   36                           | direct_abstract_declarator LB RB
+   37                           | LB RB
+
+   38 param_type_list: param_list
+   39                | param_list COMMA VARGS
+
+   40 param_list: param_decl
+   41           | param_list COMMA param_decl
+
+   42 param_decl: decl_specs declarator
+   43           | decl_specs abstract_declarator
+   44           | decl_specs
+
+   45 pointer: MULT type_qualifier_list
+   46        | MULT
+   47        | MULT type_qualifier_list pointer
+   48        | MULT pointer
+
+   49 type_qualifier_list: type_qualifier
+   50                    | type_qualifier_list type_qualifier
+
+   51 initializer: expression11
+   52            | LSCOPE initializer_list RSCOPE
+   53            | LSCOPE initializer_list COMMA RSCOPE
+
+   54 initializer_list: initializer
+   55                 | initializer_list COMMA initializer
+
+   56 expression: expression11
+   57           | expression COMMA expression11
+
+   58 expression11: expression10
+   59             | unaries aop expression11
+
+   60 expression10: expression9
+   61             | expression9 T1 expression T2 expression10
+
+   62 expression9: expression8
+   63            | expression9 LOGIC_OR expression8
+
+   64 expression8: expression7
+   65            | expression8 LOGIC_AND expression7
+
+   66 expression7: expression6
+   67            | expression7 BIT_OR expression6
+
+   68 expression6: expression5
+   69            | expression6 BIT_XOR expression5
+
+   70 expression5: expression4
+   71            | expression5 BIT_AND expression4
+
+   72 expression4: expression3
+   73            | expression4 EQ expression3
+   74            | expression4 NEQ expression3
+
+   75 expression3: expression2
+   76            | expression3 GT expression2
+   77            | expression3 LT expression2
+   78            | expression3 GE expression2
+   79            | expression3 LE expression2
+
+   80 expression2: expression1
+   81            | expression2 LSHIFT expression1
+   82            | expression2 RSHIFT expression1
+
+   83 expression1: term
+   84            | expression1 ADD term
+   85            | expression1 SUB term
+
+   86 term: factor
+   87     | term MULT factor
+   88     | term DIV factor
+   89     | term MOD factor
+
+   90 factor: unaries
+   91       | LB type_name RB factor
+
+   92 unaries: postfix
+   93        | PP unaries
+   94        | SS unaries
+   95        | uop factor
+   96        | SIZE_OF unaries
+   97        | SIZE_OF LB type_name RB
+
+   98 postfix: single
+   99        | postfix LSBSCRPT expression RSBSCRPT
+  100        | postfix DOT ID
+  101        | postfix ARROW ID
+  102        | postfix PP
+  103        | postfix SS
+  104        | function_call
+
+  105 single: NUMBER
+  106       | STR
+  107       | ID
+  108       | LB expression RB
+
+  109 aop: ASSIGN
+  110    | A_AND
+  111    | A_DIV
+  112    | A_PLUS
+  113    | A_SUB
+  114    | A_MULT
+  115    | A_LS
+  116    | A_RS
+  117    | A_OR
+  118    | A_XOR
+  119    | A_MOD
+
+  120 uop: ADD
+  121    | SUB
+  122    | BIT_AND
+  123    | LOGIC_NOT
+  124    | BIT_NOT
+  125    | MULT
+
+  126 function_call: postfix LB RB
+  127              | postfix LB args_list RB
+
+  128 args_list: expression
+  129          | args_list COMMA expression
+
+  130 type_name: TYPE
+  131          | STRUCT ID
+  132          | ENUM ID
+  133          | UNION ID
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+NUMBER (258) 105
+ID (259) 20 100 101 107 131 132 133
+STR (260) 106
+TYPE (261) 130
+CONST (262) 13
+STATIC (263) 11
+SIGNED (264)
+UNSIGNED (265)
+RET (266)
+TYPE_DEF (267)
+VARGS (268) 39
+SEMI (269) 4
+STRUCT (270) 131
+UNION (271) 133
+ENUM (272) 132
+DOT (273) 100
+ARROW (274) 101
+ADD (275) 84 120
+SUB (276) 85 121
+MULT (277) 45 46 47 48 87 125
+DIV (278) 88
+MOD (279) 89
+COMMA (280) 15 39 41 53 55 57 129
+LB (281) 21 24 25 29 34 35 36 37 91 97 108 126 127
+RB (282) 21 24 25 29 34 35 36 37 91 97 108 126 127
+LOGIC_AND (283) 65
+LOGIC_OR (284) 63
+LOGIC_NOT (285) 123
+BIT_OR (286) 67
+BIT_AND (287) 71 122
+BIT_XOR (288) 69
+BIT_NOT (289) 124
+LSHIFT (290) 81
+RSHIFT (291) 82
+LSBSCRPT (292) 22 23 30 31 32 33 99
+RSBSCRPT (293) 22 23 30 31 32 33 99
+LSCOPE (294) 52 53
+RSCOPE (295) 52 53
+GT (296) 76
+LT (297) 77
+GE (298) 78
+LE (299) 79
+EQ (300) 73
+NEQ (301) 74
+ASSIGN (302) 17 109
+A_PLUS (303) 112
+A_SUB (304) 113
+A_MULT (305) 114
+A_DIV (306) 111
+A_MOD (307) 119
+A_LS (308) 115
+A_RS (309) 116
+A_XOR (310) 118
+A_AND (311) 110
+A_OR (312) 117
+PP (313) 93 102
+SS (314) 94 103
+T1 (315) 61
+T2 (316) 61
+SIZE_OF (317) 96 97
+IF (318)
+ELSE (319)
+WHILE (320)
+DO (321)
+FOR (322)
+SWITCH (323)
+GOTO (324)
+BREAK (325)
+CASE (326)
+DEFAULT (327)
+CONTINUE (328)
+RETURN (329)
+"then" (330)
+
+
+Nonterminals, with rules where they appear
+
+$accept (76)
+    on left: 0
+input (77)
+    on left: 1, on right: 0
+decl_list (78)
+    on left: 2 3, on right: 1 3
+decl (79)
+    on left: 4, on right: 2 3
+decl_specs (80)
+    on left: 5 6 7 8 9 10, on right: 4 5 7 9 42 43 44
+storage_class_spec (81)
+    on left: 11, on right: 5 6
+type_spec (82)
+    on left: 12, on right: 7 8
+type_qualifier (83)
+    on left: 13, on right: 9 10 49 50
+init_declarator_list (84)
+    on left: 14 15, on right: 4 15
+init_declarator (85)
+    on left: 16 17, on right: 14 15
+declarator (86)
+    on left: 18 19, on right: 16 17 21 42
+direct_declarator (87)
+    on left: 20 21 22 23 24 25, on right: 18 19 22 23 24 25
+abstract_declarator (88)
+    on left: 26 27 28, on right: 29 43
+direct_abstract_declarator (89)
+    on left: 29 30 31 32 33 34 35 36 37, on right: 27 28 30 32 34 36
+param_type_list (90)
+    on left: 38 39, on right: 24 34 35
+param_list (91)
+    on left: 40 41, on right: 38 39 41
+param_decl (92)
+    on left: 42 43 44, on right: 40 41
+pointer (93)
+    on left: 45 46 47 48, on right: 18 26 27 47 48
+type_qualifier_list (94)
+    on left: 49 50, on right: 45 47 50
+initializer (95)
+    on left: 51 52 53, on right: 17 54 55
+initializer_list (96)
+    on left: 54 55, on right: 52 53 55
+expression (97)
+    on left: 56 57, on right: 57 61 99 108 128 129
+expression11 (98)
+    on left: 58 59, on right: 51 56 57 59
+expression10 (99)
+    on left: 60 61, on right: 22 30 31 58 61
+expression9 (100)
+    on left: 62 63, on right: 60 61 63
+expression8 (101)
+    on left: 64 65, on right: 62 63 65
+expression7 (102)
+    on left: 66 67, on right: 64 65 67
+expression6 (103)
+    on left: 68 69, on right: 66 67 69
+expression5 (104)
+    on left: 70 71, on right: 68 69 71
+expression4 (105)
+    on left: 72 73 74, on right: 70 71 73 74
+expression3 (106)
+    on left: 75 76 77 78 79, on right: 72 73 74 76 77 78 79
+expression2 (107)
+    on left: 80 81 82, on right: 75 76 77 78 79 81 82
+expression1 (108)
+    on left: 83 84 85, on right: 80 81 82 84 85
+term (109)
+    on left: 86 87 88 89, on right: 83 84 85 87 88 89
+factor (110)
+    on left: 90 91, on right: 86 87 88 89 91 95
+unaries (111)
+    on left: 92 93 94 95 96 97, on right: 59 90 93 94 96
+postfix (112)
+    on left: 98 99 100 101 102 103 104, on right: 92 99 100 101 102
+    103 126 127
+single (113)
+    on left: 105 106 107 108, on right: 98
+aop (114)
+    on left: 109 110 111 112 113 114 115 116 117 118 119,
+    on right: 59
+uop (115)
+    on left: 120 121 122 123 124 125, on right: 95
+function_call (116)
+    on left: 126 127, on right: 104
+args_list (117)
+    on left: 128 129, on right: 127 129
+type_name (118)
+    on left: 130 131 132 133, on right: 12 91 97
+
+
+state 0
+
+    0 $accept: . input $end
+
+    TYPE    shift, and go to state 1
+    CONST   shift, and go to state 2
+    STATIC  shift, and go to state 3
+    STRUCT  shift, and go to state 4
+    UNION   shift, and go to state 5
+    ENUM    shift, and go to state 6
+
+    input               go to state 7
+    decl_list           go to state 8
+    decl                go to state 9
+    decl_specs          go to state 10
+    storage_class_spec  go to state 11
+    type_spec           go to state 12
+    type_qualifier      go to state 13
+    type_name           go to state 14
+
+
+state 1
+
+  130 type_name: TYPE .
+
+    $default  reduce using rule 130 (type_name)
+
+
+state 2
+
+   13 type_qualifier: CONST .
+
+    $default  reduce using rule 13 (type_qualifier)
+
+
+state 3
+
+   11 storage_class_spec: STATIC .
+
+    $default  reduce using rule 11 (storage_class_spec)
+
+
+state 4
+
+  131 type_name: STRUCT . ID
+
+    ID  shift, and go to state 15
+
+
+state 5
+
+  133 type_name: UNION . ID
+
+    ID  shift, and go to state 16
+
+
+state 6
+
+  132 type_name: ENUM . ID
+
+    ID  shift, and go to state 17
+
+
+state 7
+
+    0 $accept: input . $end
+
+    $end  shift, and go to state 18
+
+
+state 8
+
+    1 input: decl_list .
+    3 decl_list: decl_list . decl
+
+    TYPE    shift, and go to state 1
+    CONST   shift, and go to state 2
+    STATIC  shift, and go to state 3
+    STRUCT  shift, and go to state 4
+    UNION   shift, and go to state 5
+    ENUM    shift, and go to state 6
+
+    $default  reduce using rule 1 (input)
+
+    decl                go to state 19
+    decl_specs          go to state 10
+    storage_class_spec  go to state 11
+    type_spec           go to state 12
+    type_qualifier      go to state 13
+    type_name           go to state 14
+
+
+state 9
+
+    2 decl_list: decl .
+
+    $default  reduce using rule 2 (decl_list)
+
+
+state 10
+
+    4 decl: decl_specs . init_declarator_list SEMI
+
+    ID    shift, and go to state 20
+    MULT  shift, and go to state 21
+    LB    shift, and go to state 22
+
+    init_declarator_list  go to state 23
+    init_declarator       go to state 24
+    declarator            go to state 25
+    direct_declarator     go to state 26
+    pointer               go to state 27
+
+
+state 11
+
+    5 decl_specs: storage_class_spec . decl_specs
+    6           | storage_class_spec .
+
+    TYPE    shift, and go to state 1
+    CONST   shift, and go to state 2
+    STATIC  shift, and go to state 3
+    STRUCT  shift, and go to state 4
+    UNION   shift, and go to state 5
+    ENUM    shift, and go to state 6
+
+    $default  reduce using rule 6 (decl_specs)
+
+    decl_specs          go to state 28
+    storage_class_spec  go to state 11
+    type_spec           go to state 12
+    type_qualifier      go to state 13
+    type_name           go to state 14
+
+
+state 12
+
+    7 decl_specs: type_spec . decl_specs
+    8           | type_spec .
+
+    TYPE    shift, and go to state 1
+    CONST   shift, and go to state 2
+    STATIC  shift, and go to state 3
+    STRUCT  shift, and go to state 4
+    UNION   shift, and go to state 5
+    ENUM    shift, and go to state 6
+
+    $default  reduce using rule 8 (decl_specs)
+
+    decl_specs          go to state 29
+    storage_class_spec  go to state 11
+    type_spec           go to state 12
+    type_qualifier      go to state 13
+    type_name           go to state 14
+
+
+state 13
+
+    9 decl_specs: type_qualifier . decl_specs
+   10           | type_qualifier .
+
+    TYPE    shift, and go to state 1
+    CONST   shift, and go to state 2
+    STATIC  shift, and go to state 3
+    STRUCT  shift, and go to state 4
+    UNION   shift, and go to state 5
+    ENUM    shift, and go to state 6
+
+    $default  reduce using rule 10 (decl_specs)
+
+    decl_specs          go to state 30
+    storage_class_spec  go to state 11
+    type_spec           go to state 12
+    type_qualifier      go to state 13
+    type_name           go to state 14
+
+
+state 14
+
+   12 type_spec: type_name .
+
+    $default  reduce using rule 12 (type_spec)
+
+
+state 15
+
+  131 type_name: STRUCT ID .
+
+    $default  reduce using rule 131 (type_name)
+
+
+state 16
+
+  133 type_name: UNION ID .
+
+    $default  reduce using rule 133 (type_name)
+
+
+state 17
+
+  132 type_name: ENUM ID .
+
+    $default  reduce using rule 132 (type_name)
+
+
+state 18
+
+    0 $accept: input $end .
+
+    $default  accept
+
+
+state 19
+
+    3 decl_list: decl_list decl .
+
+    $default  reduce using rule 3 (decl_list)
+
+
+state 20
+
+   20 direct_declarator: ID .
+
+    $default  reduce using rule 20 (direct_declarator)
+
+
+state 21
+
+   45 pointer: MULT . type_qualifier_list
+   46        | MULT .
+   47        | MULT . type_qualifier_list pointer
+   48        | MULT . pointer
+
+    CONST  shift, and go to state 2
+    MULT   shift, and go to state 21
+
+    $default  reduce using rule 46 (pointer)
+
+    type_qualifier       go to state 31
+    pointer              go to state 32
+    type_qualifier_list  go to state 33
+
+
+state 22
+
+   21 direct_declarator: LB . declarator RB
+
+    ID    shift, and go to state 20
+    MULT  shift, and go to state 21
+    LB    shift, and go to state 22
+
+    declarator         go to state 34
+    direct_declarator  go to state 26
+    pointer            go to state 27
+
+
+state 23
+
+    4 decl: decl_specs init_declarator_list . SEMI
+   15 init_declarator_list: init_declarator_list . COMMA init_declarator
+
+    SEMI   shift, and go to state 35
+    COMMA  shift, and go to state 36
+
+
+state 24
+
+   14 init_declarator_list: init_declarator .
+
+    $default  reduce using rule 14 (init_declarator_list)
+
+
+state 25
+
+   16 init_declarator: declarator .
+   17                | declarator . ASSIGN initializer
+
+    ASSIGN  shift, and go to state 37
+
+    $default  reduce using rule 16 (init_declarator)
+
+
+state 26
+
+   19 declarator: direct_declarator .
+   22 direct_declarator: direct_declarator . LSBSCRPT expression10 RSBSCRPT
+   23                  | direct_declarator . LSBSCRPT RSBSCRPT
+   24                  | direct_declarator . LB param_type_list RB
+   25                  | direct_declarator . LB RB
+
+    LB        shift, and go to state 38
+    LSBSCRPT  shift, and go to state 39
+
+    $default  reduce using rule 19 (declarator)
+
+
+state 27
+
+   18 declarator: pointer . direct_declarator
+
+    ID  shift, and go to state 20
+    LB  shift, and go to state 22
+
+    direct_declarator  go to state 40
+
+
+state 28
+
+    5 decl_specs: storage_class_spec decl_specs .
+
+    $default  reduce using rule 5 (decl_specs)
+
+
+state 29
+
+    7 decl_specs: type_spec decl_specs .
+
+    $default  reduce using rule 7 (decl_specs)
+
+
+state 30
+
+    9 decl_specs: type_qualifier decl_specs .
+
+    $default  reduce using rule 9 (decl_specs)
+
+
+state 31
+
+   49 type_qualifier_list: type_qualifier .
+
+    $default  reduce using rule 49 (type_qualifier_list)
+
+
+state 32
+
+   48 pointer: MULT pointer .
+
+    $default  reduce using rule 48 (pointer)
+
+
+state 33
+
+   45 pointer: MULT type_qualifier_list .
+   47        | MULT type_qualifier_list . pointer
+   50 type_qualifier_list: type_qualifier_list . type_qualifier
+
+    CONST  shift, and go to state 2
+    MULT   shift, and go to state 21
+
+    $default  reduce using rule 45 (pointer)
+
+    type_qualifier  go to state 41
+    pointer         go to state 42
+
+
+state 34
+
+   21 direct_declarator: LB declarator . RB
+
+    RB  shift, and go to state 43
+
+
+state 35
+
+    4 decl: decl_specs init_declarator_list SEMI .
+
+    $default  reduce using rule 4 (decl)
+
+
+state 36
+
+   15 init_declarator_list: init_declarator_list COMMA . init_declarator
+
+    ID    shift, and go to state 20
+    MULT  shift, and go to state 21
+    LB    shift, and go to state 22
+
+    init_declarator    go to state 44
+    declarator         go to state 25
+    direct_declarator  go to state 26
+    pointer            go to state 27
+
+
+state 37
+
+   17 init_declarator: declarator ASSIGN . initializer
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    LSCOPE     shift, and go to state 55
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    initializer    go to state 59
+    expression11   go to state 60
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 38
+
+   24 direct_declarator: direct_declarator LB . param_type_list RB
+   25                  | direct_declarator LB . RB
+
+    TYPE    shift, and go to state 1
+    CONST   shift, and go to state 2
+    STATIC  shift, and go to state 3
+    STRUCT  shift, and go to state 4
+    UNION   shift, and go to state 5
+    ENUM    shift, and go to state 6
+    RB      shift, and go to state 78
+
+    decl_specs          go to state 79
+    storage_class_spec  go to state 11
+    type_spec           go to state 12
+    type_qualifier      go to state 13
+    param_type_list     go to state 80
+    param_list          go to state 81
+    param_decl          go to state 82
+    type_name           go to state 14
+
+
+state 39
+
+   22 direct_declarator: direct_declarator LSBSCRPT . expression10 RSBSCRPT
+   23                  | direct_declarator LSBSCRPT . RSBSCRPT
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    RSBSCRPT   shift, and go to state 83
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression10   go to state 84
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 40
+
+   18 declarator: pointer direct_declarator .
+   22 direct_declarator: direct_declarator . LSBSCRPT expression10 RSBSCRPT
+   23                  | direct_declarator . LSBSCRPT RSBSCRPT
+   24                  | direct_declarator . LB param_type_list RB
+   25                  | direct_declarator . LB RB
+
+    LB        shift, and go to state 38
+    LSBSCRPT  shift, and go to state 39
+
+    $default  reduce using rule 18 (declarator)
+
+
+state 41
+
+   50 type_qualifier_list: type_qualifier_list type_qualifier .
+
+    $default  reduce using rule 50 (type_qualifier_list)
+
+
+state 42
+
+   47 pointer: MULT type_qualifier_list pointer .
+
+    $default  reduce using rule 47 (pointer)
+
+
+state 43
+
+   21 direct_declarator: LB declarator RB .
+
+    $default  reduce using rule 21 (direct_declarator)
+
+
+state 44
+
+   15 init_declarator_list: init_declarator_list COMMA init_declarator .
+
+    $default  reduce using rule 15 (init_declarator_list)
+
+
+state 45
+
+  105 single: NUMBER .
+
+    $default  reduce using rule 105 (single)
+
+
+state 46
+
+  107 single: ID .
+
+    $default  reduce using rule 107 (single)
+
+
+state 47
+
+  106 single: STR .
+
+    $default  reduce using rule 106 (single)
+
+
+state 48
+
+  120 uop: ADD .
+
+    $default  reduce using rule 120 (uop)
+
+
+state 49
+
+  121 uop: SUB .
+
+    $default  reduce using rule 121 (uop)
+
+
+state 50
+
+  125 uop: MULT .
+
+    $default  reduce using rule 125 (uop)
+
+
+state 51
+
+   91 factor: LB . type_name RB factor
+  108 single: LB . expression RB
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    TYPE       shift, and go to state 1
+    STRUCT     shift, and go to state 4
+    UNION      shift, and go to state 5
+    ENUM       shift, and go to state 6
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression     go to state 86
+    expression11   go to state 87
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+    type_name      go to state 88
+
+
+state 52
+
+  123 uop: LOGIC_NOT .
+
+    $default  reduce using rule 123 (uop)
+
+
+state 53
+
+  122 uop: BIT_AND .
+
+    $default  reduce using rule 122 (uop)
+
+
+state 54
+
+  124 uop: BIT_NOT .
+
+    $default  reduce using rule 124 (uop)
+
+
+state 55
+
+   52 initializer: LSCOPE . initializer_list RSCOPE
+   53            | LSCOPE . initializer_list COMMA RSCOPE
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    LSCOPE     shift, and go to state 55
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    initializer       go to state 89
+    initializer_list  go to state 90
+    expression11      go to state 60
+    expression10      go to state 61
+    expression9       go to state 62
+    expression8       go to state 63
+    expression7       go to state 64
+    expression6       go to state 65
+    expression5       go to state 66
+    expression4       go to state 67
+    expression3       go to state 68
+    expression2       go to state 69
+    expression1       go to state 70
+    term              go to state 71
+    factor            go to state 72
+    unaries           go to state 73
+    postfix           go to state 74
+    single            go to state 75
+    uop               go to state 76
+    function_call     go to state 77
+
+
+state 56
+
+   93 unaries: PP . unaries
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 91
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    unaries        go to state 92
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 57
+
+   94 unaries: SS . unaries
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 91
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    unaries        go to state 93
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 58
+
+   96 unaries: SIZE_OF . unaries
+   97        | SIZE_OF . LB type_name RB
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 94
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    unaries        go to state 95
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 59
+
+   17 init_declarator: declarator ASSIGN initializer .
+
+    $default  reduce using rule 17 (init_declarator)
+
+
+state 60
+
+   51 initializer: expression11 .
+
+    $default  reduce using rule 51 (initializer)
+
+
+state 61
+
+   58 expression11: expression10 .
+
+    $default  reduce using rule 58 (expression11)
+
+
+state 62
+
+   60 expression10: expression9 .
+   61             | expression9 . T1 expression T2 expression10
+   63 expression9: expression9 . LOGIC_OR expression8
+
+    LOGIC_OR  shift, and go to state 96
+    T1        shift, and go to state 97
+
+    $default  reduce using rule 60 (expression10)
+
+
+state 63
+
+   62 expression9: expression8 .
+   65 expression8: expression8 . LOGIC_AND expression7
+
+    LOGIC_AND  shift, and go to state 98
+
+    $default  reduce using rule 62 (expression9)
+
+
+state 64
+
+   64 expression8: expression7 .
+   67 expression7: expression7 . BIT_OR expression6
+
+    BIT_OR  shift, and go to state 99
+
+    $default  reduce using rule 64 (expression8)
+
+
+state 65
+
+   66 expression7: expression6 .
+   69 expression6: expression6 . BIT_XOR expression5
+
+    BIT_XOR  shift, and go to state 100
+
+    $default  reduce using rule 66 (expression7)
+
+
+state 66
+
+   68 expression6: expression5 .
+   71 expression5: expression5 . BIT_AND expression4
+
+    BIT_AND  shift, and go to state 101
+
+    $default  reduce using rule 68 (expression6)
+
+
+state 67
+
+   70 expression5: expression4 .
+   73 expression4: expression4 . EQ expression3
+   74            | expression4 . NEQ expression3
+
+    EQ   shift, and go to state 102
+    NEQ  shift, and go to state 103
+
+    $default  reduce using rule 70 (expression5)
+
+
+state 68
+
+   72 expression4: expression3 .
+   76 expression3: expression3 . GT expression2
+   77            | expression3 . LT expression2
+   78            | expression3 . GE expression2
+   79            | expression3 . LE expression2
+
+    GT  shift, and go to state 104
+    LT  shift, and go to state 105
+    GE  shift, and go to state 106
+    LE  shift, and go to state 107
+
+    $default  reduce using rule 72 (expression4)
+
+
+state 69
+
+   75 expression3: expression2 .
+   81 expression2: expression2 . LSHIFT expression1
+   82            | expression2 . RSHIFT expression1
+
+    LSHIFT  shift, and go to state 108
+    RSHIFT  shift, and go to state 109
+
+    $default  reduce using rule 75 (expression3)
+
+
+state 70
+
+   80 expression2: expression1 .
+   84 expression1: expression1 . ADD term
+   85            | expression1 . SUB term
+
+    ADD  shift, and go to state 110
+    SUB  shift, and go to state 111
+
+    $default  reduce using rule 80 (expression2)
+
+
+state 71
+
+   83 expression1: term .
+   87 term: term . MULT factor
+   88     | term . DIV factor
+   89     | term . MOD factor
+
+    MULT  shift, and go to state 112
+    DIV   shift, and go to state 113
+    MOD   shift, and go to state 114
+
+    $default  reduce using rule 83 (expression1)
+
+
+state 72
+
+   86 term: factor .
+
+    $default  reduce using rule 86 (term)
+
+
+state 73
+
+   59 expression11: unaries . aop expression11
+   90 factor: unaries .
+
+    ASSIGN  shift, and go to state 115
+    A_PLUS  shift, and go to state 116
+    A_SUB   shift, and go to state 117
+    A_MULT  shift, and go to state 118
+    A_DIV   shift, and go to state 119
+    A_MOD   shift, and go to state 120
+    A_LS    shift, and go to state 121
+    A_RS    shift, and go to state 122
+    A_XOR   shift, and go to state 123
+    A_AND   shift, and go to state 124
+    A_OR    shift, and go to state 125
+
+    $default  reduce using rule 90 (factor)
+
+    aop  go to state 126
+
+
+state 74
+
+   92 unaries: postfix .
+   99 postfix: postfix . LSBSCRPT expression RSBSCRPT
+  100        | postfix . DOT ID
+  101        | postfix . ARROW ID
+  102        | postfix . PP
+  103        | postfix . SS
+  126 function_call: postfix . LB RB
+  127              | postfix . LB args_list RB
+
+    DOT       shift, and go to state 127
+    ARROW     shift, and go to state 128
+    LB        shift, and go to state 129
+    LSBSCRPT  shift, and go to state 130
+    PP        shift, and go to state 131
+    SS        shift, and go to state 132
+
+    $default  reduce using rule 92 (unaries)
+
+
+state 75
+
+   98 postfix: single .
+
+    $default  reduce using rule 98 (postfix)
+
+
+state 76
+
+   95 unaries: uop . factor
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    factor         go to state 133
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 77
+
+  104 postfix: function_call .
+
+    $default  reduce using rule 104 (postfix)
+
+
+state 78
+
+   25 direct_declarator: direct_declarator LB RB .
+
+    $default  reduce using rule 25 (direct_declarator)
+
+
+state 79
+
+   42 param_decl: decl_specs . declarator
+   43           | decl_specs . abstract_declarator
+   44           | decl_specs .
+
+    ID        shift, and go to state 20
+    MULT      shift, and go to state 21
+    LB        shift, and go to state 134
+    LSBSCRPT  shift, and go to state 135
+
+    $default  reduce using rule 44 (param_decl)
+
+    declarator                  go to state 136
+    direct_declarator           go to state 26
+    abstract_declarator         go to state 137
+    direct_abstract_declarator  go to state 138
+    pointer                     go to state 139
+
+
+state 80
+
+   24 direct_declarator: direct_declarator LB param_type_list . RB
+
+    RB  shift, and go to state 140
+
+
+state 81
+
+   38 param_type_list: param_list .
+   39                | param_list . COMMA VARGS
+   41 param_list: param_list . COMMA param_decl
+
+    COMMA  shift, and go to state 141
+
+    $default  reduce using rule 38 (param_type_list)
+
+
+state 82
+
+   40 param_list: param_decl .
+
+    $default  reduce using rule 40 (param_list)
+
+
+state 83
+
+   23 direct_declarator: direct_declarator LSBSCRPT RSBSCRPT .
+
+    $default  reduce using rule 23 (direct_declarator)
+
+
+state 84
+
+   22 direct_declarator: direct_declarator LSBSCRPT expression10 . RSBSCRPT
+
+    RSBSCRPT  shift, and go to state 142
+
+
+state 85
+
+   90 factor: unaries .
+
+    $default  reduce using rule 90 (factor)
+
+
+state 86
+
+   57 expression: expression . COMMA expression11
+  108 single: LB expression . RB
+
+    COMMA  shift, and go to state 143
+    RB     shift, and go to state 144
+
+
+state 87
+
+   56 expression: expression11 .
+
+    $default  reduce using rule 56 (expression)
+
+
+state 88
+
+   91 factor: LB type_name . RB factor
+
+    RB  shift, and go to state 145
+
+
+state 89
+
+   54 initializer_list: initializer .
+
+    $default  reduce using rule 54 (initializer_list)
+
+
+state 90
+
+   52 initializer: LSCOPE initializer_list . RSCOPE
+   53            | LSCOPE initializer_list . COMMA RSCOPE
+   55 initializer_list: initializer_list . COMMA initializer
+
+    COMMA   shift, and go to state 146
+    RSCOPE  shift, and go to state 147
+
+
+state 91
+
+  108 single: LB . expression RB
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression     go to state 86
+    expression11   go to state 87
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 92
+
+   93 unaries: PP unaries .
+
+    $default  reduce using rule 93 (unaries)
+
+
+state 93
+
+   94 unaries: SS unaries .
+
+    $default  reduce using rule 94 (unaries)
+
+
+state 94
+
+   97 unaries: SIZE_OF LB . type_name RB
+  108 single: LB . expression RB
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    TYPE       shift, and go to state 1
+    STRUCT     shift, and go to state 4
+    UNION      shift, and go to state 5
+    ENUM       shift, and go to state 6
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression     go to state 86
+    expression11   go to state 87
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+    type_name      go to state 148
+
+
+state 95
+
+   96 unaries: SIZE_OF unaries .
+
+    $default  reduce using rule 96 (unaries)
+
+
+state 96
+
+   63 expression9: expression9 LOGIC_OR . expression8
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression8    go to state 149
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 97
+
+   61 expression10: expression9 T1 . expression T2 expression10
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression     go to state 150
+    expression11   go to state 87
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 98
+
+   65 expression8: expression8 LOGIC_AND . expression7
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression7    go to state 151
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 99
+
+   67 expression7: expression7 BIT_OR . expression6
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression6    go to state 152
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 100
+
+   69 expression6: expression6 BIT_XOR . expression5
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression5    go to state 153
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 101
+
+   71 expression5: expression5 BIT_AND . expression4
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression4    go to state 154
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 102
+
+   73 expression4: expression4 EQ . expression3
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression3    go to state 155
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 103
+
+   74 expression4: expression4 NEQ . expression3
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression3    go to state 156
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 104
+
+   76 expression3: expression3 GT . expression2
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression2    go to state 157
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 105
+
+   77 expression3: expression3 LT . expression2
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression2    go to state 158
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 106
+
+   78 expression3: expression3 GE . expression2
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression2    go to state 159
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 107
+
+   79 expression3: expression3 LE . expression2
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression2    go to state 160
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 108
+
+   81 expression2: expression2 LSHIFT . expression1
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression1    go to state 161
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 109
+
+   82 expression2: expression2 RSHIFT . expression1
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression1    go to state 162
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 110
+
+   84 expression1: expression1 ADD . term
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    term           go to state 163
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 111
+
+   85 expression1: expression1 SUB . term
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    term           go to state 164
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 112
+
+   87 term: term MULT . factor
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    factor         go to state 165
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 113
+
+   88 term: term DIV . factor
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    factor         go to state 166
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 114
+
+   89 term: term MOD . factor
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    factor         go to state 167
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 115
+
+  109 aop: ASSIGN .
+
+    $default  reduce using rule 109 (aop)
+
+
+state 116
+
+  112 aop: A_PLUS .
+
+    $default  reduce using rule 112 (aop)
+
+
+state 117
+
+  113 aop: A_SUB .
+
+    $default  reduce using rule 113 (aop)
+
+
+state 118
+
+  114 aop: A_MULT .
+
+    $default  reduce using rule 114 (aop)
+
+
+state 119
+
+  111 aop: A_DIV .
+
+    $default  reduce using rule 111 (aop)
+
+
+state 120
+
+  119 aop: A_MOD .
+
+    $default  reduce using rule 119 (aop)
+
+
+state 121
+
+  115 aop: A_LS .
+
+    $default  reduce using rule 115 (aop)
+
+
+state 122
+
+  116 aop: A_RS .
+
+    $default  reduce using rule 116 (aop)
+
+
+state 123
+
+  118 aop: A_XOR .
+
+    $default  reduce using rule 118 (aop)
+
+
+state 124
+
+  110 aop: A_AND .
+
+    $default  reduce using rule 110 (aop)
+
+
+state 125
+
+  117 aop: A_OR .
+
+    $default  reduce using rule 117 (aop)
+
+
+state 126
+
+   59 expression11: unaries aop . expression11
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression11   go to state 168
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 127
+
+  100 postfix: postfix DOT . ID
+
+    ID  shift, and go to state 169
+
+
+state 128
+
+  101 postfix: postfix ARROW . ID
+
+    ID  shift, and go to state 170
+
+
+state 129
+
+  126 function_call: postfix LB . RB
+  127              | postfix LB . args_list RB
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    RB         shift, and go to state 171
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression     go to state 172
+    expression11   go to state 87
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+    args_list      go to state 173
+
+
+state 130
+
+   99 postfix: postfix LSBSCRPT . expression RSBSCRPT
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression     go to state 174
+    expression11   go to state 87
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 131
+
+  102 postfix: postfix PP .
+
+    $default  reduce using rule 102 (postfix)
+
+
+state 132
+
+  103 postfix: postfix SS .
+
+    $default  reduce using rule 103 (postfix)
+
+
+state 133
+
+   95 unaries: uop factor .
+
+    $default  reduce using rule 95 (unaries)
+
+
+state 134
+
+   21 direct_declarator: LB . declarator RB
+   29 direct_abstract_declarator: LB . abstract_declarator RB
+   35                           | LB . param_type_list RB
+   37                           | LB . RB
+
+    ID        shift, and go to state 20
+    TYPE      shift, and go to state 1
+    CONST     shift, and go to state 2
+    STATIC    shift, and go to state 3
+    STRUCT    shift, and go to state 4
+    UNION     shift, and go to state 5
+    ENUM      shift, and go to state 6
+    MULT      shift, and go to state 21
+    LB        shift, and go to state 134
+    RB        shift, and go to state 175
+    LSBSCRPT  shift, and go to state 135
+
+    decl_specs                  go to state 79
+    storage_class_spec          go to state 11
+    type_spec                   go to state 12
+    type_qualifier              go to state 13
+    declarator                  go to state 34
+    direct_declarator           go to state 26
+    abstract_declarator         go to state 176
+    direct_abstract_declarator  go to state 138
+    param_type_list             go to state 177
+    param_list                  go to state 81
+    param_decl                  go to state 82
+    pointer                     go to state 139
+    type_name                   go to state 14
+
+
+state 135
+
+   31 direct_abstract_declarator: LSBSCRPT . expression10 RSBSCRPT
+   33                           | LSBSCRPT . RSBSCRPT
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    RSBSCRPT   shift, and go to state 178
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression10   go to state 179
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 136
+
+   42 param_decl: decl_specs declarator .
+
+    $default  reduce using rule 42 (param_decl)
+
+
+state 137
+
+   43 param_decl: decl_specs abstract_declarator .
+
+    $default  reduce using rule 43 (param_decl)
+
+
+state 138
+
+   28 abstract_declarator: direct_abstract_declarator .
+   30 direct_abstract_declarator: direct_abstract_declarator . LSBSCRPT expression10 RSBSCRPT
+   32                           | direct_abstract_declarator . LSBSCRPT RSBSCRPT
+   34                           | direct_abstract_declarator . LB param_type_list RB
+   36                           | direct_abstract_declarator . LB RB
+
+    LB        shift, and go to state 180
+    LSBSCRPT  shift, and go to state 181
+
+    $default  reduce using rule 28 (abstract_declarator)
+
+
+state 139
+
+   18 declarator: pointer . direct_declarator
+   26 abstract_declarator: pointer .
+   27                    | pointer . direct_abstract_declarator
+
+    ID        shift, and go to state 20
+    LB        shift, and go to state 134
+    LSBSCRPT  shift, and go to state 135
+
+    $default  reduce using rule 26 (abstract_declarator)
+
+    direct_declarator           go to state 40
+    direct_abstract_declarator  go to state 182
+
+
+state 140
+
+   24 direct_declarator: direct_declarator LB param_type_list RB .
+
+    $default  reduce using rule 24 (direct_declarator)
+
+
+state 141
+
+   39 param_type_list: param_list COMMA . VARGS
+   41 param_list: param_list COMMA . param_decl
+
+    TYPE    shift, and go to state 1
+    CONST   shift, and go to state 2
+    STATIC  shift, and go to state 3
+    VARGS   shift, and go to state 183
+    STRUCT  shift, and go to state 4
+    UNION   shift, and go to state 5
+    ENUM    shift, and go to state 6
+
+    decl_specs          go to state 79
+    storage_class_spec  go to state 11
+    type_spec           go to state 12
+    type_qualifier      go to state 13
+    param_decl          go to state 184
+    type_name           go to state 14
+
+
+state 142
+
+   22 direct_declarator: direct_declarator LSBSCRPT expression10 RSBSCRPT .
+
+    $default  reduce using rule 22 (direct_declarator)
+
+
+state 143
+
+   57 expression: expression COMMA . expression11
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression11   go to state 185
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 144
+
+  108 single: LB expression RB .
+
+    $default  reduce using rule 108 (single)
+
+
+state 145
+
+   91 factor: LB type_name RB . factor
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    factor         go to state 186
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 146
+
+   53 initializer: LSCOPE initializer_list COMMA . RSCOPE
+   55 initializer_list: initializer_list COMMA . initializer
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    LSCOPE     shift, and go to state 55
+    RSCOPE     shift, and go to state 187
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    initializer    go to state 188
+    expression11   go to state 60
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 147
+
+   52 initializer: LSCOPE initializer_list RSCOPE .
+
+    $default  reduce using rule 52 (initializer)
+
+
+state 148
+
+   97 unaries: SIZE_OF LB type_name . RB
+
+    RB  shift, and go to state 189
+
+
+state 149
+
+   63 expression9: expression9 LOGIC_OR expression8 .
+   65 expression8: expression8 . LOGIC_AND expression7
+
+    LOGIC_AND  shift, and go to state 98
+
+    $default  reduce using rule 63 (expression9)
+
+
+state 150
+
+   57 expression: expression . COMMA expression11
+   61 expression10: expression9 T1 expression . T2 expression10
+
+    COMMA  shift, and go to state 143
+    T2     shift, and go to state 190
+
+
+state 151
+
+   65 expression8: expression8 LOGIC_AND expression7 .
+   67 expression7: expression7 . BIT_OR expression6
+
+    BIT_OR  shift, and go to state 99
+
+    $default  reduce using rule 65 (expression8)
+
+
+state 152
+
+   67 expression7: expression7 BIT_OR expression6 .
+   69 expression6: expression6 . BIT_XOR expression5
+
+    BIT_XOR  shift, and go to state 100
+
+    $default  reduce using rule 67 (expression7)
+
+
+state 153
+
+   69 expression6: expression6 BIT_XOR expression5 .
+   71 expression5: expression5 . BIT_AND expression4
+
+    BIT_AND  shift, and go to state 101
+
+    $default  reduce using rule 69 (expression6)
+
+
+state 154
+
+   71 expression5: expression5 BIT_AND expression4 .
+   73 expression4: expression4 . EQ expression3
+   74            | expression4 . NEQ expression3
+
+    EQ   shift, and go to state 102
+    NEQ  shift, and go to state 103
+
+    $default  reduce using rule 71 (expression5)
+
+
+state 155
+
+   73 expression4: expression4 EQ expression3 .
+   76 expression3: expression3 . GT expression2
+   77            | expression3 . LT expression2
+   78            | expression3 . GE expression2
+   79            | expression3 . LE expression2
+
+    GT  shift, and go to state 104
+    LT  shift, and go to state 105
+    GE  shift, and go to state 106
+    LE  shift, and go to state 107
+
+    $default  reduce using rule 73 (expression4)
+
+
+state 156
+
+   74 expression4: expression4 NEQ expression3 .
+   76 expression3: expression3 . GT expression2
+   77            | expression3 . LT expression2
+   78            | expression3 . GE expression2
+   79            | expression3 . LE expression2
+
+    GT  shift, and go to state 104
+    LT  shift, and go to state 105
+    GE  shift, and go to state 106
+    LE  shift, and go to state 107
+
+    $default  reduce using rule 74 (expression4)
+
+
+state 157
+
+   76 expression3: expression3 GT expression2 .
+   81 expression2: expression2 . LSHIFT expression1
+   82            | expression2 . RSHIFT expression1
+
+    LSHIFT  shift, and go to state 108
+    RSHIFT  shift, and go to state 109
+
+    $default  reduce using rule 76 (expression3)
+
+
+state 158
+
+   77 expression3: expression3 LT expression2 .
+   81 expression2: expression2 . LSHIFT expression1
+   82            | expression2 . RSHIFT expression1
+
+    LSHIFT  shift, and go to state 108
+    RSHIFT  shift, and go to state 109
+
+    $default  reduce using rule 77 (expression3)
+
+
+state 159
+
+   78 expression3: expression3 GE expression2 .
+   81 expression2: expression2 . LSHIFT expression1
+   82            | expression2 . RSHIFT expression1
+
+    LSHIFT  shift, and go to state 108
+    RSHIFT  shift, and go to state 109
+
+    $default  reduce using rule 78 (expression3)
+
+
+state 160
+
+   79 expression3: expression3 LE expression2 .
+   81 expression2: expression2 . LSHIFT expression1
+   82            | expression2 . RSHIFT expression1
+
+    LSHIFT  shift, and go to state 108
+    RSHIFT  shift, and go to state 109
+
+    $default  reduce using rule 79 (expression3)
+
+
+state 161
+
+   81 expression2: expression2 LSHIFT expression1 .
+   84 expression1: expression1 . ADD term
+   85            | expression1 . SUB term
+
+    ADD  shift, and go to state 110
+    SUB  shift, and go to state 111
+
+    $default  reduce using rule 81 (expression2)
+
+
+state 162
+
+   82 expression2: expression2 RSHIFT expression1 .
+   84 expression1: expression1 . ADD term
+   85            | expression1 . SUB term
+
+    ADD  shift, and go to state 110
+    SUB  shift, and go to state 111
+
+    $default  reduce using rule 82 (expression2)
+
+
+state 163
+
+   84 expression1: expression1 ADD term .
+   87 term: term . MULT factor
+   88     | term . DIV factor
+   89     | term . MOD factor
+
+    MULT  shift, and go to state 112
+    DIV   shift, and go to state 113
+    MOD   shift, and go to state 114
+
+    $default  reduce using rule 84 (expression1)
+
+
+state 164
+
+   85 expression1: expression1 SUB term .
+   87 term: term . MULT factor
+   88     | term . DIV factor
+   89     | term . MOD factor
+
+    MULT  shift, and go to state 112
+    DIV   shift, and go to state 113
+    MOD   shift, and go to state 114
+
+    $default  reduce using rule 85 (expression1)
+
+
+state 165
+
+   87 term: term MULT factor .
+
+    $default  reduce using rule 87 (term)
+
+
+state 166
+
+   88 term: term DIV factor .
+
+    $default  reduce using rule 88 (term)
+
+
+state 167
+
+   89 term: term MOD factor .
+
+    $default  reduce using rule 89 (term)
+
+
+state 168
+
+   59 expression11: unaries aop expression11 .
+
+    $default  reduce using rule 59 (expression11)
+
+
+state 169
+
+  100 postfix: postfix DOT ID .
+
+    $default  reduce using rule 100 (postfix)
+
+
+state 170
+
+  101 postfix: postfix ARROW ID .
+
+    $default  reduce using rule 101 (postfix)
+
+
+state 171
+
+  126 function_call: postfix LB RB .
+
+    $default  reduce using rule 126 (function_call)
+
+
+state 172
+
+   57 expression: expression . COMMA expression11
+  128 args_list: expression .
+
+    COMMA  shift, and go to state 143
+
+    COMMA     [reduce using rule 128 (args_list)]
+    $default  reduce using rule 128 (args_list)
+
+
+state 173
+
+  127 function_call: postfix LB args_list . RB
+  129 args_list: args_list . COMMA expression
+
+    COMMA  shift, and go to state 191
+    RB     shift, and go to state 192
+
+
+state 174
+
+   57 expression: expression . COMMA expression11
+   99 postfix: postfix LSBSCRPT expression . RSBSCRPT
+
+    COMMA     shift, and go to state 143
+    RSBSCRPT  shift, and go to state 193
+
+
+state 175
+
+   37 direct_abstract_declarator: LB RB .
+
+    $default  reduce using rule 37 (direct_abstract_declarator)
+
+
+state 176
+
+   29 direct_abstract_declarator: LB abstract_declarator . RB
+
+    RB  shift, and go to state 194
+
+
+state 177
+
+   35 direct_abstract_declarator: LB param_type_list . RB
+
+    RB  shift, and go to state 195
+
+
+state 178
+
+   33 direct_abstract_declarator: LSBSCRPT RSBSCRPT .
+
+    $default  reduce using rule 33 (direct_abstract_declarator)
+
+
+state 179
+
+   31 direct_abstract_declarator: LSBSCRPT expression10 . RSBSCRPT
+
+    RSBSCRPT  shift, and go to state 196
+
+
+state 180
+
+   34 direct_abstract_declarator: direct_abstract_declarator LB . param_type_list RB
+   36                           | direct_abstract_declarator LB . RB
+
+    TYPE    shift, and go to state 1
+    CONST   shift, and go to state 2
+    STATIC  shift, and go to state 3
+    STRUCT  shift, and go to state 4
+    UNION   shift, and go to state 5
+    ENUM    shift, and go to state 6
+    RB      shift, and go to state 197
+
+    decl_specs          go to state 79
+    storage_class_spec  go to state 11
+    type_spec           go to state 12
+    type_qualifier      go to state 13
+    param_type_list     go to state 198
+    param_list          go to state 81
+    param_decl          go to state 82
+    type_name           go to state 14
+
+
+state 181
+
+   30 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT . expression10 RSBSCRPT
+   32                           | direct_abstract_declarator LSBSCRPT . RSBSCRPT
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    RSBSCRPT   shift, and go to state 199
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression10   go to state 200
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 182
+
+   27 abstract_declarator: pointer direct_abstract_declarator .
+   30 direct_abstract_declarator: direct_abstract_declarator . LSBSCRPT expression10 RSBSCRPT
+   32                           | direct_abstract_declarator . LSBSCRPT RSBSCRPT
+   34                           | direct_abstract_declarator . LB param_type_list RB
+   36                           | direct_abstract_declarator . LB RB
+
+    LB        shift, and go to state 180
+    LSBSCRPT  shift, and go to state 181
+
+    $default  reduce using rule 27 (abstract_declarator)
+
+
+state 183
+
+   39 param_type_list: param_list COMMA VARGS .
+
+    $default  reduce using rule 39 (param_type_list)
+
+
+state 184
+
+   41 param_list: param_list COMMA param_decl .
+
+    $default  reduce using rule 41 (param_list)
+
+
+state 185
+
+   57 expression: expression COMMA expression11 .
+
+    $default  reduce using rule 57 (expression)
+
+
+state 186
+
+   91 factor: LB type_name RB factor .
+
+    $default  reduce using rule 91 (factor)
+
+
+state 187
+
+   53 initializer: LSCOPE initializer_list COMMA RSCOPE .
+
+    $default  reduce using rule 53 (initializer)
+
+
+state 188
+
+   55 initializer_list: initializer_list COMMA initializer .
+
+    $default  reduce using rule 55 (initializer_list)
+
+
+state 189
+
+   97 unaries: SIZE_OF LB type_name RB .
+
+    $default  reduce using rule 97 (unaries)
+
+
+state 190
+
+   61 expression10: expression9 T1 expression T2 . expression10
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression10   go to state 201
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 85
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 191
+
+  129 args_list: args_list COMMA . expression
+
+    NUMBER     shift, and go to state 45
+    ID         shift, and go to state 46
+    STR        shift, and go to state 47
+    ADD        shift, and go to state 48
+    SUB        shift, and go to state 49
+    MULT       shift, and go to state 50
+    LB         shift, and go to state 51
+    LOGIC_NOT  shift, and go to state 52
+    BIT_AND    shift, and go to state 53
+    BIT_NOT    shift, and go to state 54
+    PP         shift, and go to state 56
+    SS         shift, and go to state 57
+    SIZE_OF    shift, and go to state 58
+
+    expression     go to state 202
+    expression11   go to state 87
+    expression10   go to state 61
+    expression9    go to state 62
+    expression8    go to state 63
+    expression7    go to state 64
+    expression6    go to state 65
+    expression5    go to state 66
+    expression4    go to state 67
+    expression3    go to state 68
+    expression2    go to state 69
+    expression1    go to state 70
+    term           go to state 71
+    factor         go to state 72
+    unaries        go to state 73
+    postfix        go to state 74
+    single         go to state 75
+    uop            go to state 76
+    function_call  go to state 77
+
+
+state 192
+
+  127 function_call: postfix LB args_list RB .
+
+    $default  reduce using rule 127 (function_call)
+
+
+state 193
+
+   99 postfix: postfix LSBSCRPT expression RSBSCRPT .
+
+    $default  reduce using rule 99 (postfix)
+
+
+state 194
+
+   29 direct_abstract_declarator: LB abstract_declarator RB .
+
+    $default  reduce using rule 29 (direct_abstract_declarator)
+
+
+state 195
+
+   35 direct_abstract_declarator: LB param_type_list RB .
+
+    $default  reduce using rule 35 (direct_abstract_declarator)
+
+
+state 196
+
+   31 direct_abstract_declarator: LSBSCRPT expression10 RSBSCRPT .
+
+    $default  reduce using rule 31 (direct_abstract_declarator)
+
+
+state 197
+
+   36 direct_abstract_declarator: direct_abstract_declarator LB RB .
+
+    $default  reduce using rule 36 (direct_abstract_declarator)
+
+
+state 198
+
+   34 direct_abstract_declarator: direct_abstract_declarator LB param_type_list . RB
+
+    RB  shift, and go to state 203
+
+
+state 199
+
+   32 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT RSBSCRPT .
+
+    $default  reduce using rule 32 (direct_abstract_declarator)
+
+
+state 200
+
+   30 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT expression10 . RSBSCRPT
+
+    RSBSCRPT  shift, and go to state 204
+
+
+state 201
+
+   61 expression10: expression9 T1 expression T2 expression10 .
+
+    $default  reduce using rule 61 (expression10)
+
+
+state 202
+
+   57 expression: expression . COMMA expression11
+  129 args_list: args_list COMMA expression .
+
+    COMMA  shift, and go to state 143
+
+    COMMA     [reduce using rule 129 (args_list)]
+    $default  reduce using rule 129 (args_list)
+
+
+state 203
+
+   34 direct_abstract_declarator: direct_abstract_declarator LB param_type_list RB .
+
+    $default  reduce using rule 34 (direct_abstract_declarator)
+
+
+state 204
+
+   30 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT expression10 RSBSCRPT .
+
+    $default  reduce using rule 30 (direct_abstract_declarator)
