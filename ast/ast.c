@@ -11,7 +11,6 @@ extern int parser_line_no;
 extern int parser_col_no;
 
 
-
 pAstNode check_types(pAstNode type) {
     if (IS_TYPE(type->type_)) return type;
     assert(type->child_ != NULL);
@@ -224,10 +223,10 @@ pAstNode createStructMember(pAstNode s, pAstNode member, char *val) {
     return node;
 }
 
-pAstNode createTypeDefTree(pAstNode old_type, pAstNode new_type) {
-    assert(old_type != NULL && new_type != NULL);
-    return createBinaryTreeNode(kTypeDef, old_type, new_type);
-}
+//pAstNode createTypeDefTree(pAstNode old_type, pAstNode new_type) {
+//    assert(old_type != NULL && new_type != NULL);
+//    return createBinaryTreeNode(kTypeDef, old_type, new_type);
+//}
 
 pAstNode createFuncType(pAstNode ret_type, pAstNode args_types) {
     pAstNode params = createUnaryTreeNode(kFuncParams, args_types);
@@ -373,4 +372,8 @@ pAstNode createForStmt(pAstNode exp1, pAstNode exp2, pAstNode exp3, pAstNode stm
     addNullableChild(node, exp3);
     addNullableChild(node, stmt);
     return node;
+}
+
+pAstNode createTypeDefTree(pAstNode decl_tree){
+
 }

@@ -3,6 +3,7 @@
     #define NODE(t)  yylval.ast_node = createAstNode(t, yytext, yyleng)
     #include <stdio.h>
     #include "../ast/ast.h"
+    #include "../types/type_checks.h"
     #include "../parser/parser.h"
     #include "../parser/tiny_compiler_yacc.h"
 
@@ -117,10 +118,19 @@ ID {LITERAL}+{ID_C}*
 }
 
 {ID} {
-    printf("got id : %s\n", yytext);
+    
     MOVE;
-    NODE(kId);
-    return ID;
+    // ID can be a type-alias
+    if(has_type(yytext)){
+        NODE(kType);
+        printf("got type : %s\n", yytext);
+        return TYPE;
+    } else {
+        NODE(kId);
+        printf("got id : %s\n", yytext);
+        return ID;
+    }
+        
 }
 
 

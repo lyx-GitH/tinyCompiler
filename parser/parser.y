@@ -3,6 +3,7 @@
   #include <stdio.h>
   #include "parser.h"
   #include "../exceptions/parser_error.h"
+  #include "../sematics/sematics.h"
   #include "../types/type_checks.h"
   #define YYDEBUG 1
   #define CDEBUG 1
@@ -98,6 +99,7 @@ translation_unit			: external_decl                     {TinyParserAppendBlock($1
 							;
 external_decl				: function_definition               {$$ = $1;}
 							| decl                              {$$ = $1;}
+							| TYPE_DEF decl                     {assert_valid_typedefs($2); $$ = $2;}
 							;
 
 function_definition			: decl_specs declarator	compound_stat 	            {assignType($2, $1); $$ = createBinaryTreeNode(kFuncDef, $2, $3); }			
@@ -368,7 +370,7 @@ type_name : TYPE
     | enum_spec
     ;
 
-struct_or_union_spec		: struct_or_union ID LSCOPE struct_decl_list RSCOPE {add_type($2->val_); addChild($1, $2); addChild($1, $4); $$ = $1;}
+struct_or_union_spec		: struct_or_union ID LSCOPE struct_decl_list RSCOPE {add_hidden_type($2->val_); addChild($1, $2); addChild($1, $4); $$ = $1;}
 							| struct_or_union LSCOPE struct_decl_list RSCOPE    {addChild($1, EMPTY_NODE); addChild($1, $3); $$ = $1;}    
 							| struct_or_union ID                                {addChild($1, $2); addChild($1, EMPTY_NODE); $$ = $1;}                            
 							;
@@ -398,7 +400,7 @@ struct_declarator			: declarator
 							| ':' const_exp */
 							;
 
-enum_spec					: enum_const ID LSCOPE enumerator_list RSCOPE   {add_type($2->val_); $$ = createBinaryTreeNode(kEnumType, $2, $4); }
+enum_spec					: enum_const ID LSCOPE enumerator_list RSCOPE   {add_hidden_type($2->val_); $$ = createBinaryTreeNode(kEnumType, $2, $4); }
 							| enum_const LSCOPE enumerator_list RSCOPE      {$$ = createBinaryTreeNode(kEnumType, NULL, $3);}
 							| enum_const ID                                 {$$ = createBinaryTreeNode(kEnumType, $2, NULL); }
 							;

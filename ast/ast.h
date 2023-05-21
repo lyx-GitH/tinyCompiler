@@ -127,6 +127,8 @@ inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
             return "kUnionType";
         case kTypeDecl:
             return "kTypeDecl";
+        case kTypeDef:
+            return "kTypeDef";
         default:
             return "Unsupported";
     }
@@ -169,7 +171,7 @@ pAstNode createFunctionDelcTree(pAstNode var_decl, pAstNode placeholders);
 
 pAstNode createStructMember(pAstNode node, pAstNode member, char* val);
 
-pAstNode createTypeDefTree(pAstNode old_type, pAstNode new_type);
+pAstNode createTypeDefTree(pAstNode decl_tree);
 
 pAstNode createFuncType(pAstNode ret_type, pAstNode args_types);
 
@@ -191,5 +193,6 @@ pAstNode createEnumerator(pAstNode id, pAstNode value);
 
 pAstNode createForStmt(pAstNode exp1, pAstNode exp2, pAstNode exp3,
                        pAstNode stmt);
+
 
 #endif  // TINYCOMPILER_AST_H

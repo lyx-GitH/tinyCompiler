@@ -6,14 +6,18 @@
 #define TINYCOMPILER_TYPE_CHECKS_H
 
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void add_type(const char *type_name);
 
+void add_hidden_type(const char *type_name);
+
 int has_type(const char *type_name);
+
+
+void assert_type_exist(const char *type_name);
 
 #ifdef __cplusplus
 }
