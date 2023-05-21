@@ -20,4 +20,16 @@ This project is under-construction. It contains (at least) these parts:
     - define a rule in ```lexer.l```
     - if a new token is needed, go to ```tokens.h``` to add one
     - remember to follow the coding styles!
+
+### About: *parser*
+The parser converts the program into a ast
+The parser can now do:
+- expressions
+- types(including compilcated ones)
   
+
+### About *AST*
+The syntax tree. inherited from the well-known ZJU project called *miniSQL*
+
+### About *visualizer*
+This part can visualize a ast in Type of ```dot``` language. Also inherited from *miniSQL*

@@ -14,6 +14,11 @@
 #include <filesystem>
 
 
+struct t {
+    int a:10;
+    
+};
+
 class TCLexer {
 public:
     using ParsedTokenStream = std::vector<std::tuple<Token, std::string>>;

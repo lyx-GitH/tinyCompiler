@@ -1,0 +1,28 @@
+struct point{
+    int x, y;
+    double len;
+};
+
+const struct person {
+    int age;
+    const char* name;
+} x, y, z;
+
+enum Types{
+    _int,
+    _long,
+    _double = 10,
+    _char
+};
+
+int main() {
+    struct person p;
+    int x = 10;
+    p.age = 10;
+    p.name = "hello";
+
+    for(; x<5; ++x){
+        p.age += x;
+    }
+    return 0;
+}

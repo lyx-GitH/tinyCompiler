@@ -14,6 +14,7 @@ int cur_token_len = 0;
 int parse_error = 0;
 extern FILE *yyin;
 
+
 extern int yyparse(void);
 
 void TinyParserMove(int line, char *text) {

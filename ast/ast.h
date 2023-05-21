@@ -5,32 +5,32 @@
 #ifndef TINYCOMPILER_AST_H
 #define TINYCOMPILER_AST_H
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include "ast_node_type.h"
 
+#include "ast_node_type.h"
 
 struct AstNode {
     int id_;
     enum AstNodeType type_;
     int line_no_;
     int col_no_;
-    char *val_;
-    struct AstNode *child_;
-    struct AstNode *next_;
+    char* val_;
+    struct AstNode* child_;
+    struct AstNode* next_;
 };
 
-
-
-typedef struct AstNode *pAstNode;
+typedef struct AstNode* pAstNode;
 
 void addChild(pAstNode target, pAstNode child);
 
 void addChildHead(pAstNode target, pAstNode child);
 
 void assignType(pAstNode root, pAstNode type);
+
+pAstNode initVar(pAstNode var, pAstNode value);
 
 void addNext(pAstNode target, pAstNode next);
 
@@ -43,9 +43,8 @@ pAstNode createAstNode(enum AstNodeType type, char* value, int len);
 void freeAstNode(pAstNode node);
 
 inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
-    //TODO: change this to return real names
+    // TODO: change this to return real names
     switch (type) {
-
         case kNULL:
             return "kNull";
         case kRoot:
@@ -94,12 +93,40 @@ inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
             return "kArrType";
         case kPtrType:
             return "kPtrType";
+        case kScope:
+            return "kScope";
+        case kJump:
+            return "kJump";
         case kFuncType:
             return "kFuncType";
         case kInitList:
             return "kInitList";
         case kVarInit:
             return "kVarInit";
+        case kLabeledStmt:
+            return "kLabeledStmt";
+        case kIfStmt:
+            return "kIfStmt";
+        case kWhileStmt:
+            return "kWhileStmt";
+        case kForStmt:
+            return "kForStmt";
+        case kDoWhileStmt:
+            return "kDoWhileStmt";
+        case kFuncDef:
+            return "kFuncDef";
+        case kSwitchStmt:
+            return "kSwitch";
+        case kCase:
+            return "kCase";
+        case kEnumType:
+            return "kEnumType";
+        case kStructType:
+            return "kStructType";
+        case kUnionType:
+            return "kUnionType";
+        case kTypeDecl:
+            return "kTypeDecl";
         default:
             return "Unsupported";
     }
@@ -111,17 +138,22 @@ void addNewTypeHint(pAstNode root, pAstNode type_hint);
 
 void addLeftMost(pAstNode root, pAstNode node);
 
-pAstNode createEmptyTreeNode(); 
+pAstNode createEmptyTreeNode();
 
-pAstNode createBinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode right);
+pAstNode createTrinaryTreeNode(enum AstNodeType type, pAstNode left,
+                               pAstNode mid, pAstNode right);
+
+pAstNode createBinaryTreeNode(enum AstNodeType type, pAstNode left,
+                              pAstNode right);
 
 pAstNode createUnaryTreeNode(enum AstNodeType type, pAstNode child);
 
-pAstNode createBinaryOpTree(const char * op, pAstNode lhs, pAstNode rhs);
+pAstNode createBinaryOpTree(const char* op, pAstNode lhs, pAstNode rhs);
 
 pAstNode createUnaryOpTree(const char* op, pAstNode hs);
 
-pAstNode createTrinaryOpTree(pAstNode condition, pAstNode true_exp, pAstNode false_exp);
+pAstNode createTrinaryOpTree(pAstNode condition, pAstNode true_exp,
+                             pAstNode false_exp);
 
 pAstNode createExprTree(pAstNode expr_top);
 
@@ -135,7 +167,7 @@ pAstNode createQualifiedVar(pAstNode qualifiers, pAstNode type, pAstNode Id);
 
 pAstNode createFunctionDelcTree(pAstNode var_decl, pAstNode placeholders);
 
-pAstNode createStructMember(pAstNode node,pAstNode member,  char* val);
+pAstNode createStructMember(pAstNode node, pAstNode member, char* val);
 
 pAstNode createTypeDefTree(pAstNode old_type, pAstNode new_type);
 
@@ -153,8 +185,11 @@ pAstNode extractType(pAstNode keywords_list);
 
 pAstNode maintainTypeSpecs(pAstNode root, pAstNode node);
 
+pAstNode createLabledStmt(pAstNode lableId, pAstNode stat);
 
+pAstNode createEnumerator(pAstNode id, pAstNode value);
 
+pAstNode createForStmt(pAstNode exp1, pAstNode exp2, pAstNode exp3,
+                       pAstNode stmt);
 
-
-#endif //TINYCOMPILER_AST_H
+#endif  // TINYCOMPILER_AST_H

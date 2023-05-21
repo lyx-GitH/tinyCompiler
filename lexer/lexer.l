@@ -29,20 +29,11 @@ ID {LITERAL}+{ID_C}*
 
 ";" {MOVE; return SEMI;}
 
-"char"|"short"|"int"|"long"|"float"|"double"|"void" {
+"char"|"short"|"int"|"long"|"float"|"double"|"void"|"signed"|"unsigned" {
     MOVE;
     NODE(kType);
     return TYPE;
 }
-
-
-"signed" {
-    MOVE;
-    NODE(kTypeQualifier);
-    return SIGNED;
-}
-
-"unsigned" {MOVE; NODE(kTypeQualifier); return UNSIGNED; }
 
 "const" {
     MOVE;
@@ -92,12 +83,12 @@ ID {LITERAL}+{ID_C}*
 "case"      {MOVE; return CASE;}
 "defualt"   {MOVE; return DEFAULT; }
 
-"goto"      {MOVE; return GOTO;}
-"break"     {MOVE; return BREAK;}
-"continue"  {MOVE; return CONTINUE;}
+"goto"      {MOVE; NODE(kJump); return GOTO;}
+"break"     {MOVE; NODE(kJump); return BREAK;}
+"continue"  {MOVE; NODE(kJump); return CONTINUE;}
 
 "..." {MOVE; return VARGS; }
-"return" {MOVE; return RET;}
+"return" {MOVE; NODE(kJump); return RETURN;}
 
 
 

@@ -45,72 +45,69 @@
      TYPE = 261,
      CONST = 262,
      STATIC = 263,
-     SIGNED = 264,
-     UNSIGNED = 265,
-     RET = 266,
-     TYPE_DEF = 267,
-     VARGS = 268,
-     SEMI = 269,
-     STRUCT = 270,
-     UNION = 271,
-     ENUM = 272,
-     DOT = 273,
-     ARROW = 274,
-     ADD = 275,
-     SUB = 276,
-     MULT = 277,
-     DIV = 278,
-     MOD = 279,
-     COMMA = 280,
-     LB = 281,
-     RB = 282,
-     LOGIC_AND = 283,
-     LOGIC_OR = 284,
-     LOGIC_NOT = 285,
-     BIT_OR = 286,
-     BIT_AND = 287,
-     BIT_XOR = 288,
-     BIT_NOT = 289,
-     LSHIFT = 290,
-     RSHIFT = 291,
-     LSBSCRPT = 292,
-     RSBSCRPT = 293,
-     LSCOPE = 294,
-     RSCOPE = 295,
-     GT = 296,
-     LT = 297,
-     GE = 298,
-     LE = 299,
-     EQ = 300,
-     NEQ = 301,
-     ASSIGN = 302,
-     A_PLUS = 303,
-     A_SUB = 304,
-     A_MULT = 305,
-     A_DIV = 306,
-     A_MOD = 307,
-     A_LS = 308,
-     A_RS = 309,
-     A_XOR = 310,
-     A_AND = 311,
-     A_OR = 312,
-     PP = 313,
-     SS = 314,
-     T1 = 315,
-     T2 = 316,
-     SIZE_OF = 317,
-     IF = 318,
-     ELSE = 319,
-     WHILE = 320,
-     DO = 321,
-     FOR = 322,
-     SWITCH = 323,
-     GOTO = 324,
-     BREAK = 325,
-     CASE = 326,
-     DEFAULT = 327,
-     CONTINUE = 328,
-     RETURN = 329
+     TYPE_DEF = 264,
+     VARGS = 265,
+     GOTO = 266,
+     BREAK = 267,
+     CONTINUE = 268,
+     RETURN = 269,
+     SEMI = 270,
+     STRUCT = 271,
+     UNION = 272,
+     ENUM = 273,
+     DOT = 274,
+     ARROW = 275,
+     ADD = 276,
+     SUB = 277,
+     MULT = 278,
+     DIV = 279,
+     MOD = 280,
+     COMMA = 281,
+     LB = 282,
+     RB = 283,
+     LOGIC_AND = 284,
+     LOGIC_OR = 285,
+     LOGIC_NOT = 286,
+     BIT_OR = 287,
+     BIT_AND = 288,
+     BIT_XOR = 289,
+     BIT_NOT = 290,
+     LSHIFT = 291,
+     RSHIFT = 292,
+     LSBSCRPT = 293,
+     RSBSCRPT = 294,
+     LSCOPE = 295,
+     RSCOPE = 296,
+     GT = 297,
+     LT = 298,
+     GE = 299,
+     LE = 300,
+     EQ = 301,
+     NEQ = 302,
+     ASSIGN = 303,
+     A_PLUS = 304,
+     A_SUB = 305,
+     A_MULT = 306,
+     A_DIV = 307,
+     A_MOD = 308,
+     A_LS = 309,
+     A_RS = 310,
+     A_XOR = 311,
+     A_AND = 312,
+     A_OR = 313,
+     PP = 314,
+     SS = 315,
+     T1 = 316,
+     T2 = 317,
+     SIZE_OF = 318,
+     IF = 319,
+     ELSE = 320,
+     WHILE = 321,
+     DO = 322,
+     FOR = 323,
+     SWITCH = 324,
+     CASE = 325,
+     DEFAULT = 326
    };
 #endif
 /* Tokens.  */
@@ -120,84 +117,81 @@
 #define TYPE 261
 #define CONST 262
 #define STATIC 263
-#define SIGNED 264
-#define UNSIGNED 265
-#define RET 266
-#define TYPE_DEF 267
-#define VARGS 268
-#define SEMI 269
-#define STRUCT 270
-#define UNION 271
-#define ENUM 272
-#define DOT 273
-#define ARROW 274
-#define ADD 275
-#define SUB 276
-#define MULT 277
-#define DIV 278
-#define MOD 279
-#define COMMA 280
-#define LB 281
-#define RB 282
-#define LOGIC_AND 283
-#define LOGIC_OR 284
-#define LOGIC_NOT 285
-#define BIT_OR 286
-#define BIT_AND 287
-#define BIT_XOR 288
-#define BIT_NOT 289
-#define LSHIFT 290
-#define RSHIFT 291
-#define LSBSCRPT 292
-#define RSBSCRPT 293
-#define LSCOPE 294
-#define RSCOPE 295
-#define GT 296
-#define LT 297
-#define GE 298
-#define LE 299
-#define EQ 300
-#define NEQ 301
-#define ASSIGN 302
-#define A_PLUS 303
-#define A_SUB 304
-#define A_MULT 305
-#define A_DIV 306
-#define A_MOD 307
-#define A_LS 308
-#define A_RS 309
-#define A_XOR 310
-#define A_AND 311
-#define A_OR 312
-#define PP 313
-#define SS 314
-#define T1 315
-#define T2 316
-#define SIZE_OF 317
-#define IF 318
-#define ELSE 319
-#define WHILE 320
-#define DO 321
-#define FOR 322
-#define SWITCH 323
-#define GOTO 324
-#define BREAK 325
-#define CASE 326
-#define DEFAULT 327
-#define CONTINUE 328
-#define RETURN 329
+#define TYPE_DEF 264
+#define VARGS 265
+#define GOTO 266
+#define BREAK 267
+#define CONTINUE 268
+#define RETURN 269
+#define SEMI 270
+#define STRUCT 271
+#define UNION 272
+#define ENUM 273
+#define DOT 274
+#define ARROW 275
+#define ADD 276
+#define SUB 277
+#define MULT 278
+#define DIV 279
+#define MOD 280
+#define COMMA 281
+#define LB 282
+#define RB 283
+#define LOGIC_AND 284
+#define LOGIC_OR 285
+#define LOGIC_NOT 286
+#define BIT_OR 287
+#define BIT_AND 288
+#define BIT_XOR 289
+#define BIT_NOT 290
+#define LSHIFT 291
+#define RSHIFT 292
+#define LSBSCRPT 293
+#define RSBSCRPT 294
+#define LSCOPE 295
+#define RSCOPE 296
+#define GT 297
+#define LT 298
+#define GE 299
+#define LE 300
+#define EQ 301
+#define NEQ 302
+#define ASSIGN 303
+#define A_PLUS 304
+#define A_SUB 305
+#define A_MULT 306
+#define A_DIV 307
+#define A_MOD 308
+#define A_LS 309
+#define A_RS 310
+#define A_XOR 311
+#define A_AND 312
+#define A_OR 313
+#define PP 314
+#define SS 315
+#define T1 316
+#define T2 317
+#define SIZE_OF 318
+#define IF 319
+#define ELSE 320
+#define WHILE 321
+#define DO 322
+#define FOR 323
+#define SWITCH 324
+#define CASE 325
+#define DEFAULT 326
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 15 "parser.y"
+#line 18 "parser.y"
 {
     struct AstNode* ast_node;
 }
 /* Line 1529 of yacc.c.  */
-#line 201 "./tiny_compiler_yacc.h"
+#line 195 "./tiny_compiler_yacc.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

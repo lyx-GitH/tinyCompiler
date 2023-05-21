@@ -48,7 +48,7 @@ void llvm_test() {
 
 
 int main() {
-    yydebug = 1;
+    yydebug = 0;
     auto parser = TCParser("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
     parser.parse();
     parser.visualize(false);

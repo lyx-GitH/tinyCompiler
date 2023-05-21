@@ -17,7 +17,10 @@ enum AstNodeType {
     kPtrType,
     kArrType,
     kFuncType,
-    kBinOp,
+    kEnumType,
+    kUnionType,
+    kStructType,
+    kBinOp = 24,
     kTriOp,
     kUop,
     kExpr,
@@ -45,12 +48,18 @@ enum AstNodeType {
     kForStmt,
     kWhileStmt,
     kDoWhileStmt,
+    kLabeledStmt,
+    kSwitchStmt,
+    kCase,
+    kJump,
+    kFuncDef,
     kCharLiteral,
-    kStrLiteral
+    kStrLiteral,
+    kTypeDecl,
 };
 
 #define IS_NUMBER(TYPE) ((TYPE) >> 2 == 1)
-#define IS_TYPE(t) ((t) >> 2 == 4)
+#define IS_TYPE(t) ((t) >> 2 == 4 || (t) >> 2 == 5)
 
 
 

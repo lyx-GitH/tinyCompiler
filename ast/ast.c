@@ -1,24 +1,25 @@
 //
 // Created by 刘宇轩 on 2023/5/15.
 //
-
+#include "../types/type_checks.h"
 #include "ast.h"
+#include <stdio.h>
 
-#include "stdio.h"
 
 static int parser_node_cnt = 0;
 extern int parser_line_no;
 extern int parser_col_no;
 
+
+
 pAstNode check_types(pAstNode type) {
-    if(type->type_ == kType)
-        return type;
+    if (IS_TYPE(type->type_)) return type;
     assert(type->child_ != NULL);
-    if(type->child_->type_ != kType) {
+    if (!IS_TYPE(type->child_->type_)) {
         pAstNode node = createAstNode(kType, "int", 3);
         addChildHead(type, node);
     }
-    if(type->child_->next_ == NULL) {
+    if (type->child_->next_ == NULL) {
         pAstNode junk = type;
         type = type->child_;
         junk->child_ = NULL;
@@ -37,9 +38,7 @@ void assignType(pAstNode dec_list, pAstNode type) {
     freeAstNode(type);
 }
 
-size_t safe_strlen(char * s) {
-    return s == NULL ? 0 : strlen(s);
-}
+size_t safe_strlen(char *s) { return s == NULL ? 0 : strlen(s); }
 
 pAstNode copyNode(pAstNode target) {
     if (target == NULL) return NULL;
@@ -62,6 +61,11 @@ void addChild(pAstNode target, pAstNode child) {
     pAstNode c = target->child_;
     while (c->next_) c = c->next_;
     c->next_ = child;
+}
+
+void addNullableChild(pAstNode target, pAstNode child) {
+    if(!child) child = createEmptyTreeNode();
+    addChild(target, child);
 }
 
 void addNext(pAstNode target, pAstNode next) {
@@ -189,7 +193,7 @@ pAstNode createQualifiedVar(pAstNode qualifiers, pAstNode type, pAstNode Id) {
     assert(type->type_ == kType);
     assert(Id->type_ == kId);
 
-    // pAstNode type_node = createBinaryTreeNode(kTypeFeature, type,
+    // pAstNode type_node = createBinaryTreeNode(kTypeFeature, Type,
     // qualifiers);
     pAstNode type_node = createFeaturedType(qualifiers, type);
     pAstNode node = createBinaryTreeNode(kVarDecl, type_node, Id);
@@ -199,7 +203,7 @@ pAstNode createQualifiedVar(pAstNode qualifiers, pAstNode type, pAstNode Id) {
 pAstNode createFeaturedType(pAstNode features, pAstNode type) {
     assert(features->type_ == kTypeQualifier);
     pAstNode node = createBinaryTreeNode(kTypeFeature, type, features);
-    if (type->type_ == NULL) {
+    if (type == NULL) {
         node->type_ = kTypeFeatureEmpty;
     }
     return node;
@@ -250,20 +254,20 @@ pAstNode createArrType(pAstNode ele_type, pAstNode size) {
     return node;
 }
 
-pAstNode extractType(pAstNode keywords_list) {
-    assert(keywords_list != NULL);
-    int i = 0;
-    pAstNode cur = keywords_list;
-    while (cur && cur->type_ != kType) {
-        cur = cur->next_;
-        i++;
-    }
-    if (!cur) {
-        pAstNode node = createAstNode(kType, "int", 3);
-        node->next_ = keywords_list;
-        return node;
-    }
-}
+// pAstNode extractType(pAstNode keywords_list) {
+//     assert(keywords_list != NULL);
+//     int i = 0;
+//     pAstNode cur = keywords_list;
+//     while (cur && cur->type_ != kType) {
+//         cur = cur->next_;
+//         i++;
+//     }
+//     if (!cur) {
+//         pAstNode node = createAstNode(kType, "int", 3);
+//         node->next_ = keywords_list;
+//         return node;
+//     }
+// }
 
 pAstNode createScope(pAstNode stats) {
     pAstNode node = createAstNode(kScope, NULL, 0);
@@ -314,14 +318,15 @@ void addLeftMost(pAstNode root, pAstNode node) {
 
 pAstNode maintainTypeSpecs(pAstNode root, pAstNode node) {
     pAstNode top = NULL;
-    if(!root || root->type_ != kTypeFeature)
+    if (!root || root->type_ != kTypeFeature)
         top = createAstNode(kTypeFeature, NULL, 0);
-    else top = root;
+    else
+        top = root;
 
-    if(node && node->type_ == kType) {
-        if(!top->child_) {
+    if (node && IS_TYPE(node->type_)) {
+        if (!top->child_) {
             addChild(top, node);
-        } else if(top->child_->type_ != kType){
+        } else {
             addChildHead(top, node);
         }
     } else if (node && node->type_ == kTypeQualifier) {
@@ -329,5 +334,43 @@ pAstNode maintainTypeSpecs(pAstNode root, pAstNode node) {
     }
 
     return top;
+}
 
+pAstNode createLabledStmt(pAstNode lableId, pAstNode stat) {
+    lableId->type_ = kLabeledStmt;
+    addChild(lableId, stat);
+    return lableId;
+}
+
+pAstNode createTrinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode mid,
+                     pAstNode right) {
+    pAstNode node = createAstNode(type, NULL, 0);
+    left = left == NULL ? createEmptyTreeNode() : left;
+    mid = mid == NULL ? createEmptyTreeNode() : mid;
+    right = right == NULL ? createEmptyTreeNode() : right;
+    addChild(node, left);
+    addChild(node, mid);
+    addChild(node, right);
+    return node;
+}
+
+pAstNode initVar(pAstNode var, pAstNode value){
+    pAstNode node = createBinaryTreeNode(kVarInit, var, value);
+    return node;
+}
+
+
+pAstNode createEnumerator(pAstNode id, pAstNode value){
+    pAstNode const_int_type = createBinaryTreeNode(kTypeFeature, createAstNode(kType, "int", 3), createAstNode(kTypeQualifier, "const", 5)); 
+    pAstNode var_dec = createBinaryTreeNode(kVarDecl, const_int_type, id);
+    return createBinaryTreeNode(kVarInit, var_dec, value);
+}
+
+pAstNode createForStmt(pAstNode exp1, pAstNode exp2, pAstNode exp3, pAstNode stmt){
+    pAstNode node= createAstNode(kForStmt, NULL, 0);
+    addNullableChild(node, exp1);
+    addNullableChild(node, exp2);
+    addNullableChild(node, exp3);
+    addNullableChild(node, stmt);
+    return node;
 }

@@ -3,8 +3,11 @@
   #include <stdio.h>
   #include "parser.h"
   #include "../exceptions/parser_error.h"
+  #include "../types/type_checks.h"
   #define YYDEBUG 1
   #define CDEBUG 1
+  #define INT_TYPE createAstNode(kType, "int", 3)
+  #define EMPTY_NODE createEmptyTreeNode()
   extern char *yytext;
   extern int yylex(void);
   extern int yyparse(void);
@@ -18,7 +21,8 @@
 
 %token <ast_node> NUMBER ID STR
 %token <ast_node> TYPE 
-%token <ast_node> CONST STATIC SIGNED UNSIGNED RET TYPE_DEF VARGS
+%token <ast_node> CONST STATIC TYPE_DEF VARGS
+%token <ast_node> GOTO BREAK CONTINUE RETURN;
 
 %token SEMI
 %token STRUCT UNION ENUM DOT ARROW
@@ -36,7 +40,7 @@
 %token T1 T2
 %token SIZE_OF
 %token IF ELSE WHILE DO FOR
-%token SWITCH GOTO BREAK CASE DEFAULT CONTINUE RETURN 
+%token SWITCH  CASE DEFAULT
 
 %left ADD SUB
 %left MULT DIV
@@ -44,22 +48,25 @@
 %nonassoc ELSE
 
 
-%type <ast_node> param_decl
+%type <ast_node> param_decl function_definition external_decl 
 %type <ast_node> init_declarator declarator direct_declarator abstract_declarator direct_abstract_declarator
 %type <ast_node> type_qualifier type_qualifier_list storage_class_spec
+%type <ast_node> enum_const enumerator_list enumerator enum_spec
+%type <ast_node> struct_or_union_spec struct_or_union struct_decl_list struct_declarator_list struct_decl spec_qualifier_list
+%type <ast_node> struct_declarator
 %type <ast_node> param_type_list param_list
 %type <ast_node> decl_list decl_specs init_declarator_list decl type_spec
-/* %type <ast_node> stat stat_list labeled_stat exp_stat compound_stat selection_stat iteration_stat jump_stat */
+%type <ast_node> stat stat_list labeled_stat exp_stat compound_stat selection_stat iteration_stat jump_stat
 %type <ast_node> initializer initializer_list
 %type <ast_node> function_call args_list
-%type <ast_node> unaries postfix term factor single line
+%type <ast_node> unaries postfix term factor single program_unit translation_unit
 %type <ast_node> pointer
 %type <ast_node> type_name
 %type <ast_node> expression expression1 expression2 expression3 expression4 expression5 expression6 expression7 expression8
 %type <ast_node> expression9 expression10 expression11
 %type <ast_node> uop aop
 
-%start input
+%start program_unit
 %%
 /* program:
     | program block
@@ -72,21 +79,37 @@ block: func_delr
     ; */
 
 
-input : decl_list;
+/* input : decl_list; */
 
 /* line: var_declare           { TinyParserAppendBlock($1);}
     | func_declare          { TinyParserAppendBlock($1);}
     | typedefs              { TinyParserAppendBlock($1);}
     ; */
 
-line: decl_list { TinyParserAppendBlock($1);};
+/* program_unit				: HEADER program_unit                               
+							| DEFINE primary_exp program_unit                 	
+							| translation_unit									
+							; */
 
-decl_list					: decl              {printf("parser got declare"); TinyParserAppendBlock($1);}
+program_unit                : translation_unit;
+
+translation_unit			: external_decl                     {TinyParserAppendBlock($1); } 									
+							| translation_unit external_decl    {TinyParserAppendBlock($2); }					
+							;
+external_decl				: function_definition               {$$ = $1;}
+							| decl                              {$$ = $1;}
+							;
+
+function_definition			: decl_specs declarator	compound_stat 	            {assignType($2, $1); $$ = createBinaryTreeNode(kFuncDef, $2, $3); }			
+							| declarator compound_stat                          {assignType($1, INT_TYPE); $$ = createBinaryTreeNode(kFuncDef, $1, $2); }
+							;
+
+decl_list					: decl              {$$ = $1; }
 							| decl_list decl    {addNext($1, $2);}
                             ;
 
 decl						: decl_specs init_declarator_list SEMI { assignType($2, $1); $$ = $2; }				
-							/* | decl_specs SEMI                           */
+							| decl_specs SEMI                      {$$ = $1;}                          
                             ;
 
 decl_specs					: storage_class_spec decl_specs {$$ = maintainTypeSpecs($2, $1); }
@@ -169,7 +192,7 @@ initializer_list			: initializer                               { $$ = $1;}
 							| initializer_list COMMA initializer        { addNext($1, $3); }
 							;
 
-/* stat						: labeled_stat 									      	
+stat						: labeled_stat 									      	
 							| exp_stat 											  	
 							| compound_stat 									  	
 							| selection_stat  									  
@@ -177,48 +200,48 @@ initializer_list			: initializer                               { $$ = $1;}
 							| jump_stat
 							;
 
-labeled_stat				: ID T2 stat
-							| CASE expression10 T2 stat
+labeled_stat				: ID T2 stat                    {$$ = createLabledStmt($1, $3);}                    
+							| CASE expression10 T2 stat     {$$ = createBinaryTreeNode(kCase, $2, $4); }
 							| DEFAULT T2 stat
 							;
 
-exp_stat					: expression SEMI
-							| SEMI
+exp_stat					: expression SEMI               {$$ = createExprTree($1);}
+							| SEMI                          
 							;
 
-compound_stat				: LSCOPE decl_list stat_list RSCOPE   						
-							| LSCOPE stat_list RSCOPE										
-							| LSCOPE decl_list	RSCOPE										
-							| LSCOPE RSCOPE												
+compound_stat				: LSCOPE decl_list stat_list RSCOPE     {$$ = createBinaryTreeNode(kScope, $2, $3); }  						
+							| LSCOPE stat_list RSCOPE               {$$ = createUnaryTreeNode(kScope, $2); }										
+							| LSCOPE decl_list	RSCOPE	            {$$ = createUnaryTreeNode(kScope, $2); }									
+							| LSCOPE RSCOPE                         {$$ = createUnaryTreeNode(kScope, NULL); }												
 							;
 
 stat_list					: stat              {$$ = $1;} 												
 							| stat_list stat    {addNext($1, $2); }  										
 							;
 
-selection_stat				: IF LB expression RB stat 									%prec "then"
-							| IF LB expression RB stat ELSE stat
-							| SWITCH LB expression RB stat
+selection_stat				: IF LB expression RB stat 									%prec "then"    {$$ = createTrinaryTreeNode(kIfStmt, $3, $5, NULL); }
+							| IF LB expression RB stat ELSE stat                                        {$$ = createTrinaryTreeNode(kIfStmt, $3, $5, $7); }
+							| SWITCH LB expression RB stat                                              {$$ = createBinaryTreeNode(kSwitchStmt, $3, $5); }
 							;
 
-iteration_stat				: WHILE LB expression RB stat
-							| DO stat WHILE LB expression RB SEMI
-							| FOR LB expression SEMI expression SEMI expression RB stat
-							| FOR LB expression SEMI expression SEMI	RB stat
-							| FOR LB expression SEMI SEMI expression RB stat
-							| FOR LB expression SEMI SEMI RB stat
-							| FOR LB SEMI expression SEMI expression RB stat
-							| FOR LB SEMI expression SEMI RB stat
-							| FOR LB SEMI SEMI expression RB stat
-							| FOR LB SEMI SEMI RB stat
+iteration_stat				: WHILE LB expression RB stat                                   {$$ = createBinaryTreeNode(kWhileStmt, createExprTree($3), $5); }
+							| DO stat WHILE LB expression RB SEMI                           {$$ = createBinaryTreeNode(kDoWhileStmt, $2, createExprTree($5)); }                          
+							| FOR LB expression SEMI expression SEMI expression RB stat     {$$ = createForStmt($3, $5, $7, $9); }
+							| FOR LB expression SEMI expression SEMI	        RB stat     {$$ = createForStmt($3, $5, NULL, $8); }
+							| FOR LB expression SEMI            SEMI expression RB stat     {$$ = createForStmt($3, NULL, $6, $8); }
+							| FOR LB expression SEMI            SEMI            RB stat     {$$ = createForStmt($3, NULL, NULL, $7); }
+							| FOR LB            SEMI expression SEMI expression RB stat     {$$ = createForStmt(NULL, $4, $6, $8); }
+							| FOR LB            SEMI expression SEMI            RB stat     {$$ = createForStmt(NULL, $4, NULL, $7); }
+							| FOR LB            SEMI            SEMI expression RB stat     {$$ = createForStmt(NULL, NULL, $5, $7); }
+							| FOR LB            SEMI            SEMI            RB stat     {$$ = createForStmt(NULL, NULL, NULL, $6); }
 							;
 
-jump_stat					: GOTO ID SEMI
-							| CONTINUE SEMI
-							| BREAK SEMI
-							| RETURN expression SEMI
-							| RETURN SEMI
-							; */
+jump_stat					: GOTO ID SEMI                  {addChild($1, $2); $$ = $1; }
+							| CONTINUE SEMI                 {$$ = $1;}
+							| BREAK SEMI                    {$$ = $1;}
+							| RETURN expression SEMI        {$2 = createExprTree($2); addChild($1, $2); $$ = $1; }
+							| RETURN SEMI                   {$$ = $1;}
+							;
 
 
 expression : expression11
@@ -338,22 +361,57 @@ args_list : expression {$$ = createArgList($1); }
     | args_list COMMA expression {addChild($$, $3); }
     ;
 
-/* // TODO: implement this
-f_args_plchld : arg_placeholder
-    | f_args_plchld COMMA arg_placeholder {addNext($1, $3); }
-    ;
-
-arg_placeholder: CONST TYPE {$$ = createFeaturedType($1, $2); }
-    | TYPE ID               {$$ = $1;}
-    ; */
 
 type_name : TYPE
     /* | ID            {$$ = $1; $$->type_ = kType; } */
-    | STRUCT ID     {$$ = $2; $$->type_ = kType; }
-    | ENUM ID       {$$ = $2; $$->type_ = kType; }
-    | UNION ID      {$$ = $2; $$->type_ = kType;}
+    | struct_or_union_spec
+    | enum_spec
     ;
 
+struct_or_union_spec		: struct_or_union ID LSCOPE struct_decl_list RSCOPE {add_type($2->val_); addChild($1, $2); addChild($1, $4); $$ = $1;}
+							| struct_or_union LSCOPE struct_decl_list RSCOPE    {addChild($1, EMPTY_NODE); addChild($1, $3); $$ = $1;}    
+							| struct_or_union ID                                {addChild($1, $2); addChild($1, EMPTY_NODE); $$ = $1;}                            
+							;
+
+struct_or_union				: STRUCT    {$$ = createAstNode(kStructType, NULL, 0); }
+                            | UNION     {$$ = createAstNode(kUnionType, NULL, 0); }    
+							;
+
+struct_decl_list			: struct_decl                   {$$ = $1;}
+							| struct_decl_list struct_decl  {addNext($1, $2); }
+                            ;
+
+struct_decl					: spec_qualifier_list struct_declarator_list SEMI   {assignType($2, $1); $$ = $2;}
+
+spec_qualifier_list			: type_spec spec_qualifier_list                     {$$ = maintainTypeSpecs($2, $1);}
+							| type_spec                                         {$$ = maintainTypeSpecs(NULL, $1); }
+							| type_qualifier spec_qualifier_list                {$$ = maintainTypeSpecs($2, $1); }
+							| type_qualifier                                    {$$ = maintainTypeSpecs(NULL, $1); }
+							;
+
+struct_declarator_list		: struct_declarator                                 {$$ = $1;}
+							| struct_declarator_list COMMA struct_declarator    {addNext($1, $3); }  
+							;
+
+struct_declarator			: declarator
+							/* | declarator ':' const_exp
+							| ':' const_exp */
+							;
+
+enum_spec					: enum_const ID LSCOPE enumerator_list RSCOPE   {add_type($2->val_); $$ = createBinaryTreeNode(kEnumType, $2, $4); }
+							| enum_const LSCOPE enumerator_list RSCOPE      {$$ = createBinaryTreeNode(kEnumType, NULL, $3);}
+							| enum_const ID                                 {$$ = createBinaryTreeNode(kEnumType, $2, NULL); }
+							;
+
+enumerator_list				: enumerator                            {$$ = $1;}
+							| enumerator_list COMMA enumerator      {addNext($1, $3); }
+							;
+
+enumerator					: ID                                    {$$ = createEnumerator($1, NULL); }
+							| ID ASSIGN expression10                {$$ = createEnumerator($1, $3);}
+							;
+
+enum_const                  : ENUM { $$ = createAstNode(kEnumType, NULL, 0); }
 
 
 

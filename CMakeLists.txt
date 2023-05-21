@@ -15,7 +15,7 @@ add_definitions(${LLVM_DEFINITIONS})
 
 # Now build our tools
 add_executable(tinyCompiler main.cpp ast/ast.h lexer/tokens.h lexer/base_lexer.h lexer/base_lexer.cpp lexer/tcLexer.cpp lexer/tcLexer.h code_gen/CodeGenerator.cpp code_gen/CodeGenerator.h ast/ast_node_type.h ast/ast.c parser/parser.h parser/parser.c visualizer/syntax_tree_printer.cpp visualizer/syntax_tree_printer.h parser/TCParser.cpp parser/TCParser.h
-        parser/tiny_compiler_yacc.c parser/tiny_compiler_yacc.h lexer/tiny_compiler_lex.c lexer/tiny_compiler_lex.h exceptions/parser_error.h exceptions/parser_error.cpp)
+        parser/tiny_compiler_yacc.c parser/tiny_compiler_yacc.h lexer/tiny_compiler_lex.c lexer/tiny_compiler_lex.h exceptions/parser_error.h exceptions/parser_error.cpp types/type.cpp types/type.h types/type_checks.h types/type_checks.cpp)
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
