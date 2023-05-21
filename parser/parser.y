@@ -49,7 +49,7 @@
 %nonassoc ELSE
 
 
-%type <ast_node> param_decl function_definition external_decl 
+%type <ast_node> param_decl function_definition external_decl type_name_cast
 %type <ast_node> init_declarator declarator direct_declarator abstract_declarator direct_abstract_declarator
 %type <ast_node> type_qualifier type_qualifier_list storage_class_spec
 %type <ast_node> enum_const enumerator_list enumerator enum_spec
@@ -306,7 +306,7 @@ term: factor
     ;
 
 factor: unaries                     
-    | LB type_name RB factor {$$ = createBinaryTreeNode(kCast, $2, $4); }
+    | LB type_name_cast RB factor {$$ = createBinaryTreeNode(kCast, $2, $4); }
     ;
 
 unaries : postfix                           
@@ -364,11 +364,16 @@ args_list : expression {$$ = createArgList($1); }
     ;
 
 
+type_name_cast				: spec_qualifier_list abstract_declarator	{assignType($2, $1); $$ = $2;}
+							| spec_qualifier_list						
+							;
+
 type_name : TYPE
-    /* | ID            {$$ = $1; $$->type_ = kType; } */
+   
     | struct_or_union_spec
     | enum_spec
-    ;
+    ; 
+	
 
 struct_or_union_spec		: struct_or_union ID LSCOPE struct_decl_list RSCOPE {add_hidden_type($2->val_); addChild($1, $2); addChild($1, $4); $$ = $1;}
 							| struct_or_union LSCOPE struct_decl_list RSCOPE    {addChild($1, EMPTY_NODE); addChild($1, $3); $$ = $1;}    

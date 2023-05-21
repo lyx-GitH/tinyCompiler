@@ -119,6 +119,8 @@ inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
             return "kSwitch";
         case kCase:
             return "kCase";
+        case kCast:
+            return "kCast";
         case kEnumType:
             return "kEnumType";
         case kStructType:
