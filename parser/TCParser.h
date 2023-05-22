@@ -23,7 +23,9 @@ public:
 
     void visualize(bool to_file = false, const std::string &out_file_path = "");
 
-    const pAstNode getSyntaxTree();
+    pAstNode getSyntaxTree();
+
+    pAstNode releaseSyntaxTree();
 
     ~TCParser() { freeAstNode(ast_root_); }
 
@@ -33,7 +35,6 @@ private:
     pAstNode ast_root_;
 
 };
-
 
 
 #endif //TINYCOMPILER_TCPARSER_H

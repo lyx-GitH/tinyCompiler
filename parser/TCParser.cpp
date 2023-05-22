@@ -35,3 +35,13 @@ void TCParser::visualize(bool to_file, const std::string &out_file_path) {
         printer.PrintTree(static_cast<std::ostream&>(fs));
     }
 }
+
+pAstNode TCParser::getSyntaxTree() {
+    return ast_root_;
+}
+
+pAstNode TCParser::releaseSyntaxTree() {
+    auto ptr = ast_root_;
+    ast_root_ = nullptr;
+    return ptr;
+}
