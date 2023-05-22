@@ -3,6 +3,8 @@
 //
 
 #include "CodeGenerator.h"
+llvm::LLVMContext CodeGenerator::Context;
+llvm::IRBuilder<> CodeGenerator::IRBuilder{CodeGenerator::Context};
 
 void CodeGenerator::optimize(const std::string &opt_level) {
     assert(Module);
@@ -42,11 +44,11 @@ void CodeGenerator::GenObjectCode(std::string file_name) {
     llvm::InitializeAllAsmParsers();
     llvm::InitializeAllAsmPrinters();
 
-    std::string Error;
-    auto Target = llvm::TargetRegistry::lookupTarget(TargetTriple, Error);
+    std::string error;
+    auto Target = llvm::TargetRegistry::lookupTarget(TargetTriple, error);
 
     if (!Target)
-        throw std::runtime_error(Error);
+        throw std::runtime_error(error);
 
     auto CPU = "generic";
 
@@ -57,17 +59,17 @@ void CodeGenerator::GenObjectCode(std::string file_name) {
     Module->setDataLayout(TargetMachine->createDataLayout());
     Module->setTargetTriple(TargetTriple);
 
-    std::error_code EC;
-    llvm::raw_fd_ostream Dest(file_name, EC, llvm::sys::fs::OF_None);
+    std::error_code ec;
+    llvm::raw_fd_ostream Dest(file_name, ec, llvm::sys::fs::OF_None);
 
-    if (EC)
-        throw std::runtime_error("Could not open file: " + EC.message());
+    if (ec)
+        throw std::runtime_error("Could not open file: " + ec.message());
 
     auto FileType = llvm::CGFT_ObjectFile;
     llvm::legacy::PassManager PM;
 
     if (TargetMachine->addPassesToEmitFile(PM, Dest, nullptr, FileType))
-        throw std::runtime_error("TargetMachine can't emit a file of this type");
+        throw std::runtime_error("type unsupported");
 
 
     PM.run(*Module);

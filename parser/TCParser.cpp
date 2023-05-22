@@ -6,17 +6,21 @@
 #include <fstream>
 #include <iostream>
 
+#include "../exceptions/parse_exception.h"
 
 void TCParser::parse() {
     TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
     TinyParserBegin();
     try{
         TinyParserParse(file_path_.c_str());
-    } catch(std::runtime_error& e) {
-        std::printf("\033[31m failed \033[0m\n");
+    } catch(ParseException& e) {
+        std::printf("\033[31mfailed \033[0m");
+        e.show();
         TinyParserEnd();
         is_ok_ = false;
         return;
+    }catch(std::runtime_error& e) {
+        // do nothing
     }
     is_ok_ = true;
     ast_root_ = TinyParserGetRoot();

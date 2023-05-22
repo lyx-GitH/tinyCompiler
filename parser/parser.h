@@ -15,7 +15,7 @@ void TinyParserParse(const char *file_name);
 
 void TinyParserEnd();
 
-void TinyParserRaiseError();
+void TinyParserRaiseError(const char*);
 
 const char* TinyParserGetPwd();
 

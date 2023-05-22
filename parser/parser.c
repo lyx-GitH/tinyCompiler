@@ -2,7 +2,7 @@
 // Created by 刘宇轩 on 2023/5/15.
 //
 #include "parser.h"
-
+#include "../exceptions/parser_error.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -45,7 +45,10 @@ void TinyParserBegin() {
     assert(parser_root_node != NULL);
 }
 
-void TinyParserRaiseError() { parse_error |= 1; }
+void TinyParserRaiseError(const char* e) {
+    parse_error |= 1;
+    throw_parse_exception(e);
+}
 
 void TinyParserParse(const char *file_name) {
     FILE *input_file = fopen(file_name, "r");

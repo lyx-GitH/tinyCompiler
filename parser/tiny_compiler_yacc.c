@@ -3008,8 +3008,7 @@ yyreturn:
 #line 425 "parser.y"
 
 int yyerror(char* s) {
-    printf("tinyParser: \033[31merror:\033[0m %s at %s:%d:%d\n", s, TinyParserGetPwd(), TinyParserGetLine(), TinyParserGetColumn() - TinyParserGetCurTokLen());
-    show_lexer_error(TinyParserGetPwd(), TinyParserGetColumn() - TinyParserGetCurTokLen(), TinyParserGetLine());
+    TinyParserRaiseError(s);
     return 1;
 }
 

@@ -14,6 +14,7 @@
 #include <exception>
 #include <cassert>
 #include <functional>
+#include <vector>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Module.h>
@@ -52,15 +53,24 @@
 #include <llvm/Target/TargetOptions.h>
 #include "llvm/IR/LegacyPassManager.h"
 #include "../ast/ast.h"
+#include "Symbol.h"
 
 typedef std::function<llvm::Value *()> genFunc;
 
 static std::array<genFunc, 1024> generators{};
 
+#define LOAD_F(idx, f) generators.at(idx) = (f)
+
+static void initGenerators() {
+
+}
 
 
 class CodeGenerator {
 public:
+    using pValue = llvm::Value *;
+    using SymbolTable = std::map<std::string, Symbol>;
+
     CodeGenerator(pAstNode root) : root_{root} {
         Module = new llvm::Module("main", Context);
         DataLayout = new llvm::DataLayout(Module);
@@ -88,10 +98,12 @@ private:
     static llvm::LLVMContext Context;
     static llvm::IRBuilder<> IRBuilder;
 
+    std::vector<SymbolTable> SymbolTableStack;
+
+
 };
 
-llvm::LLVMContext CodeGenerator::Context;
-llvm::IRBuilder<> CodeGenerator::IRBuilder{CodeGenerator::Context};
+
 
 
 #endif //TINYCOMPILER_CODEGENERATOR_H

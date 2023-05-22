@@ -3,6 +3,7 @@
 //
 
 #include "sematics.h"
+#include "../exceptions/parse_exception.h"
 #include <utility>
 #include <stdexcept>
 
@@ -24,5 +25,5 @@ void assert_valid_typedefs(pAstNode declares){
 
     err:
     freeAstNode(declares);
-    throw std::runtime_error{"not a valid typedef"};
+    throw ParseException{"not a valid typedef"};
 }

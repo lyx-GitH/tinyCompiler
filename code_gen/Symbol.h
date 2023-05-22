@@ -12,6 +12,12 @@
 
 class Symbol {
 public:
+    union symbol_content {
+        llvm::Function *f = nullptr;
+        llvm::Value *v;
+        llvm::Type *t;
+    };
+
     Symbol() : Type(UNDEFINED) {}
 
     Symbol(llvm::Function *Func) : Type(FUNCTION) { Content.f = Func; }
@@ -29,11 +35,7 @@ public:
     llvm::Value *GetConstant() { return this->Type == CONSTANT ? Content.v : nullptr; }
 
 private:
-    union {
-        llvm::Function *f = nullptr;
-        llvm::Value *v;
-        llvm::Type *t;
-    } Content;
+    symbol_content Content;
     enum {
         FUNCTION,
         TYPE,

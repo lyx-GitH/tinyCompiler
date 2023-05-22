@@ -10,7 +10,9 @@
 extern "C" {
 #endif
 
-void show_lexer_error(const char *file_name, int column, int line);
+void show_lexer_error(const char *file_name, int column, int line, int throw_exp);
+
+void throw_parse_exception(const char *e);
 
 #ifdef __cplusplus
 }
