@@ -17,8 +17,8 @@ add_definitions(${LLVM_DEFINITIONS})
 # Now build our tools
 
 # Now build our tools
-add_executable(tinyCompiler main.cpp ast/ast.h lexer/tokens.h lexer/base_lexer.h lexer/base_lexer.cpp lexer/tcLexer.cpp lexer/tcLexer.h code_gen/CodeGenerator.cpp code_gen/CodeGenerator.h ast/ast_node_type.h ast/ast.c parser/parser.h parser/parser.c visualizer/syntax_tree_printer.cpp visualizer/syntax_tree_printer.h parser/TCParser.cpp parser/TCParser.h
-        parser/tiny_compiler_yacc.c parser/tiny_compiler_yacc.h lexer/tiny_compiler_lex.c lexer/tiny_compiler_lex.h exceptions/parser_error.h exceptions/parser_error.cpp exceptions/parse_exception.h exceptions/parse_exception.cpp types/type.cpp types/type.h types/type_checks.h types/type_checks.cpp sematics/sematics.h sematics/sematics.cpp code_gen/Symbol.h)
+add_executable(tinyCompiler main.cpp ast/ast.h lexer/tokens.h lexer/base_lexer.h lexer/base_lexer.cpp lexer/tcLexer.cpp lexer/tcLexer.h code_gen/code_generator.cpp code_gen/code_generator.h ast/ast_node_type.h ast/ast.c parser/parser.h parser/parser.c visualizer/syntax_tree_printer.cpp visualizer/syntax_tree_printer.h parser/tc_parser.cpp parser/tc_parser.h
+        parser/tiny_compiler_yacc.c parser/tiny_compiler_yacc.h lexer/tiny_compiler_lex.c lexer/tiny_compiler_lex.h exceptions/parser_error.h exceptions/parser_error.cpp exceptions/parse_exception.h exceptions/parse_exception.cpp types/type.cpp types/type.h types/type_checks.h types/type_checks.cpp sematics/sematics.h sematics/sematics.cpp code_gen/symbol.h compiler/tiny_compiler.cpp compiler/tiny_compiler.h preprocesser/tc_preprocessor.cpp preprocesser/tc_preprocessor.h)
 
 # God, this part is so ridiculous
 foreach (target ${LLVM_TARGETS_TO_BUILD})

@@ -7,40 +7,79 @@
 
 #include <string>
 #include <utility>
+#include <map>
+#include <llvm/IR/Type.h>
+#include <concepts>
 
-struct my_struct {
-    int a,b, :10;
-    int x;
+static const int BLOCK_SIZE = 64;
+static const int CONST_MASK = 1 << 1;
+static std::map<uint64_t, std::shared_ptr<char>> blocks;
 
-};
+static inline void SetConst(char *block, bool is_const = true) {
+    block[BLOCK_SIZE - 1] |= static_cast<char>(is_const);
+}
 
-class Type {
-public:
-    Type(std::string  name, const std::size_t size) : name_(std::move(name)), size_(size) {}
+static inline bool _IsConst(char *block) {
+    return static_cast<bool>(block[BLOCK_SIZE - 1]);
+}
 
-    [[nodiscard]] const std::string &getName() const;
+static inline uint64_t GetHash(void *p, bool is_c) {
+    return reinterpret_cast<uint64_t>(p) | static_cast<uint64_t>(is_c);
+}
 
-    void setName(const std::string &name);
+template<typename T>
+requires
+std::is_base_of_v<llvm::Type, T>
+T *GetMyType(T *ptr, bool is_const = false) {
+    auto hash = GetHash(ptr, is_const);
+    if (blocks.contains(hash))
+        return reinterpret_cast<T *>(blocks.at(hash).get());
+    auto size = sizeof(T);
+    assert(size < BLOCK_SIZE - 1);
+    std::shared_ptr<char[]> block(new char[BLOCK_SIZE]());
+    memcpy(block.get(), ptr, size);
+    SetConst(block.get(), is_const);
+    hash = GetHash(block.get(), is_const);
+    blocks[hash] = block;
+    return reinterpret_cast<T *>(blocks[hash].get());
+}
 
-    [[nodiscard]] size_t getSize() const;
+template<typename T>
+requires
+std::is_base_of_v<llvm::Type, T>
+bool IsConst(T *ptr) {
+    return _IsConst(reinterpret_cast<char *>(ptr));
+}
 
-protected:
-    std::string name_;
-    const std::size_t size_;
-};
+//struct TCType<llvm::Type> p;
 
-
-class PtrType : public Type {
-public:
-    PtrType(std::string name) : Type(std::move(name), sizeof(char*)) {}
-private:
-    std::unique_ptr<Type> TypePtrTo;
-};
-
-class ArrType : public Type {
-public:
-
-};
-
+//namespace tc {
+//    class Type {
+//    public:
+//        Type() = default;
+//
+//        Type(llvm::Type *type) : type_(type) {}
+//
+//        Type(llvm::Type *type, bool is_const) : type_(type), is_const_(is_const) {}
+//
+//        operator llvm::Type *() {
+//            return type_;
+//        }
+//
+//        bool IsConst() const{
+//            return is_const_;
+//        }
+//
+//        Type MarkConst() {
+//            is_const_ = true;
+//            return *this;
+//        }
+//
+//    private:
+//        llvm::Type *type_ = nullptr;
+//        bool is_const_ = false;
+//
+//    };
+//}
 
 #endif //TINYCOMPILER_TYPE_H

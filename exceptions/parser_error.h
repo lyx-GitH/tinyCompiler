@@ -14,6 +14,10 @@ void show_lexer_error(const char *file_name, int column, int line, int throw_exp
 
 void throw_parse_exception(const char *e);
 
+extern struct AstNode;
+
+void throw_code_gen_exception(const struct AstNode* node, const char *e);
+
 #ifdef __cplusplus
 }
 #endif

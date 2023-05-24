@@ -32,4 +32,4 @@ The parser can now do:
 The syntax tree. inherited from the well-known ZJU project called *miniSQL*
 
 ### About *visualizer*
-This part can visualize a ast in Type of ```dot``` language. Also inherited from *miniSQL*
+This part can Visualize a ast in Type of ```dot``` language. Also inherited from *miniSQL*

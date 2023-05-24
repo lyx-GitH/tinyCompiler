@@ -4,8 +4,8 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "lexer/tcLexer.h"
-#include "parser/TCParser.h"
-#include "code_gen/CodeGenerator.h"
+#include "parser/tc_parser.h"
+#include "code_gen/code_generator.h"
 
 
 extern "C" {
@@ -16,6 +16,32 @@ extern int yydebug;
 }
 using namespace llvm;
 
+//template<typename T, typename... Args> requires std::is_base_of_v<llvm::Type, T>
+//class MyClass : public T {
+//private:
+//    bool is_const_;
+//public:
+//    void MarkConst() {
+//        is_const_ = true;
+//        return *this;
+//    }
+//
+//    MyClass(Args &&...args) : T(std::forward<Args>(args)...), is_const_(false) {
+//
+//    }
+//
+//
+//};
+
+//template<typename T>
+//requires
+//std::is_base_of_v<llvm::Type, T>
+//auto make_my_class(T *x)
+//
+//-> std::shared_ptr<MyClass<T>> {
+//    return std::make_shared<MyClass<T>>(new MyClass<T>(*x));
+//}
+
 // This function tests that if your llvm is correctly configured
 void llvm_test() {
     LLVMContext context;
@@ -25,7 +51,7 @@ void llvm_test() {
     // Create a function named `add` that takes two `i32` arguments and returns an `i32` value
     FunctionType *funcType = FunctionType::get(builder.getInt32Ty(), {builder.getInt32Ty(), builder.getInt32Ty()},
                                                false);
-
+//    auto p = make_my_class(funcType);
     Function *addFunc = Function::Create(funcType, Function::ExternalLinkage, "add", module);
 
     // Set names for the function arguments
@@ -50,11 +76,11 @@ void llvm_test() {
 
 //int llvm_test2() {
 //    LLVMContext Context;
-//    // Create some module to put our function into it.
+//    // Create some module_ to put our function into it.
 //    std::unique_ptr<Module> Owner = std::make_unique<Module>("test", Context);
 //    Module *M = Owner.get();
 //
-//    // Create the add1 function entry and insert this entry into module M.  The
+//    // Create the add1 function entry and insert this entry into module_ M.  The
 //    // function will have a return type of "int" and take an argument of "int".
 //    Function *Add1F =
 //            Function::Create(FunctionType::get(Type::getInt32Ty(Context),
@@ -101,7 +127,7 @@ void llvm_test() {
 //    builder.CreateRet(Add1CallRes);
 //
 //
-//    outs() << "We just constructed this LLVM module:\n\n" << *M;
+//    outs() << "We just constructed this LLVM module_:\n\n" << *M;
 //    outs().flush();
 //    std::error_code error_code;
 //    std::unique_ptr<ToolOutputFile> Out(new ToolOutputFile(
@@ -116,14 +142,47 @@ void llvm_test() {
 //    Out->keep(); // Declare success
 //    return 0;
 //}
+#include "concepts"
+
+class A {
+};
+
+class B : public A {
+public:
+    double f;
+};
+
+class C : public A {
+public:
+    int p;
+};
+
+
+template<class T>
+void call(T a) {
+    std::cout << "generic" << std::endl;
+}
+
+template<>
+void call(C a) {
+    std::cout << "ccc" << std::endl;
+}
+
+template<>
+void call(B a) {
+    std::cout << "bbb" << std::endl;
+}
+
+void pre_call(A a) {
+    call(a);
+}
 
 
 int main() {
-    CodeGenerator codeGenerator{nullptr};
-    codeGenerator.optimize("O0");
     yydebug = 0; // set this to 1 to enable debuggings
-    auto parser = TCParser("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
-    parser.parse();
-    parser.visualize(false);
+    auto parser = CodeGenerator("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
+    parser.Parse();
+//    parser.Visualize(false);
+
     return 0;
 }

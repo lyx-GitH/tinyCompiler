@@ -17,12 +17,13 @@ struct AstNode {
     enum AstNodeType type_;
     int line_no_;
     int col_no_;
-    char* val_;
-    struct AstNode* child_;
-    struct AstNode* next_;
+    char *val_;
+    struct AstNode *child_;
+    struct AstNode *next_;
 };
 
-typedef struct AstNode* pAstNode;
+typedef struct AstNode *pAstNode;
+
 
 void addChild(pAstNode target, pAstNode child);
 
@@ -38,11 +39,15 @@ pAstNode copyNode(pAstNode target);
 
 pAstNode initAstNode();
 
-pAstNode createAstNode(enum AstNodeType type, char* value, int len);
+pAstNode createAstNode(enum AstNodeType type, char *value, int len);
+
+pAstNode getNChildSafe(struct AstNode const* node, int n);
+
+uint64_t solveConstantExpr(const struct AstNode* node);
 
 void freeAstNode(pAstNode node);
 
-inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
+inline const char *GetSyntaxNodeTypeStr(enum AstNodeType type) {
     // TODO: change this to return real names
     switch (type) {
         case kNULL:
@@ -138,6 +143,7 @@ inline const char* GetSyntaxNodeTypeStr(enum AstNodeType type) {
 
 /*=========== Specialized functions for binary ops ======== */
 
+
 void addNewTypeHint(pAstNode root, pAstNode type_hint);
 
 void addLeftMost(pAstNode root, pAstNode node);
@@ -152,9 +158,9 @@ pAstNode createBinaryTreeNode(enum AstNodeType type, pAstNode left,
 
 pAstNode createUnaryTreeNode(enum AstNodeType type, pAstNode child);
 
-pAstNode createBinaryOpTree(const char* op, pAstNode lhs, pAstNode rhs);
+pAstNode createBinaryOpTree(const char *op, pAstNode lhs, pAstNode rhs);
 
-pAstNode createUnaryOpTree(const char* op, pAstNode hs);
+pAstNode createUnaryOpTree(const char *op, pAstNode hs);
 
 pAstNode createTrinaryOpTree(pAstNode condition, pAstNode true_exp,
                              pAstNode false_exp);
@@ -171,7 +177,7 @@ pAstNode createQualifiedVar(pAstNode qualifiers, pAstNode type, pAstNode Id);
 
 pAstNode createFunctionDelcTree(pAstNode var_decl, pAstNode placeholders);
 
-pAstNode createStructMember(pAstNode node, pAstNode member, char* val);
+pAstNode createStructMember(pAstNode node, pAstNode member, char *val);
 
 pAstNode createTypeDefTree(pAstNode decl_tree);
 

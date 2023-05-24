@@ -1768,7 +1768,7 @@ yyparse ()
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  YYDPRINTF ((stderr, "Starting parse\n"));
+  YYDPRINTF ((stderr, "Starting Parse\n"));
 
   yystate = 0;
   yyerrstatus = 0;

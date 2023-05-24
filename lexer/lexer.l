@@ -123,11 +123,9 @@ ID {LITERAL}+{ID_C}*
     // ID can be a type-alias
     if(has_type(yytext)){
         NODE(kType);
-        printf("got type : %s\n", yytext);
         return TYPE;
     } else {
         NODE(kId);
-        printf("got id : %s\n", yytext);
         return ID;
     }
         

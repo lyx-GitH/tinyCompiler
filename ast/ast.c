@@ -42,7 +42,7 @@ size_t safe_strlen(char *s) { return s == NULL ? 0 : strlen(s); }
 pAstNode copyNode(pAstNode target) {
     if (target == NULL) return NULL;
     pAstNode new_node =
-        createAstNode(target->type_, target->val_, safe_strlen(target->val_));
+            createAstNode(target->type_, target->val_, safe_strlen(target->val_));
     new_node->col_no_ = target->col_no_;
     new_node->line_no_ = target->line_no_;
     new_node->next_ = copyNode(target->next_);
@@ -63,7 +63,7 @@ void addChild(pAstNode target, pAstNode child) {
 }
 
 void addNullableChild(pAstNode target, pAstNode child) {
-    if(!child) child = createEmptyTreeNode();
+    if (!child) child = createEmptyTreeNode();
     addChild(target, child);
 }
 
@@ -90,7 +90,7 @@ void addChildHead(pAstNode target, pAstNode child) {
 }
 
 pAstNode initAstNode() {
-    pAstNode node = (pAstNode)malloc(sizeof(struct AstNode));
+    pAstNode node = (pAstNode) malloc(sizeof(struct AstNode));
     node->id_ = parser_node_cnt++;
     node->child_ = NULL;
     node->next_ = NULL;
@@ -282,6 +282,7 @@ pAstNode createVarDecl(pAstNode type, pAstNode var) {
     pAstNode node = createBinaryTreeNode(kVarDecl, type, var);
     return node;
 }
+
 /**
  * @brief
  *                  R
@@ -293,7 +294,7 @@ pAstNode createVarDecl(pAstNode type, pAstNode var) {
 
 void addNewTypeHint(pAstNode root, pAstNode type_hint) {
     pAstNode a = root, b = root->child_, c = root->child_->next_, d = type_hint,
-             e = type_hint->child_->next_, x = type_hint->child_;
+            e = type_hint->child_->next_, x = type_hint->child_;
 
     assert(x->type_ == kNULL);
     assert(x->child_ == NULL);
@@ -342,7 +343,7 @@ pAstNode createLabledStmt(pAstNode lableId, pAstNode stat) {
 }
 
 pAstNode createTrinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode mid,
-                     pAstNode right) {
+                               pAstNode right) {
     pAstNode node = createAstNode(type, NULL, 0);
     left = left == NULL ? createEmptyTreeNode() : left;
     mid = mid == NULL ? createEmptyTreeNode() : mid;
@@ -353,20 +354,21 @@ pAstNode createTrinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode mi
     return node;
 }
 
-pAstNode initVar(pAstNode var, pAstNode value){
+pAstNode initVar(pAstNode var, pAstNode value) {
     pAstNode node = createBinaryTreeNode(kVarInit, var, value);
     return node;
 }
 
 
-pAstNode createEnumerator(pAstNode id, pAstNode value){
-    pAstNode const_int_type = createBinaryTreeNode(kTypeFeature, createAstNode(kType, "int", 3), createAstNode(kTypeQualifier, "const", 5)); 
+pAstNode createEnumerator(pAstNode id, pAstNode value) {
+    pAstNode const_int_type = createBinaryTreeNode(kTypeFeature, createAstNode(kType, "int", 3),
+                                                   createAstNode(kTypeQualifier, "const", 5));
     pAstNode var_dec = createBinaryTreeNode(kVarDecl, const_int_type, id);
     return createBinaryTreeNode(kVarInit, var_dec, value);
 }
 
-pAstNode createForStmt(pAstNode exp1, pAstNode exp2, pAstNode exp3, pAstNode stmt){
-    pAstNode node= createAstNode(kForStmt, NULL, 0);
+pAstNode createForStmt(pAstNode exp1, pAstNode exp2, pAstNode exp3, pAstNode stmt) {
+    pAstNode node = createAstNode(kForStmt, NULL, 0);
     addNullableChild(node, exp1);
     addNullableChild(node, exp2);
     addNullableChild(node, exp3);
@@ -374,6 +376,32 @@ pAstNode createForStmt(pAstNode exp1, pAstNode exp2, pAstNode exp3, pAstNode stm
     return node;
 }
 
-pAstNode createTypeDefTree(pAstNode decl_tree){
+pAstNode createTypeDefTree(pAstNode decl_tree) {
 
+}
+
+pAstNode getNChildSafe(struct AstNode const* node, int n) {
+    if (!node)
+        return NULL;
+    assert(n >= 0);
+    pAstNode cur = node->child_;
+    for (int i = 0; cur && i < n; i++) {
+        cur = cur->next_;
+    }
+    return cur;
+}
+
+uint64_t solveConstantExpr(const struct AstNode *node) {
+    assert(node);
+    if(node->type_ == kExpr) {
+        return solveConstantExpr(node->child_);
+    } else if(IS_NUMBER(node->type_)) {
+        return strtoll(node->val_, NULL, 0);
+    } else {
+        switch (node->type_) {
+
+        }
+    }
+
+    assert(0);
 }

@@ -2,8 +2,8 @@
 // Created by 刘宇轩 on 2023/5/15.
 //
 
-#ifndef TINYCOMPILER_TCPARSER_H
-#define TINYCOMPILER_TCPARSER_H
+#ifndef TINYCOMPILER_TC_PARSER_H
+#define TINYCOMPILER_TC_PARSER_H
 
 #include <utility>
 
@@ -18,18 +18,23 @@ extern "C" {
 class TCParser {
 public:
     explicit TCParser(std::string file_path) : file_path_(std::move(file_path)), ast_root_{nullptr}, is_ok_{false} {}
+    ~TCParser() { freeAstNode(ast_root_); }
 
-    void parse();
+    void Parse();
 
-    void visualize(bool to_file = false, const std::string &out_file_path = "");
+    void Visualize(bool to_file = false, const std::string &out_file_path = "");
 
-    pAstNode getSyntaxTree();
+    [[nodiscard]] pAstNode getSyntaxTree() const;
 
     pAstNode releaseSyntaxTree();
 
-    ~TCParser() { freeAstNode(ast_root_); }
 
-private:
+
+    [[nodiscard]] bool isParseOK() const{
+        return is_ok_;
+    }
+
+protected:
     bool is_ok_;
     std::string file_path_;
     pAstNode ast_root_;
@@ -37,4 +42,4 @@ private:
 };
 
 
-#endif //TINYCOMPILER_TCPARSER_H
+#endif //TINYCOMPILER_TC_PARSER_H

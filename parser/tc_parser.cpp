@@ -2,13 +2,13 @@
 // Created by 刘宇轩 on 2023/5/15.
 //
 
-#include "TCParser.h"
+#include "tc_parser.h"
 #include <fstream>
 #include <iostream>
 
 #include "../exceptions/parse_exception.h"
 
-void TCParser::parse() {
+void TCParser::Parse() {
     TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
     TinyParserBegin();
     try{
@@ -28,7 +28,7 @@ void TCParser::parse() {
     assert(ast_root_ != nullptr);
 }
 
-void TCParser::visualize(bool to_file, const std::string &out_file_path) {
+void TCParser::Visualize(bool to_file, const std::string &out_file_path) {
     if(!ast_root_)
         return;
     auto printer = SyntaxTreePrinter(ast_root_);
@@ -40,7 +40,7 @@ void TCParser::visualize(bool to_file, const std::string &out_file_path) {
     }
 }
 
-pAstNode TCParser::getSyntaxTree() {
+pAstNode TCParser::getSyntaxTree() const{
     return ast_root_;
 }
 
