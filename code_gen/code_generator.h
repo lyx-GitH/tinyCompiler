@@ -55,7 +55,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 
 #include "symbol.h"
-#include "../types/type.h"
+#include "../types/type_factory.h"
 #include "../types/type_checks.h"
 #include "../parser/tc_parser.h"
 
@@ -90,13 +90,13 @@ public:
 //    CodeGenerator() = default;
 
     explicit CodeGenerator(std::string file_path) : TCParser(std::move(file_path)) {
+        InScope();
         InitGenerators();
         InitBasicTypes();
-        InScope();
         module_ = new llvm::Module("main", context);
         data_layout_ = new llvm::DataLayout(module_);
-//        test();
-//        test2();
+        test();
+        test2();
     };
 
     ~CodeGenerator() {
@@ -136,19 +136,30 @@ public:
     };
 
     void test() {
-//        auto d_p = IR_builder.getDoubleTy();
-        auto d_p = GetMyType(IR_builder.getDoubleTy());
-        auto p_p = llvm::PointerType::get(d_p, 0U);
-        std::cout << d_p << " " << p_p << std::endl;
+        auto int_type = GetSymbol("int")->GetType();
+        assert(int_type->isIntOrIntVectorTy());
+
+        auto const_int_type = TypeFactory::GetConstTypeOf(int_type);
+        auto const_int_ptr_type = TypeFactory::Get<llvm::PointerType>(const_int_type, 0U);
+        std::cout << "const int:" << const_int_type << " " << "const int*: " << const_int_ptr_type << std::endl;
+        auto int_ptr_type = TypeFactory::Get<llvm::PointerType>(int_type, 0U);
+        std::cout << "int* : " << int_ptr_type << std::endl;
 
     }
 
     void test2() {
-        auto d_p = GetMyType(IR_builder.getDoubleTy(), true);
-        auto d_p2 = GetMyType(d_p, true);
-        auto d_p3 = GetMyType(d_p2);
-        auto p_p = llvm::PointerType::get(d_p, 0U);
-        std::cout << d_p << " " << d_p2 << " " << d_p3 << " " << p_p << std::endl;
+        auto int_type = GetSymbol("int")->GetType();
+        assert(!TypeFactory::IsConst(int_type));
+        assert(int_type != IR_builder.getInt32Ty());
+        assert(int_type->isIntOrIntVectorTy());
+        auto const_int_type = TypeFactory::GetConstTypeOf(int_type);
+        auto c_const_int_ty = TypeFactory::GetConstTypeOf(const_int_type);
+        assert(const_int_type == c_const_int_ty);
+        assert(TypeFactory::IsConst(const_int_type));
+        auto const_int_ptr_type = TypeFactory::Get<llvm::PointerType>(const_int_type, 0U);
+        std::cout << "const int:" << const_int_type << " " << "const int*: " << const_int_ptr_type << std::endl;
+        auto int_ptr_type = TypeFactory::Get<llvm::PointerType>(int_type, 0U);
+        std::cout << "int* : " << int_ptr_type << std::endl;
     }
 
 

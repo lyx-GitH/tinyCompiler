@@ -398,9 +398,7 @@ uint64_t solveConstantExpr(const struct AstNode *node) {
     } else if(IS_NUMBER(node->type_)) {
         return strtoll(node->val_, NULL, 0);
     } else {
-        switch (node->type_) {
 
-        }
     }
 
     assert(0);

@@ -9,7 +9,7 @@
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Function.h>
-#include "../types/type.h"
+#include "../types/type_factory.h"
 
 
 class Symbol {

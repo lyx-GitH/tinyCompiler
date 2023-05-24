@@ -23,11 +23,11 @@ void CodeGenerator::InitGenerators() {
 }
 
 void CodeGenerator::InitBasicTypes() {
-    SetType("char", GetMyType(IR_builder.getInt8Ty()));
-    SetType("short", GetMyType(IR_builder.getInt16Ty()));
-    SetType("int", GetMyType(IR_builder.getInt32Ty()));
-    SetType("float", GetMyType(IR_builder.getFloatTy()));
-    SetType("double", GetMyType(IR_builder.getDoubleTy()));
+    SetType("char", TypeFactory::Get(IR_builder.getInt8Ty()));
+    SetType("short", TypeFactory::Get(IR_builder.getInt16Ty()));
+    SetType("int", TypeFactory::Get(IR_builder.getInt32Ty()));
+    SetType("float", TypeFactory::Get(IR_builder.getFloatTy()));
+    SetType("double", TypeFactory::Get(IR_builder.getDoubleTy()));
 }
 
 CodeGenerator::pValue CallGenerator(const AstNode *node) {
@@ -180,7 +180,9 @@ GEN_DEF(kFuncType) {
     auto ret_type = CallGenerator(ret_node).GetType();
     std::vector<llvm::Type *> param_types;
     //TODO: add methods to create params_types
-    return pValue{llvm::FunctionType::get(ret_type, param_types, false)};
+
+    auto type = TypeFactory::Get<llvm::FunctionType>(ret_type, param_types, false);
+    return pValue{type};
 }
 
 GEN_DEF(kType) {
@@ -192,7 +194,7 @@ GEN_DEF(kPtrType) {
     auto ptr_to_type = getNChildSafe(node, 0);
     assert(ptr_to_type);
     auto ptr_to_symbol = CallGenerator(ptr_to_type);
-    return pValue{llvm::PointerType::get(ptr_to_symbol.GetType(), 0U)};
+    return pValue{TypeFactory::Get<llvm::PointerType>(ptr_to_symbol.GetType(), 0U)};
 }
 
 GEN_DEF(kArrType) {
@@ -202,11 +204,10 @@ GEN_DEF(kArrType) {
     assert(len);
     auto type_symbol = CallGenerator(ele_type);
     if (len->type_ == kDemNumber && strcmp(len->val_, "*") == 0) {
-        return pValue{llvm::PointerType::get(type_symbol.GetType(), 0U)};
+        return pValue{TypeFactory::Get<llvm::PointerType>(type_symbol.GetType(), 0U)};
     } else {
         uint64_t len_i = solveConstantExpr(len);
-
-        return pValue{llvm::ArrayType::get(type_symbol.GetType(), len_i)};
+        return pValue{TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), len_i)};
     }
 }
 
@@ -219,7 +220,7 @@ GEN_DEF(kTypeFeature) {
         qualifiers = qualifiers->next_;
     }
     if (qualifiers) {
-        return pValue{type.GetType()};
+        return pValue{TypeFactory::GetConstTypeOf(type.GetType())};
     } else return type;
 }
 
@@ -236,16 +237,16 @@ void CodeGenerator::SetSymbol(const std::string &name, Symbol symbol) {
     symbol_table_stack_.back().insert({name, symbol});
 }
 
-void CodeGenerator::SetType(const std::string &name, llvm::Type* type) {
+void CodeGenerator::SetType(const std::string &name, llvm::Type *type) {
     SetSymbol(name, Symbol{type});
 }
 
-void CodeGenerator::AddTypeAlias(const std::string &name, llvm::Type* type) {
+void CodeGenerator::AddTypeAlias(const std::string &name, llvm::Type *type) {
     assert(GetSymbol(name));
     SetType(name, type);
 }
 
-llvm::Type* CodeGenerator::GetType(const std::string &name) {
+llvm::Type *CodeGenerator::GetType(const std::string &name) {
     auto symbol = GetSymbol(name);
     assert(symbol && symbol->IsType());
     return symbol->GetType();
