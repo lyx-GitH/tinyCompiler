@@ -111,16 +111,22 @@ decl_list					: decl              {$$ = $1; }
                             ;
 
 decl						: decl_specs init_declarator_list SEMI { assignType($2, $1); $$ = $2; }				
-							| decl_specs SEMI                      {$$ = $1;}                          
+							| decl_specs SEMI                      {$$ = maintainTypeSpecs($1);}                          
                             ;
 
-decl_specs					: storage_class_spec decl_specs {$$ = maintainTypeSpecs($2, $1); }
+/* decl_specs					: storage_class_spec decl_specs {$$ = maintainTypeSpecs($2, $1); }
 							| storage_class_spec            {$$ = maintainTypeSpecs(NULL, $1); }
 							| type_spec decl_specs		    {$$ = maintainTypeSpecs($2, $1);}						
 							| type_spec 					{$$ = maintainTypeSpecs(NULL, $1);}					
 							| type_qualifier decl_specs     {$$ = maintainTypeSpecs($2, $1);}
 							| type_qualifier                {$$ = maintainTypeSpecs(NULL, $1);}
-							;
+							; */
+decl_specs					: storage_class_spec decl_specs	{$$ = $2;}
+							| type_spec decl_specs			{addNext($1, $2); $$ = $1;}
+							| type_spec						{$$ = $1; }
+							| type_qualifier decl_specs		{addNext($2, $1); $$ = $2;}
+							| type_qualifier				{$$ = $1;}
+
 
 storage_class_spec			: STATIC;
 
@@ -175,7 +181,7 @@ param_decl					: decl_specs declarator             {assignType($2, $1); $$ = $2;
 							| decl_specs                        
 							;
 
-pointer						: MULT type_qualifier_list              {$$ = createPtrType($2); $$ = createFeaturedType($2, NULL);}
+pointer						: MULT type_qualifier_list              {$$ = createPtrType(NULL); $$ = createFeaturedType($2, $$);}
 							| MULT                                  {$$ = createPtrType(NULL); }
 							| MULT type_qualifier_list pointer      {$$ = createFeaturedType($2, $3); $$ = createPtrType($$); }
 							| MULT pointer                          {$$ = createPtrType($2); }
@@ -365,7 +371,7 @@ args_list : expression {$$ = createArgList($1); }
 
 
 type_name_cast				: spec_qualifier_list abstract_declarator	{assignType($2, $1); $$ = $2;}
-							| spec_qualifier_list						
+							| spec_qualifier_list						{$$ = maintainTypeSpecs($1);}						
 							;
 
 type_name : TYPE
@@ -390,10 +396,15 @@ struct_decl_list			: struct_decl                   {$$ = $1;}
 
 struct_decl					: spec_qualifier_list struct_declarator_list SEMI   {assignType($2, $1); $$ = $2;}
 
-spec_qualifier_list			: type_spec spec_qualifier_list                     {$$ = maintainTypeSpecs($2, $1);}
+/* spec_qualifier_list			: type_spec spec_qualifier_list                     {$$ = maintainTypeSpecs($2, $1);}
 							| type_spec                                         {$$ = maintainTypeSpecs(NULL, $1); }
 							| type_qualifier spec_qualifier_list                {$$ = maintainTypeSpecs($2, $1); }
 							| type_qualifier                                    {$$ = maintainTypeSpecs(NULL, $1); }
+							; */
+spec_qualifier_list			: type_spec spec_qualifier_list						{addNext($1, $2); $$ = $1;}
+							| type_spec											{$$ = $1;}
+							| type_qualifier spec_qualifier_list				{addNext($2, $1); $$ = $1;}
+							| type_qualifier									{$$ = $1; }
 							;
 
 struct_declarator_list		: struct_declarator                                 {$$ = $1;}

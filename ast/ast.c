@@ -12,6 +12,7 @@ extern int parser_col_no;
 
 
 pAstNode check_types(pAstNode type) {
+    type = maintainTypeSpecs(type);
     if (IS_TYPE(type->type_)) return type;
     assert(type->child_ != NULL);
     if (!IS_TYPE(type->child_->type_)) {
@@ -316,24 +317,37 @@ void addLeftMost(pAstNode root, pAstNode node) {
     freeAstNode(junk);
 }
 
-pAstNode maintainTypeSpecs(pAstNode root, pAstNode node) {
-    pAstNode top = NULL;
-    if (!root || root->type_ != kTypeFeature)
-        top = createAstNode(kTypeFeature, NULL, 0);
-    else
-        top = root;
+pAstNode maintainTypeSpecs(pAstNode root) {
+    // pAstNode top = NULL;
+    // if (!root || root->type_ != kTypeFeature)
+    //     top = createAstNode(kTypeFeature, NULL, 0);
+    // else
+    //     top = root;
 
-    if (node && IS_TYPE(node->type_)) {
-        if (!top->child_) {
-            addChild(top, node);
-        } else {
-            addChildHead(top, node);
+    // if (node && IS_TYPE(node->type_)) {
+    //     if (!top->child_) {
+    //         addChild(top, node);
+    //     } else {
+    //         addChildHead(top, node);
+    //     }
+    // } else if (node && node->type_ == kTypeQualifier) {
+    //     addChild(top, node);
+    // }
+
+    // return top;
+    if(root && IS_TYPE(root->type_)) {
+        if(root->next_) {
+            pAstNode node = createAstNode(kTypeFeature, NULL, 0);
+            addChild(node, root);
+            return node;
+        }else {
+            return root;
         }
-    } else if (node && node->type_ == kTypeQualifier) {
-        addChild(top, node);
-    }
-
-    return top;
+    } else {
+        pAstNode node = createAstNode(kType, "int", 3);
+        addChild(node, root);
+        return node;
+    } 
 }
 
 pAstNode createLabledStmt(pAstNode lableId, pAstNode stat) {

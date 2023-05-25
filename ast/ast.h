@@ -193,7 +193,7 @@ pAstNode createVarDecl(pAstNode type, pAstNode var);
 
 pAstNode extractType(pAstNode keywords_list);
 
-pAstNode maintainTypeSpecs(pAstNode root, pAstNode node);
+pAstNode maintainTypeSpecs(pAstNode root);
 
 pAstNode createLabledStmt(pAstNode lableId, pAstNode stat);
 

@@ -187,6 +187,7 @@ GEN_DEF(kFuncType) {
 
 GEN_DEF(kType) {
     ASSERT_TYPE(node, kType);
+
     return Symbol{GetType(node->val_)};
 }
 
@@ -216,7 +217,7 @@ GEN_DEF(kTypeFeature) {
     ASSERT_TYPE(type_node, kType);
     auto type = CallGenerator(type_node);
     auto qualifiers = type_node->next_;
-    while (qualifiers && strcmp(qualifiers->val_, "const")) {
+    while (qualifiers && strcmp(qualifiers->val_, "const") != 0) {
         qualifiers = qualifiers->next_;
     }
     if (qualifiers) {
@@ -230,6 +231,7 @@ GEN_DEF(kTypeDef) {
     auto real_type = CallGenerator(real_type_node).GetType();
     auto alias_name = getNChildSafe(node, 1)->val_;
     AddTypeAlias(alias_name, real_type);
+    return {};
 }
 
 void CodeGenerator::SetSymbol(const std::string &name, Symbol symbol) {

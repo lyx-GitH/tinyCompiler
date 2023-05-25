@@ -1197,11 +1197,9 @@ YY_RULE_SETUP
     // ID can be a type-alias
     if(has_type(yytext)){
         NODE(kType);
-        printf("got type : %s\n", yytext);
         return TYPE;
     } else {
         NODE(kId);
-        printf("got id : %s\n", yytext);
         return ID;
     }
         
@@ -1209,269 +1207,269 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 140 "./lexer.l"
+#line 138 "./lexer.l"
 {MOVE; return DOT;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 141 "./lexer.l"
+#line 139 "./lexer.l"
 {MOVE; return ARROW;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 146 "./lexer.l"
+#line 144 "./lexer.l"
 { MOVE; return ASSIGN;};
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 147 "./lexer.l"
+#line 145 "./lexer.l"
 {MOVE; return A_PLUS;};
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 148 "./lexer.l"
+#line 146 "./lexer.l"
 {MOVE; return A_SUB;};
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 149 "./lexer.l"
+#line 147 "./lexer.l"
 {MOVE; return A_MULT;};
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 150 "./lexer.l"
+#line 148 "./lexer.l"
 {MOVE; return A_DIV;};
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 151 "./lexer.l"
+#line 149 "./lexer.l"
 {MOVE; return A_MOD;};
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 152 "./lexer.l"
+#line 150 "./lexer.l"
 {MOVE; return A_LS;};
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 153 "./lexer.l"
+#line 151 "./lexer.l"
 {MOVE; return A_RS;};
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 154 "./lexer.l"
+#line 152 "./lexer.l"
 {MOVE; return A_OR;};
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 155 "./lexer.l"
+#line 153 "./lexer.l"
 {MOVE; return A_AND;};
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 156 "./lexer.l"
+#line 154 "./lexer.l"
 {MOVE; return A_XOR;};
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 158 "./lexer.l"
+#line 156 "./lexer.l"
 {MOVE; return LB;};
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 159 "./lexer.l"
+#line 157 "./lexer.l"
 {MOVE; return RB;};
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 161 "./lexer.l"
+#line 159 "./lexer.l"
 {MOVE; return PP;};
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 162 "./lexer.l"
+#line 160 "./lexer.l"
 {MOVE; return SS; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 164 "./lexer.l"
+#line 162 "./lexer.l"
 {MOVE; return LSBSCRPT;};
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 165 "./lexer.l"
+#line 163 "./lexer.l"
 {MOVE; return RSBSCRPT;};
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 167 "./lexer.l"
+#line 165 "./lexer.l"
 {MOVE; return LSCOPE;};
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 168 "./lexer.l"
+#line 166 "./lexer.l"
 {MOVE; return RSCOPE;};
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 170 "./lexer.l"
+#line 168 "./lexer.l"
 {MOVE; return ADD;};
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 171 "./lexer.l"
+#line 169 "./lexer.l"
 {MOVE; return SUB;};
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 172 "./lexer.l"
+#line 170 "./lexer.l"
 {MOVE; return MULT;};
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 173 "./lexer.l"
+#line 171 "./lexer.l"
 {MOVE; return DIV;};
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 174 "./lexer.l"
+#line 172 "./lexer.l"
 {MOVE; return MOD;};
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 176 "./lexer.l"
+#line 174 "./lexer.l"
 {MOVE; return LSHIFT;};
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 177 "./lexer.l"
+#line 175 "./lexer.l"
 {MOVE; return RSHIFT;};
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 179 "./lexer.l"
+#line 177 "./lexer.l"
 {MOVE; return GT;};
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 180 "./lexer.l"
+#line 178 "./lexer.l"
 {MOVE; return LT;};
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 181 "./lexer.l"
+#line 179 "./lexer.l"
 {MOVE; return GE;};
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 182 "./lexer.l"
+#line 180 "./lexer.l"
 {MOVE; return LE;};
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 184 "./lexer.l"
+#line 182 "./lexer.l"
 {MOVE; return EQ;};
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 185 "./lexer.l"
+#line 183 "./lexer.l"
 {MOVE; return NEQ;};
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 187 "./lexer.l"
+#line 185 "./lexer.l"
 {MOVE; return COMMA;};
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 190 "./lexer.l"
+#line 188 "./lexer.l"
 {MOVE; return LOGIC_NOT;};
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 191 "./lexer.l"
+#line 189 "./lexer.l"
 {MOVE; return LOGIC_OR;};
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 192 "./lexer.l"
+#line 190 "./lexer.l"
 {MOVE; return LOGIC_AND;};
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 194 "./lexer.l"
+#line 192 "./lexer.l"
 {MOVE; return BIT_NOT;};
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 195 "./lexer.l"
+#line 193 "./lexer.l"
 {MOVE; return BIT_OR;};
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 196 "./lexer.l"
+#line 194 "./lexer.l"
 {MOVE; return BIT_AND;};
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 197 "./lexer.l"
+#line 195 "./lexer.l"
 {MOVE; return BIT_XOR;};
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 199 "./lexer.l"
+#line 197 "./lexer.l"
 {MOVE; return T1;};
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 200 "./lexer.l"
+#line 198 "./lexer.l"
 {MOVE; return T2;};
 	YY_BREAK
 case 72:
 /* rule 72 can match eol */
 YY_RULE_SETUP
-#line 202 "./lexer.l"
+#line 200 "./lexer.l"
 {MOVE;};
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 203 "./lexer.l"
+#line 201 "./lexer.l"
 {MOVE;};
 	YY_BREAK
 case 74:
 /* rule 74 can match eol */
 YY_RULE_SETUP
-#line 205 "./lexer.l"
+#line 203 "./lexer.l"
 {MOVE;};
 	YY_BREAK
 case 75:
 /* rule 75 can match eol */
 YY_RULE_SETUP
-#line 206 "./lexer.l"
+#line 204 "./lexer.l"
 {MOVE;};
 	YY_BREAK
 case 76:
 /* rule 76 can match eol */
 YY_RULE_SETUP
-#line 207 "./lexer.l"
+#line 205 "./lexer.l"
 {MOVE; NODE(kStrLiteral); return STR; }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 208 "./lexer.l"
+#line 206 "./lexer.l"
 {MOVE; NODE(kCharLiteral); return NUMBER;}
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 209 "./lexer.l"
+#line 207 "./lexer.l"
 {MOVE;};
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 211 "./lexer.l"
+#line 209 "./lexer.l"
 ECHO;
 	YY_BREAK
-#line 1474 "./tiny_compiler_lex.c"
+#line 1472 "./tiny_compiler_lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2488,7 +2486,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 211 "./lexer.l"
+#line 209 "./lexer.l"
 
 
 

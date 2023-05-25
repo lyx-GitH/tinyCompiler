@@ -142,47 +142,16 @@ void llvm_test() {
 //    Out->keep(); // Declare success
 //    return 0;
 //}
-#include "concepts"
-
-class A {
-};
-
-class B : public A {
-public:
-    double f;
-};
-
-class C : public A {
-public:
-    int p;
-};
 
 
-template<class T>
-void call(T a) {
-    std::cout << "generic" << std::endl;
-}
 
-template<>
-void call(C a) {
-    std::cout << "ccc" << std::endl;
-}
-
-template<>
-void call(B a) {
-    std::cout << "bbb" << std::endl;
-}
-
-void pre_call(A a) {
-    call(a);
-}
 
 
 int main() {
-    yydebug = 0; // set this to 1 to enable debuggings
+    yydebug = 1; // set this to 1 to enable debugging
     auto parser = CodeGenerator("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
     parser.Parse();
-//    parser.Visualize(false);
+    parser.Visualize(false);
 
     return 0;
 }

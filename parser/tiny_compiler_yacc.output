@@ -25,328 +25,327 @@ Grammar
    12     | decl_specs SEMI
 
    13 decl_specs: storage_class_spec decl_specs
-   14           | storage_class_spec
-   15           | type_spec decl_specs
-   16           | type_spec
-   17           | type_qualifier decl_specs
-   18           | type_qualifier
+   14           | type_spec decl_specs
+   15           | type_spec
+   16           | type_qualifier decl_specs
+   17           | type_qualifier
 
-   19 storage_class_spec: STATIC
+   18 storage_class_spec: STATIC
 
-   20 type_spec: type_name
+   19 type_spec: type_name
 
-   21 type_qualifier: CONST
+   20 type_qualifier: CONST
 
-   22 init_declarator_list: init_declarator
-   23                     | init_declarator_list COMMA init_declarator
+   21 init_declarator_list: init_declarator
+   22                     | init_declarator_list COMMA init_declarator
 
-   24 init_declarator: declarator
-   25                | declarator ASSIGN initializer
+   23 init_declarator: declarator
+   24                | declarator ASSIGN initializer
 
-   26 declarator: pointer direct_declarator
-   27           | direct_declarator
+   25 declarator: pointer direct_declarator
+   26           | direct_declarator
 
-   28 direct_declarator: ID
-   29                  | LB declarator RB
-   30                  | direct_declarator LSBSCRPT expression10 RSBSCRPT
-   31                  | direct_declarator LSBSCRPT RSBSCRPT
-   32                  | direct_declarator LB param_type_list RB
-   33                  | direct_declarator LB RB
+   27 direct_declarator: ID
+   28                  | LB declarator RB
+   29                  | direct_declarator LSBSCRPT expression10 RSBSCRPT
+   30                  | direct_declarator LSBSCRPT RSBSCRPT
+   31                  | direct_declarator LB param_type_list RB
+   32                  | direct_declarator LB RB
 
-   34 abstract_declarator: pointer
-   35                    | pointer direct_abstract_declarator
-   36                    | direct_abstract_declarator
+   33 abstract_declarator: pointer
+   34                    | pointer direct_abstract_declarator
+   35                    | direct_abstract_declarator
 
-   37 direct_abstract_declarator: LB abstract_declarator RB
-   38                           | direct_abstract_declarator LSBSCRPT expression10 RSBSCRPT
-   39                           | LSBSCRPT expression10 RSBSCRPT
-   40                           | direct_abstract_declarator LSBSCRPT RSBSCRPT
-   41                           | LSBSCRPT RSBSCRPT
-   42                           | direct_abstract_declarator LB param_type_list RB
-   43                           | LB param_type_list RB
-   44                           | direct_abstract_declarator LB RB
-   45                           | LB RB
+   36 direct_abstract_declarator: LB abstract_declarator RB
+   37                           | direct_abstract_declarator LSBSCRPT expression10 RSBSCRPT
+   38                           | LSBSCRPT expression10 RSBSCRPT
+   39                           | direct_abstract_declarator LSBSCRPT RSBSCRPT
+   40                           | LSBSCRPT RSBSCRPT
+   41                           | direct_abstract_declarator LB param_type_list RB
+   42                           | LB param_type_list RB
+   43                           | direct_abstract_declarator LB RB
+   44                           | LB RB
 
-   46 param_type_list: param_list
-   47                | param_list COMMA VARGS
+   45 param_type_list: param_list
+   46                | param_list COMMA VARGS
 
-   48 param_list: param_decl
-   49           | param_list COMMA param_decl
+   47 param_list: param_decl
+   48           | param_list COMMA param_decl
 
-   50 param_decl: decl_specs declarator
-   51           | decl_specs abstract_declarator
-   52           | decl_specs
+   49 param_decl: decl_specs declarator
+   50           | decl_specs abstract_declarator
+   51           | decl_specs
 
-   53 pointer: MULT type_qualifier_list
-   54        | MULT
-   55        | MULT type_qualifier_list pointer
-   56        | MULT pointer
+   52 pointer: MULT type_qualifier_list
+   53        | MULT
+   54        | MULT type_qualifier_list pointer
+   55        | MULT pointer
 
-   57 type_qualifier_list: type_qualifier
-   58                    | type_qualifier_list type_qualifier
+   56 type_qualifier_list: type_qualifier
+   57                    | type_qualifier_list type_qualifier
 
-   59 initializer: expression11
-   60            | LSCOPE initializer_list RSCOPE
-   61            | LSCOPE initializer_list COMMA RSCOPE
+   58 initializer: expression11
+   59            | LSCOPE initializer_list RSCOPE
+   60            | LSCOPE initializer_list COMMA RSCOPE
 
-   62 initializer_list: initializer
-   63                 | initializer_list COMMA initializer
+   61 initializer_list: initializer
+   62                 | initializer_list COMMA initializer
 
-   64 stat: labeled_stat
-   65     | exp_stat
-   66     | compound_stat
-   67     | selection_stat
-   68     | iteration_stat
-   69     | jump_stat
+   63 stat: labeled_stat
+   64     | exp_stat
+   65     | compound_stat
+   66     | selection_stat
+   67     | iteration_stat
+   68     | jump_stat
 
-   70 labeled_stat: ID T2 stat
-   71             | CASE expression10 T2 stat
-   72             | DEFAULT T2 stat
+   69 labeled_stat: ID T2 stat
+   70             | CASE expression10 T2 stat
+   71             | DEFAULT T2 stat
 
-   73 exp_stat: expression SEMI
-   74         | SEMI
+   72 exp_stat: expression SEMI
+   73         | SEMI
 
-   75 compound_stat: LSCOPE decl_list stat_list RSCOPE
-   76              | LSCOPE stat_list RSCOPE
-   77              | LSCOPE decl_list RSCOPE
-   78              | LSCOPE RSCOPE
+   74 compound_stat: LSCOPE decl_list stat_list RSCOPE
+   75              | LSCOPE stat_list RSCOPE
+   76              | LSCOPE decl_list RSCOPE
+   77              | LSCOPE RSCOPE
 
-   79 stat_list: stat
-   80          | stat_list stat
+   78 stat_list: stat
+   79          | stat_list stat
 
-   81 selection_stat: IF LB expression RB stat
-   82               | IF LB expression RB stat ELSE stat
-   83               | SWITCH LB expression RB stat
+   80 selection_stat: IF LB expression RB stat
+   81               | IF LB expression RB stat ELSE stat
+   82               | SWITCH LB expression RB stat
 
-   84 iteration_stat: WHILE LB expression RB stat
-   85               | DO stat WHILE LB expression RB SEMI
-   86               | FOR LB expression SEMI expression SEMI expression RB stat
-   87               | FOR LB expression SEMI expression SEMI RB stat
-   88               | FOR LB expression SEMI SEMI expression RB stat
-   89               | FOR LB expression SEMI SEMI RB stat
-   90               | FOR LB SEMI expression SEMI expression RB stat
-   91               | FOR LB SEMI expression SEMI RB stat
-   92               | FOR LB SEMI SEMI expression RB stat
-   93               | FOR LB SEMI SEMI RB stat
+   83 iteration_stat: WHILE LB expression RB stat
+   84               | DO stat WHILE LB expression RB SEMI
+   85               | FOR LB expression SEMI expression SEMI expression RB stat
+   86               | FOR LB expression SEMI expression SEMI RB stat
+   87               | FOR LB expression SEMI SEMI expression RB stat
+   88               | FOR LB expression SEMI SEMI RB stat
+   89               | FOR LB SEMI expression SEMI expression RB stat
+   90               | FOR LB SEMI expression SEMI RB stat
+   91               | FOR LB SEMI SEMI expression RB stat
+   92               | FOR LB SEMI SEMI RB stat
 
-   94 jump_stat: GOTO ID SEMI
-   95          | CONTINUE SEMI
-   96          | BREAK SEMI
-   97          | RETURN expression SEMI
-   98          | RETURN SEMI
+   93 jump_stat: GOTO ID SEMI
+   94          | CONTINUE SEMI
+   95          | BREAK SEMI
+   96          | RETURN expression SEMI
+   97          | RETURN SEMI
 
-   99 expression: expression11
-  100           | expression COMMA expression11
+   98 expression: expression11
+   99           | expression COMMA expression11
 
-  101 expression11: expression10
-  102             | unaries aop expression11
+  100 expression11: expression10
+  101             | unaries aop expression11
 
-  103 expression10: expression9
-  104             | expression9 T1 expression T2 expression10
+  102 expression10: expression9
+  103             | expression9 T1 expression T2 expression10
 
-  105 expression9: expression8
-  106            | expression9 LOGIC_OR expression8
+  104 expression9: expression8
+  105            | expression9 LOGIC_OR expression8
 
-  107 expression8: expression7
-  108            | expression8 LOGIC_AND expression7
+  106 expression8: expression7
+  107            | expression8 LOGIC_AND expression7
 
-  109 expression7: expression6
-  110            | expression7 BIT_OR expression6
+  108 expression7: expression6
+  109            | expression7 BIT_OR expression6
 
-  111 expression6: expression5
-  112            | expression6 BIT_XOR expression5
+  110 expression6: expression5
+  111            | expression6 BIT_XOR expression5
 
-  113 expression5: expression4
-  114            | expression5 BIT_AND expression4
+  112 expression5: expression4
+  113            | expression5 BIT_AND expression4
 
-  115 expression4: expression3
-  116            | expression4 EQ expression3
-  117            | expression4 NEQ expression3
+  114 expression4: expression3
+  115            | expression4 EQ expression3
+  116            | expression4 NEQ expression3
 
-  118 expression3: expression2
-  119            | expression3 GT expression2
-  120            | expression3 LT expression2
-  121            | expression3 GE expression2
-  122            | expression3 LE expression2
+  117 expression3: expression2
+  118            | expression3 GT expression2
+  119            | expression3 LT expression2
+  120            | expression3 GE expression2
+  121            | expression3 LE expression2
 
-  123 expression2: expression1
-  124            | expression2 LSHIFT expression1
-  125            | expression2 RSHIFT expression1
+  122 expression2: expression1
+  123            | expression2 LSHIFT expression1
+  124            | expression2 RSHIFT expression1
 
-  126 expression1: term
-  127            | expression1 ADD term
-  128            | expression1 SUB term
+  125 expression1: term
+  126            | expression1 ADD term
+  127            | expression1 SUB term
 
-  129 term: factor
-  130     | term MULT factor
-  131     | term DIV factor
-  132     | term MOD factor
+  128 term: factor
+  129     | term MULT factor
+  130     | term DIV factor
+  131     | term MOD factor
 
-  133 factor: unaries
-  134       | LB type_name_cast RB factor
+  132 factor: unaries
+  133       | LB type_name_cast RB factor
 
-  135 unaries: postfix
-  136        | PP unaries
-  137        | SS unaries
-  138        | uop factor
-  139        | SIZE_OF unaries
-  140        | SIZE_OF LB type_name RB
+  134 unaries: postfix
+  135        | PP unaries
+  136        | SS unaries
+  137        | uop factor
+  138        | SIZE_OF unaries
+  139        | SIZE_OF LB type_name RB
 
-  141 postfix: single
-  142        | postfix LSBSCRPT expression RSBSCRPT
-  143        | postfix DOT ID
-  144        | postfix ARROW ID
-  145        | postfix PP
-  146        | postfix SS
-  147        | function_call
+  140 postfix: single
+  141        | postfix LSBSCRPT expression RSBSCRPT
+  142        | postfix DOT ID
+  143        | postfix ARROW ID
+  144        | postfix PP
+  145        | postfix SS
+  146        | function_call
 
-  148 single: NUMBER
-  149       | STR
-  150       | ID
-  151       | LB expression RB
+  147 single: NUMBER
+  148       | STR
+  149       | ID
+  150       | LB expression RB
 
-  152 aop: ASSIGN
-  153    | A_AND
-  154    | A_DIV
-  155    | A_PLUS
-  156    | A_SUB
-  157    | A_MULT
-  158    | A_LS
-  159    | A_RS
-  160    | A_OR
-  161    | A_XOR
-  162    | A_MOD
+  151 aop: ASSIGN
+  152    | A_AND
+  153    | A_DIV
+  154    | A_PLUS
+  155    | A_SUB
+  156    | A_MULT
+  157    | A_LS
+  158    | A_RS
+  159    | A_OR
+  160    | A_XOR
+  161    | A_MOD
 
-  163 uop: ADD
-  164    | SUB
-  165    | BIT_AND
-  166    | LOGIC_NOT
-  167    | BIT_NOT
-  168    | MULT
+  162 uop: ADD
+  163    | SUB
+  164    | BIT_AND
+  165    | LOGIC_NOT
+  166    | BIT_NOT
+  167    | MULT
 
-  169 function_call: postfix LB RB
-  170              | postfix LB args_list RB
+  168 function_call: postfix LB RB
+  169              | postfix LB args_list RB
 
-  171 args_list: expression
-  172          | args_list COMMA expression
+  170 args_list: expression
+  171          | args_list COMMA expression
 
-  173 type_name_cast: spec_qualifier_list abstract_declarator
-  174               | spec_qualifier_list
+  172 type_name_cast: spec_qualifier_list abstract_declarator
+  173               | spec_qualifier_list
 
-  175 type_name: TYPE
-  176          | struct_or_union_spec
-  177          | enum_spec
+  174 type_name: TYPE
+  175          | struct_or_union_spec
+  176          | enum_spec
 
-  178 struct_or_union_spec: struct_or_union ID LSCOPE struct_decl_list RSCOPE
-  179                     | struct_or_union LSCOPE struct_decl_list RSCOPE
-  180                     | struct_or_union ID
+  177 struct_or_union_spec: struct_or_union ID LSCOPE struct_decl_list RSCOPE
+  178                     | struct_or_union LSCOPE struct_decl_list RSCOPE
+  179                     | struct_or_union ID
 
-  181 struct_or_union: STRUCT
-  182                | UNION
+  180 struct_or_union: STRUCT
+  181                | UNION
 
-  183 struct_decl_list: struct_decl
-  184                 | struct_decl_list struct_decl
+  182 struct_decl_list: struct_decl
+  183                 | struct_decl_list struct_decl
 
-  185 struct_decl: spec_qualifier_list struct_declarator_list SEMI
+  184 struct_decl: spec_qualifier_list struct_declarator_list SEMI
 
-  186 spec_qualifier_list: type_spec spec_qualifier_list
-  187                    | type_spec
-  188                    | type_qualifier spec_qualifier_list
-  189                    | type_qualifier
+  185 spec_qualifier_list: type_spec spec_qualifier_list
+  186                    | type_spec
+  187                    | type_qualifier spec_qualifier_list
+  188                    | type_qualifier
 
-  190 struct_declarator_list: struct_declarator
-  191                       | struct_declarator_list COMMA struct_declarator
+  189 struct_declarator_list: struct_declarator
+  190                       | struct_declarator_list COMMA struct_declarator
 
-  192 struct_declarator: declarator
+  191 struct_declarator: declarator
 
-  193 enum_spec: enum_const ID LSCOPE enumerator_list RSCOPE
-  194          | enum_const LSCOPE enumerator_list RSCOPE
-  195          | enum_const ID
+  192 enum_spec: enum_const ID LSCOPE enumerator_list RSCOPE
+  193          | enum_const LSCOPE enumerator_list RSCOPE
+  194          | enum_const ID
 
-  196 enumerator_list: enumerator
-  197                | enumerator_list COMMA enumerator
+  195 enumerator_list: enumerator
+  196                | enumerator_list COMMA enumerator
 
-  198 enumerator: ID
-  199           | ID ASSIGN expression10
+  197 enumerator: ID
+  198           | ID ASSIGN expression10
 
-  200 enum_const: ENUM
+  199 enum_const: ENUM
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-NUMBER (258) 148
-ID (259) 28 70 94 143 144 150 178 180 193 195 198 199
-STR (260) 149
-TYPE (261) 175
-CONST (262) 21
-STATIC (263) 19
+NUMBER (258) 147
+ID (259) 27 69 93 142 143 149 177 179 192 194 197 198
+STR (260) 148
+TYPE (261) 174
+CONST (262) 20
+STATIC (263) 18
 TYPE_DEF (264) 6
-VARGS (265) 47
-GOTO (266) 94
-BREAK (267) 96
-CONTINUE (268) 95
-RETURN (269) 97 98
-SEMI (270) 11 12 73 74 85 86 87 88 89 90 91 92 93 94 95 96 97 98 185
-STRUCT (271) 181
-UNION (272) 182
-ENUM (273) 200
-DOT (274) 143
-ARROW (275) 144
-ADD (276) 127 163
-SUB (277) 128 164
-MULT (278) 53 54 55 56 130 168
-DIV (279) 131
-MOD (280) 132
-COMMA (281) 23 47 49 61 63 100 172 191 197
-LB (282) 29 32 33 37 42 43 44 45 81 82 83 84 85 86 87 88 89 90 91 92
-    93 134 140 151 169 170
-RB (283) 29 32 33 37 42 43 44 45 81 82 83 84 85 86 87 88 89 90 91 92
-    93 134 140 151 169 170
-LOGIC_AND (284) 108
-LOGIC_OR (285) 106
-LOGIC_NOT (286) 166
-BIT_OR (287) 110
-BIT_AND (288) 114 165
-BIT_XOR (289) 112
-BIT_NOT (290) 167
-LSHIFT (291) 124
-RSHIFT (292) 125
-LSBSCRPT (293) 30 31 38 39 40 41 142
-RSBSCRPT (294) 30 31 38 39 40 41 142
-LSCOPE (295) 60 61 75 76 77 78 178 179 193 194
-RSCOPE (296) 60 61 75 76 77 78 178 179 193 194
-GT (297) 119
-LT (298) 120
-GE (299) 121
-LE (300) 122
-EQ (301) 116
-NEQ (302) 117
-ASSIGN (303) 25 152 199
-A_PLUS (304) 155
-A_SUB (305) 156
-A_MULT (306) 157
-A_DIV (307) 154
-A_MOD (308) 162
-A_LS (309) 158
-A_RS (310) 159
-A_XOR (311) 161
-A_AND (312) 153
-A_OR (313) 160
-PP (314) 136 145
-SS (315) 137 146
-T1 (316) 104
-T2 (317) 70 71 72 104
-SIZE_OF (318) 139 140
-IF (319) 81 82
-ELSE (320) 82
-WHILE (321) 84 85
-DO (322) 85
-FOR (323) 86 87 88 89 90 91 92 93
-SWITCH (324) 83
-CASE (325) 71
-DEFAULT (326) 72
+VARGS (265) 46
+GOTO (266) 93
+BREAK (267) 95
+CONTINUE (268) 94
+RETURN (269) 96 97
+SEMI (270) 11 12 72 73 84 85 86 87 88 89 90 91 92 93 94 95 96 97 184
+STRUCT (271) 180
+UNION (272) 181
+ENUM (273) 199
+DOT (274) 142
+ARROW (275) 143
+ADD (276) 126 162
+SUB (277) 127 163
+MULT (278) 52 53 54 55 129 167
+DIV (279) 130
+MOD (280) 131
+COMMA (281) 22 46 48 60 62 99 171 190 196
+LB (282) 28 31 32 36 41 42 43 44 80 81 82 83 84 85 86 87 88 89 90 91
+    92 133 139 150 168 169
+RB (283) 28 31 32 36 41 42 43 44 80 81 82 83 84 85 86 87 88 89 90 91
+    92 133 139 150 168 169
+LOGIC_AND (284) 107
+LOGIC_OR (285) 105
+LOGIC_NOT (286) 165
+BIT_OR (287) 109
+BIT_AND (288) 113 164
+BIT_XOR (289) 111
+BIT_NOT (290) 166
+LSHIFT (291) 123
+RSHIFT (292) 124
+LSBSCRPT (293) 29 30 37 38 39 40 141
+RSBSCRPT (294) 29 30 37 38 39 40 141
+LSCOPE (295) 59 60 74 75 76 77 177 178 192 193
+RSCOPE (296) 59 60 74 75 76 77 177 178 192 193
+GT (297) 118
+LT (298) 119
+GE (299) 120
+LE (300) 121
+EQ (301) 115
+NEQ (302) 116
+ASSIGN (303) 24 151 198
+A_PLUS (304) 154
+A_SUB (305) 155
+A_MULT (306) 156
+A_DIV (307) 153
+A_MOD (308) 161
+A_LS (309) 157
+A_RS (310) 158
+A_XOR (311) 160
+A_AND (312) 152
+A_OR (313) 159
+PP (314) 135 144
+SS (315) 136 145
+T1 (316) 103
+T2 (317) 69 70 71 103
+SIZE_OF (318) 138 139
+IF (319) 80 81
+ELSE (320) 81
+WHILE (321) 83 84
+DO (322) 84
+FOR (323) 85 86 87 88 89 90 91 92
+SWITCH (324) 82
+CASE (325) 70
+DEFAULT (326) 71
 "then" (327)
 
 
@@ -363,132 +362,132 @@ external_decl (76)
 function_definition (77)
     on left: 7 8, on right: 4
 decl_list (78)
-    on left: 9 10, on right: 10 75 77
+    on left: 9 10, on right: 10 74 76
 decl (79)
     on left: 11 12, on right: 5 6 9 10
 decl_specs (80)
-    on left: 13 14 15 16 17 18, on right: 7 11 12 13 15 17 50 51 52
+    on left: 13 14 15 16 17, on right: 7 11 12 13 14 16 49 50 51
 storage_class_spec (81)
-    on left: 19, on right: 13 14
+    on left: 18, on right: 13
 type_spec (82)
-    on left: 20, on right: 15 16 186 187
+    on left: 19, on right: 14 15 185 186
 type_qualifier (83)
-    on left: 21, on right: 17 18 57 58 188 189
+    on left: 20, on right: 16 17 56 57 187 188
 init_declarator_list (84)
-    on left: 22 23, on right: 11 23
+    on left: 21 22, on right: 11 22
 init_declarator (85)
-    on left: 24 25, on right: 22 23
+    on left: 23 24, on right: 21 22
 declarator (86)
-    on left: 26 27, on right: 7 8 24 25 29 50 192
+    on left: 25 26, on right: 7 8 23 24 28 49 191
 direct_declarator (87)
-    on left: 28 29 30 31 32 33, on right: 26 27 30 31 32 33
+    on left: 27 28 29 30 31 32, on right: 25 26 29 30 31 32
 abstract_declarator (88)
-    on left: 34 35 36, on right: 37 51 173
+    on left: 33 34 35, on right: 36 50 172
 direct_abstract_declarator (89)
-    on left: 37 38 39 40 41 42 43 44 45, on right: 35 36 38 40 42 44
+    on left: 36 37 38 39 40 41 42 43 44, on right: 34 35 37 39 41 43
 param_type_list (90)
-    on left: 46 47, on right: 32 42 43
+    on left: 45 46, on right: 31 41 42
 param_list (91)
-    on left: 48 49, on right: 46 47 49
+    on left: 47 48, on right: 45 46 48
 param_decl (92)
-    on left: 50 51 52, on right: 48 49
+    on left: 49 50 51, on right: 47 48
 pointer (93)
-    on left: 53 54 55 56, on right: 26 34 35 55 56
+    on left: 52 53 54 55, on right: 25 33 34 54 55
 type_qualifier_list (94)
-    on left: 57 58, on right: 53 55 58
+    on left: 56 57, on right: 52 54 57
 initializer (95)
-    on left: 59 60 61, on right: 25 62 63
+    on left: 58 59 60, on right: 24 61 62
 initializer_list (96)
-    on left: 62 63, on right: 60 61 63
+    on left: 61 62, on right: 59 60 62
 stat (97)
-    on left: 64 65 66 67 68 69, on right: 70 71 72 79 80 81 82 83 84
-    85 86 87 88 89 90 91 92 93
+    on left: 63 64 65 66 67 68, on right: 69 70 71 78 79 80 81 82 83
+    84 85 86 87 88 89 90 91 92
 labeled_stat (98)
-    on left: 70 71 72, on right: 64
+    on left: 69 70 71, on right: 63
 exp_stat (99)
-    on left: 73 74, on right: 65
+    on left: 72 73, on right: 64
 compound_stat (100)
-    on left: 75 76 77 78, on right: 7 8 66
+    on left: 74 75 76 77, on right: 7 8 65
 stat_list (101)
-    on left: 79 80, on right: 75 76 80
+    on left: 78 79, on right: 74 75 79
 selection_stat (102)
-    on left: 81 82 83, on right: 67
+    on left: 80 81 82, on right: 66
 iteration_stat (103)
-    on left: 84 85 86 87 88 89 90 91 92 93, on right: 68
+    on left: 83 84 85 86 87 88 89 90 91 92, on right: 67
 jump_stat (104)
-    on left: 94 95 96 97 98, on right: 69
+    on left: 93 94 95 96 97, on right: 68
 expression (105)
-    on left: 99 100, on right: 73 81 82 83 84 85 86 87 88 89 90 91
-    92 97 100 104 142 151 171 172
+    on left: 98 99, on right: 72 80 81 82 83 84 85 86 87 88 89 90 91
+    96 99 103 141 150 170 171
 expression11 (106)
-    on left: 101 102, on right: 59 99 100 102
+    on left: 100 101, on right: 58 98 99 101
 expression10 (107)
-    on left: 103 104, on right: 30 38 39 71 101 104 199
+    on left: 102 103, on right: 29 37 38 70 100 103 198
 expression9 (108)
-    on left: 105 106, on right: 103 104 106
+    on left: 104 105, on right: 102 103 105
 expression8 (109)
-    on left: 107 108, on right: 105 106 108
+    on left: 106 107, on right: 104 105 107
 expression7 (110)
-    on left: 109 110, on right: 107 108 110
+    on left: 108 109, on right: 106 107 109
 expression6 (111)
-    on left: 111 112, on right: 109 110 112
+    on left: 110 111, on right: 108 109 111
 expression5 (112)
-    on left: 113 114, on right: 111 112 114
+    on left: 112 113, on right: 110 111 113
 expression4 (113)
-    on left: 115 116 117, on right: 113 114 116 117
+    on left: 114 115 116, on right: 112 113 115 116
 expression3 (114)
-    on left: 118 119 120 121 122, on right: 115 116 117 119 120 121
-    122
+    on left: 117 118 119 120 121, on right: 114 115 116 118 119 120
+    121
 expression2 (115)
-    on left: 123 124 125, on right: 118 119 120 121 122 124 125
+    on left: 122 123 124, on right: 117 118 119 120 121 123 124
 expression1 (116)
-    on left: 126 127 128, on right: 123 124 125 127 128
+    on left: 125 126 127, on right: 122 123 124 126 127
 term (117)
-    on left: 129 130 131 132, on right: 126 127 128 130 131 132
+    on left: 128 129 130 131, on right: 125 126 127 129 130 131
 factor (118)
-    on left: 133 134, on right: 129 130 131 132 134 138
+    on left: 132 133, on right: 128 129 130 131 133 137
 unaries (119)
-    on left: 135 136 137 138 139 140, on right: 102 133 136 137 139
+    on left: 134 135 136 137 138 139, on right: 101 132 135 136 138
 postfix (120)
-    on left: 141 142 143 144 145 146 147, on right: 135 142 143 144
-    145 146 169 170
+    on left: 140 141 142 143 144 145 146, on right: 134 141 142 143
+    144 145 168 169
 single (121)
-    on left: 148 149 150 151, on right: 141
+    on left: 147 148 149 150, on right: 140
 aop (122)
-    on left: 152 153 154 155 156 157 158 159 160 161 162,
-    on right: 102
+    on left: 151 152 153 154 155 156 157 158 159 160 161,
+    on right: 101
 uop (123)
-    on left: 163 164 165 166 167 168, on right: 138
+    on left: 162 163 164 165 166 167, on right: 137
 function_call (124)
-    on left: 169 170, on right: 147
+    on left: 168 169, on right: 146
 args_list (125)
-    on left: 171 172, on right: 170 172
+    on left: 170 171, on right: 169 171
 type_name_cast (126)
-    on left: 173 174, on right: 134
+    on left: 172 173, on right: 133
 type_name (127)
-    on left: 175 176 177, on right: 20 140
+    on left: 174 175 176, on right: 19 139
 struct_or_union_spec (128)
-    on left: 178 179 180, on right: 176
+    on left: 177 178 179, on right: 175
 struct_or_union (129)
-    on left: 181 182, on right: 178 179 180
+    on left: 180 181, on right: 177 178 179
 struct_decl_list (130)
-    on left: 183 184, on right: 178 179 184
+    on left: 182 183, on right: 177 178 183
 struct_decl (131)
-    on left: 185, on right: 183 184
+    on left: 184, on right: 182 183
 spec_qualifier_list (132)
-    on left: 186 187 188 189, on right: 173 174 185 186 188
+    on left: 185 186 187 188, on right: 172 173 184 185 187
 struct_declarator_list (133)
-    on left: 190 191, on right: 185 191
+    on left: 189 190, on right: 184 190
 struct_declarator (134)
-    on left: 192, on right: 190 191
+    on left: 191, on right: 189 190
 enum_spec (135)
-    on left: 193 194 195, on right: 177
+    on left: 192 193 194, on right: 176
 enumerator_list (136)
-    on left: 196 197, on right: 193 194 197
+    on left: 195 196, on right: 192 193 196
 enumerator (137)
-    on left: 198 199, on right: 196 197
+    on left: 197 198, on right: 195 196
 enum_const (138)
-    on left: 200, on right: 193 194 195
+    on left: 199, on right: 192 193 194
 
 
 state 0
@@ -527,30 +526,30 @@ state 0
 
 state 1
 
-   28 direct_declarator: ID .
+   27 direct_declarator: ID .
 
-    $default  reduce using rule 28 (direct_declarator)
+    $default  reduce using rule 27 (direct_declarator)
 
 
 state 2
 
-  175 type_name: TYPE .
+  174 type_name: TYPE .
 
-    $default  reduce using rule 175 (type_name)
+    $default  reduce using rule 174 (type_name)
 
 
 state 3
 
-   21 type_qualifier: CONST .
+   20 type_qualifier: CONST .
 
-    $default  reduce using rule 21 (type_qualifier)
+    $default  reduce using rule 20 (type_qualifier)
 
 
 state 4
 
-   19 storage_class_spec: STATIC .
+   18 storage_class_spec: STATIC .
 
-    $default  reduce using rule 19 (storage_class_spec)
+    $default  reduce using rule 18 (storage_class_spec)
 
 
 state 5
@@ -578,36 +577,36 @@ state 5
 
 state 6
 
-  181 struct_or_union: STRUCT .
+  180 struct_or_union: STRUCT .
 
-    $default  reduce using rule 181 (struct_or_union)
+    $default  reduce using rule 180 (struct_or_union)
 
 
 state 7
 
-  182 struct_or_union: UNION .
+  181 struct_or_union: UNION .
 
-    $default  reduce using rule 182 (struct_or_union)
+    $default  reduce using rule 181 (struct_or_union)
 
 
 state 8
 
-  200 enum_const: ENUM .
+  199 enum_const: ENUM .
 
-    $default  reduce using rule 200 (enum_const)
+    $default  reduce using rule 199 (enum_const)
 
 
 state 9
 
-   53 pointer: MULT . type_qualifier_list
-   54        | MULT .
-   55        | MULT . type_qualifier_list pointer
-   56        | MULT . pointer
+   52 pointer: MULT . type_qualifier_list
+   53        | MULT .
+   54        | MULT . type_qualifier_list pointer
+   55        | MULT . pointer
 
     CONST  shift, and go to state 3
     MULT   shift, and go to state 9
 
-    $default  reduce using rule 54 (pointer)
+    $default  reduce using rule 53 (pointer)
 
     type_qualifier       go to state 30
     pointer              go to state 31
@@ -616,7 +615,7 @@ state 9
 
 state 10
 
-   29 direct_declarator: LB . declarator RB
+   28 direct_declarator: LB . declarator RB
 
     ID    shift, and go to state 1
     MULT  shift, and go to state 9
@@ -711,7 +710,6 @@ state 16
 state 17
 
    13 decl_specs: storage_class_spec . decl_specs
-   14           | storage_class_spec .
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -719,8 +717,6 @@ state 17
     STRUCT  shift, and go to state 6
     UNION   shift, and go to state 7
     ENUM    shift, and go to state 8
-
-    $default  reduce using rule 14 (decl_specs)
 
     decl_specs            go to state 40
     storage_class_spec    go to state 17
@@ -735,8 +731,8 @@ state 17
 
 state 18
 
-   15 decl_specs: type_spec . decl_specs
-   16           | type_spec .
+   14 decl_specs: type_spec . decl_specs
+   15           | type_spec .
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -745,7 +741,7 @@ state 18
     UNION   shift, and go to state 7
     ENUM    shift, and go to state 8
 
-    $default  reduce using rule 16 (decl_specs)
+    $default  reduce using rule 15 (decl_specs)
 
     decl_specs            go to state 41
     storage_class_spec    go to state 17
@@ -760,8 +756,8 @@ state 18
 
 state 19
 
-   17 decl_specs: type_qualifier . decl_specs
-   18           | type_qualifier .
+   16 decl_specs: type_qualifier . decl_specs
+   17           | type_qualifier .
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -770,7 +766,7 @@ state 19
     UNION   shift, and go to state 7
     ENUM    shift, and go to state 8
 
-    $default  reduce using rule 18 (decl_specs)
+    $default  reduce using rule 17 (decl_specs)
 
     decl_specs            go to state 42
     storage_class_spec    go to state 17
@@ -794,21 +790,21 @@ state 20
 
 state 21
 
-   27 declarator: direct_declarator .
-   30 direct_declarator: direct_declarator . LSBSCRPT expression10 RSBSCRPT
-   31                  | direct_declarator . LSBSCRPT RSBSCRPT
-   32                  | direct_declarator . LB param_type_list RB
-   33                  | direct_declarator . LB RB
+   26 declarator: direct_declarator .
+   29 direct_declarator: direct_declarator . LSBSCRPT expression10 RSBSCRPT
+   30                  | direct_declarator . LSBSCRPT RSBSCRPT
+   31                  | direct_declarator . LB param_type_list RB
+   32                  | direct_declarator . LB RB
 
     LB        shift, and go to state 45
     LSBSCRPT  shift, and go to state 46
 
-    $default  reduce using rule 27 (declarator)
+    $default  reduce using rule 26 (declarator)
 
 
 state 22
 
-   26 declarator: pointer . direct_declarator
+   25 declarator: pointer . direct_declarator
 
     ID  shift, and go to state 1
     LB  shift, and go to state 10
@@ -818,23 +814,23 @@ state 22
 
 state 23
 
-   20 type_spec: type_name .
+   19 type_spec: type_name .
 
-    $default  reduce using rule 20 (type_spec)
+    $default  reduce using rule 19 (type_spec)
 
 
 state 24
 
-  176 type_name: struct_or_union_spec .
+  175 type_name: struct_or_union_spec .
 
-    $default  reduce using rule 176 (type_name)
+    $default  reduce using rule 175 (type_name)
 
 
 state 25
 
-  178 struct_or_union_spec: struct_or_union . ID LSCOPE struct_decl_list RSCOPE
-  179                     | struct_or_union . LSCOPE struct_decl_list RSCOPE
-  180                     | struct_or_union . ID
+  177 struct_or_union_spec: struct_or_union . ID LSCOPE struct_decl_list RSCOPE
+  178                     | struct_or_union . LSCOPE struct_decl_list RSCOPE
+  179                     | struct_or_union . ID
 
     ID      shift, and go to state 48
     LSCOPE  shift, and go to state 49
@@ -842,16 +838,16 @@ state 25
 
 state 26
 
-  177 type_name: enum_spec .
+  176 type_name: enum_spec .
 
-    $default  reduce using rule 177 (type_name)
+    $default  reduce using rule 176 (type_name)
 
 
 state 27
 
-  193 enum_spec: enum_const . ID LSCOPE enumerator_list RSCOPE
-  194          | enum_const . LSCOPE enumerator_list RSCOPE
-  195          | enum_const . ID
+  192 enum_spec: enum_const . ID LSCOPE enumerator_list RSCOPE
+  193          | enum_const . LSCOPE enumerator_list RSCOPE
+  194          | enum_const . ID
 
     ID      shift, and go to state 50
     LSCOPE  shift, and go to state 51
@@ -883,28 +879,28 @@ state 29
 
 state 30
 
-   57 type_qualifier_list: type_qualifier .
+   56 type_qualifier_list: type_qualifier .
 
-    $default  reduce using rule 57 (type_qualifier_list)
+    $default  reduce using rule 56 (type_qualifier_list)
 
 
 state 31
 
-   56 pointer: MULT pointer .
+   55 pointer: MULT pointer .
 
-    $default  reduce using rule 56 (pointer)
+    $default  reduce using rule 55 (pointer)
 
 
 state 32
 
-   53 pointer: MULT type_qualifier_list .
-   55        | MULT type_qualifier_list . pointer
-   58 type_qualifier_list: type_qualifier_list . type_qualifier
+   52 pointer: MULT type_qualifier_list .
+   54        | MULT type_qualifier_list . pointer
+   57 type_qualifier_list: type_qualifier_list . type_qualifier
 
     CONST  shift, and go to state 3
     MULT   shift, and go to state 9
 
-    $default  reduce using rule 53 (pointer)
+    $default  reduce using rule 52 (pointer)
 
     type_qualifier  go to state 53
     pointer         go to state 54
@@ -912,7 +908,7 @@ state 32
 
 state 33
 
-   29 direct_declarator: LB declarator . RB
+   28 direct_declarator: LB declarator . RB
 
     RB  shift, and go to state 55
 
@@ -941,7 +937,7 @@ state 36
 state 37
 
    11 decl: decl_specs init_declarator_list . SEMI
-   23 init_declarator_list: init_declarator_list . COMMA init_declarator
+   22 init_declarator_list: init_declarator_list . COMMA init_declarator
 
     SEMI   shift, and go to state 56
     COMMA  shift, and go to state 57
@@ -949,21 +945,21 @@ state 37
 
 state 38
 
-   22 init_declarator_list: init_declarator .
+   21 init_declarator_list: init_declarator .
 
-    $default  reduce using rule 22 (init_declarator_list)
+    $default  reduce using rule 21 (init_declarator_list)
 
 
 state 39
 
     7 function_definition: decl_specs declarator . compound_stat
-   24 init_declarator: declarator .
-   25                | declarator . ASSIGN initializer
+   23 init_declarator: declarator .
+   24                | declarator . ASSIGN initializer
 
     LSCOPE  shift, and go to state 43
     ASSIGN  shift, and go to state 58
 
-    $default  reduce using rule 24 (init_declarator)
+    $default  reduce using rule 23 (init_declarator)
 
     compound_stat  go to state 59
 
@@ -977,24 +973,24 @@ state 40
 
 state 41
 
-   15 decl_specs: type_spec decl_specs .
+   14 decl_specs: type_spec decl_specs .
 
-    $default  reduce using rule 15 (decl_specs)
+    $default  reduce using rule 14 (decl_specs)
 
 
 state 42
 
-   17 decl_specs: type_qualifier decl_specs .
+   16 decl_specs: type_qualifier decl_specs .
 
-    $default  reduce using rule 17 (decl_specs)
+    $default  reduce using rule 16 (decl_specs)
 
 
 state 43
 
-   75 compound_stat: LSCOPE . decl_list stat_list RSCOPE
-   76              | LSCOPE . stat_list RSCOPE
-   77              | LSCOPE . decl_list RSCOPE
-   78              | LSCOPE . RSCOPE
+   74 compound_stat: LSCOPE . decl_list stat_list RSCOPE
+   75              | LSCOPE . stat_list RSCOPE
+   76              | LSCOPE . decl_list RSCOPE
+   77              | LSCOPE . RSCOPE
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -1079,8 +1075,8 @@ state 44
 
 state 45
 
-   32 direct_declarator: direct_declarator LB . param_type_list RB
-   33                  | direct_declarator LB . RB
+   31 direct_declarator: direct_declarator LB . param_type_list RB
+   32                  | direct_declarator LB . RB
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -1106,8 +1102,8 @@ state 45
 
 state 46
 
-   30 direct_declarator: direct_declarator LSBSCRPT . expression10 RSBSCRPT
-   31                  | direct_declarator LSBSCRPT . RSBSCRPT
+   29 direct_declarator: direct_declarator LSBSCRPT . expression10 RSBSCRPT
+   30                  | direct_declarator LSBSCRPT . RSBSCRPT
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1145,31 +1141,31 @@ state 46
 
 state 47
 
-   26 declarator: pointer direct_declarator .
-   30 direct_declarator: direct_declarator . LSBSCRPT expression10 RSBSCRPT
-   31                  | direct_declarator . LSBSCRPT RSBSCRPT
-   32                  | direct_declarator . LB param_type_list RB
-   33                  | direct_declarator . LB RB
+   25 declarator: pointer direct_declarator .
+   29 direct_declarator: direct_declarator . LSBSCRPT expression10 RSBSCRPT
+   30                  | direct_declarator . LSBSCRPT RSBSCRPT
+   31                  | direct_declarator . LB param_type_list RB
+   32                  | direct_declarator . LB RB
 
     LB        shift, and go to state 45
     LSBSCRPT  shift, and go to state 46
 
-    $default  reduce using rule 26 (declarator)
+    $default  reduce using rule 25 (declarator)
 
 
 state 48
 
-  178 struct_or_union_spec: struct_or_union ID . LSCOPE struct_decl_list RSCOPE
-  180                     | struct_or_union ID .
+  177 struct_or_union_spec: struct_or_union ID . LSCOPE struct_decl_list RSCOPE
+  179                     | struct_or_union ID .
 
     LSCOPE  shift, and go to state 124
 
-    $default  reduce using rule 180 (struct_or_union_spec)
+    $default  reduce using rule 179 (struct_or_union_spec)
 
 
 state 49
 
-  179 struct_or_union_spec: struct_or_union LSCOPE . struct_decl_list RSCOPE
+  178 struct_or_union_spec: struct_or_union LSCOPE . struct_decl_list RSCOPE
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -1191,17 +1187,17 @@ state 49
 
 state 50
 
-  193 enum_spec: enum_const ID . LSCOPE enumerator_list RSCOPE
-  195          | enum_const ID .
+  192 enum_spec: enum_const ID . LSCOPE enumerator_list RSCOPE
+  194          | enum_const ID .
 
     LSCOPE  shift, and go to state 130
 
-    $default  reduce using rule 195 (enum_spec)
+    $default  reduce using rule 194 (enum_spec)
 
 
 state 51
 
-  194 enum_spec: enum_const LSCOPE . enumerator_list RSCOPE
+  193 enum_spec: enum_const LSCOPE . enumerator_list RSCOPE
 
     ID  shift, and go to state 131
 
@@ -1211,33 +1207,33 @@ state 51
 
 state 52
 
-   24 init_declarator: declarator .
-   25                | declarator . ASSIGN initializer
+   23 init_declarator: declarator .
+   24                | declarator . ASSIGN initializer
 
     ASSIGN  shift, and go to state 58
 
-    $default  reduce using rule 24 (init_declarator)
+    $default  reduce using rule 23 (init_declarator)
 
 
 state 53
 
-   58 type_qualifier_list: type_qualifier_list type_qualifier .
+   57 type_qualifier_list: type_qualifier_list type_qualifier .
 
-    $default  reduce using rule 58 (type_qualifier_list)
+    $default  reduce using rule 57 (type_qualifier_list)
 
 
 state 54
 
-   55 pointer: MULT type_qualifier_list pointer .
+   54 pointer: MULT type_qualifier_list pointer .
 
-    $default  reduce using rule 55 (pointer)
+    $default  reduce using rule 54 (pointer)
 
 
 state 55
 
-   29 direct_declarator: LB declarator RB .
+   28 direct_declarator: LB declarator RB .
 
-    $default  reduce using rule 29 (direct_declarator)
+    $default  reduce using rule 28 (direct_declarator)
 
 
 state 56
@@ -1249,7 +1245,7 @@ state 56
 
 state 57
 
-   23 init_declarator_list: init_declarator_list COMMA . init_declarator
+   22 init_declarator_list: init_declarator_list COMMA . init_declarator
 
     ID    shift, and go to state 1
     MULT  shift, and go to state 9
@@ -1263,7 +1259,7 @@ state 57
 
 state 58
 
-   25 init_declarator: declarator ASSIGN . initializer
+   24 init_declarator: declarator ASSIGN . initializer
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1310,53 +1306,53 @@ state 59
 
 state 60
 
-  148 single: NUMBER .
+  147 single: NUMBER .
 
-    $default  reduce using rule 148 (single)
+    $default  reduce using rule 147 (single)
 
 
 state 61
 
-   70 labeled_stat: ID . T2 stat
-  150 single: ID .
+   69 labeled_stat: ID . T2 stat
+  149 single: ID .
 
     T2  shift, and go to state 138
-
-    $default  reduce using rule 150 (single)
-
-
-state 62
-
-  149 single: STR .
 
     $default  reduce using rule 149 (single)
 
 
+state 62
+
+  148 single: STR .
+
+    $default  reduce using rule 148 (single)
+
+
 state 63
 
-   94 jump_stat: GOTO . ID SEMI
+   93 jump_stat: GOTO . ID SEMI
 
     ID  shift, and go to state 139
 
 
 state 64
 
-   96 jump_stat: BREAK . SEMI
+   95 jump_stat: BREAK . SEMI
 
     SEMI  shift, and go to state 140
 
 
 state 65
 
-   95 jump_stat: CONTINUE . SEMI
+   94 jump_stat: CONTINUE . SEMI
 
     SEMI  shift, and go to state 141
 
 
 state 66
 
-   97 jump_stat: RETURN . expression SEMI
-   98          | RETURN . SEMI
+   96 jump_stat: RETURN . expression SEMI
+   97          | RETURN . SEMI
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1396,36 +1392,36 @@ state 66
 
 state 67
 
-   74 exp_stat: SEMI .
+   73 exp_stat: SEMI .
 
-    $default  reduce using rule 74 (exp_stat)
+    $default  reduce using rule 73 (exp_stat)
 
 
 state 68
 
-  163 uop: ADD .
+  162 uop: ADD .
 
-    $default  reduce using rule 163 (uop)
+    $default  reduce using rule 162 (uop)
 
 
 state 69
 
-  164 uop: SUB .
+  163 uop: SUB .
 
-    $default  reduce using rule 164 (uop)
+    $default  reduce using rule 163 (uop)
 
 
 state 70
 
-  168 uop: MULT .
+  167 uop: MULT .
 
-    $default  reduce using rule 168 (uop)
+    $default  reduce using rule 167 (uop)
 
 
 state 71
 
-  134 factor: LB . type_name_cast RB factor
-  151 single: LB . expression RB
+  133 factor: LB . type_name_cast RB factor
+  150 single: LB . expression RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1478,35 +1474,35 @@ state 71
 
 state 72
 
-  166 uop: LOGIC_NOT .
-
-    $default  reduce using rule 166 (uop)
-
-
-state 73
-
-  165 uop: BIT_AND .
+  165 uop: LOGIC_NOT .
 
     $default  reduce using rule 165 (uop)
 
 
+state 73
+
+  164 uop: BIT_AND .
+
+    $default  reduce using rule 164 (uop)
+
+
 state 74
 
-  167 uop: BIT_NOT .
+  166 uop: BIT_NOT .
 
-    $default  reduce using rule 167 (uop)
+    $default  reduce using rule 166 (uop)
 
 
 state 75
 
-   78 compound_stat: LSCOPE RSCOPE .
+   77 compound_stat: LSCOPE RSCOPE .
 
-    $default  reduce using rule 78 (compound_stat)
+    $default  reduce using rule 77 (compound_stat)
 
 
 state 76
 
-  136 unaries: PP . unaries
+  135 unaries: PP . unaries
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1531,7 +1527,7 @@ state 76
 
 state 77
 
-  137 unaries: SS . unaries
+  136 unaries: SS . unaries
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1556,8 +1552,8 @@ state 77
 
 state 78
 
-  139 unaries: SIZE_OF . unaries
-  140        | SIZE_OF . LB type_name RB
+  138 unaries: SIZE_OF . unaries
+  139        | SIZE_OF . LB type_name RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1582,22 +1578,22 @@ state 78
 
 state 79
 
-   81 selection_stat: IF . LB expression RB stat
-   82               | IF . LB expression RB stat ELSE stat
+   80 selection_stat: IF . LB expression RB stat
+   81               | IF . LB expression RB stat ELSE stat
 
     LB  shift, and go to state 152
 
 
 state 80
 
-   84 iteration_stat: WHILE . LB expression RB stat
+   83 iteration_stat: WHILE . LB expression RB stat
 
     LB  shift, and go to state 153
 
 
 state 81
 
-   85 iteration_stat: DO . stat WHILE LB expression RB SEMI
+   84 iteration_stat: DO . stat WHILE LB expression RB SEMI
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -1656,28 +1652,28 @@ state 81
 
 state 82
 
-   86 iteration_stat: FOR . LB expression SEMI expression SEMI expression RB stat
-   87               | FOR . LB expression SEMI expression SEMI RB stat
-   88               | FOR . LB expression SEMI SEMI expression RB stat
-   89               | FOR . LB expression SEMI SEMI RB stat
-   90               | FOR . LB SEMI expression SEMI expression RB stat
-   91               | FOR . LB SEMI expression SEMI RB stat
-   92               | FOR . LB SEMI SEMI expression RB stat
-   93               | FOR . LB SEMI SEMI RB stat
+   85 iteration_stat: FOR . LB expression SEMI expression SEMI expression RB stat
+   86               | FOR . LB expression SEMI expression SEMI RB stat
+   87               | FOR . LB expression SEMI SEMI expression RB stat
+   88               | FOR . LB expression SEMI SEMI RB stat
+   89               | FOR . LB SEMI expression SEMI expression RB stat
+   90               | FOR . LB SEMI expression SEMI RB stat
+   91               | FOR . LB SEMI SEMI expression RB stat
+   92               | FOR . LB SEMI SEMI RB stat
 
     LB  shift, and go to state 155
 
 
 state 83
 
-   83 selection_stat: SWITCH . LB expression RB stat
+   82 selection_stat: SWITCH . LB expression RB stat
 
     LB  shift, and go to state 156
 
 
 state 84
 
-   71 labeled_stat: CASE . expression10 T2 stat
+   70 labeled_stat: CASE . expression10 T2 stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1714,7 +1710,7 @@ state 84
 
 state 85
 
-   72 labeled_stat: DEFAULT . T2 stat
+   71 labeled_stat: DEFAULT . T2 stat
 
     T2  shift, and go to state 158
 
@@ -1722,8 +1718,8 @@ state 85
 state 86
 
    10 decl_list: decl_list . decl
-   75 compound_stat: LSCOPE decl_list . stat_list RSCOPE
-   77              | LSCOPE decl_list . RSCOPE
+   74 compound_stat: LSCOPE decl_list . stat_list RSCOPE
+   76              | LSCOPE decl_list . RSCOPE
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -1807,36 +1803,36 @@ state 87
 
 state 88
 
-   79 stat_list: stat .
+   78 stat_list: stat .
 
-    $default  reduce using rule 79 (stat_list)
+    $default  reduce using rule 78 (stat_list)
 
 
 state 89
 
-   64 stat: labeled_stat .
+   63 stat: labeled_stat .
 
-    $default  reduce using rule 64 (stat)
+    $default  reduce using rule 63 (stat)
 
 
 state 90
 
-   65 stat: exp_stat .
+   64 stat: exp_stat .
 
-    $default  reduce using rule 65 (stat)
+    $default  reduce using rule 64 (stat)
 
 
 state 91
 
-   66 stat: compound_stat .
+   65 stat: compound_stat .
 
-    $default  reduce using rule 66 (stat)
+    $default  reduce using rule 65 (stat)
 
 
 state 92
 
-   76 compound_stat: LSCOPE stat_list . RSCOPE
-   80 stat_list: stat_list . stat
+   75 compound_stat: LSCOPE stat_list . RSCOPE
+   79 stat_list: stat_list . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -1896,29 +1892,29 @@ state 92
 
 state 93
 
-   67 stat: selection_stat .
+   66 stat: selection_stat .
 
-    $default  reduce using rule 67 (stat)
+    $default  reduce using rule 66 (stat)
 
 
 state 94
 
-   68 stat: iteration_stat .
+   67 stat: iteration_stat .
 
-    $default  reduce using rule 68 (stat)
+    $default  reduce using rule 67 (stat)
 
 
 state 95
 
-   69 stat: jump_stat .
+   68 stat: jump_stat .
 
-    $default  reduce using rule 69 (stat)
+    $default  reduce using rule 68 (stat)
 
 
 state 96
 
-   73 exp_stat: expression . SEMI
-  100 expression: expression . COMMA expression11
+   72 exp_stat: expression . SEMI
+   99 expression: expression . COMMA expression11
 
     SEMI   shift, and go to state 164
     COMMA  shift, and go to state 165
@@ -1926,147 +1922,147 @@ state 96
 
 state 97
 
-   99 expression: expression11 .
+   98 expression: expression11 .
 
-    $default  reduce using rule 99 (expression)
+    $default  reduce using rule 98 (expression)
 
 
 state 98
 
-  101 expression11: expression10 .
+  100 expression11: expression10 .
 
-    $default  reduce using rule 101 (expression11)
+    $default  reduce using rule 100 (expression11)
 
 
 state 99
 
-  103 expression10: expression9 .
-  104             | expression9 . T1 expression T2 expression10
-  106 expression9: expression9 . LOGIC_OR expression8
+  102 expression10: expression9 .
+  103             | expression9 . T1 expression T2 expression10
+  105 expression9: expression9 . LOGIC_OR expression8
 
     LOGIC_OR  shift, and go to state 166
     T1        shift, and go to state 167
 
-    $default  reduce using rule 103 (expression10)
+    $default  reduce using rule 102 (expression10)
 
 
 state 100
 
-  105 expression9: expression8 .
-  108 expression8: expression8 . LOGIC_AND expression7
+  104 expression9: expression8 .
+  107 expression8: expression8 . LOGIC_AND expression7
 
     LOGIC_AND  shift, and go to state 168
 
-    $default  reduce using rule 105 (expression9)
+    $default  reduce using rule 104 (expression9)
 
 
 state 101
 
-  107 expression8: expression7 .
-  110 expression7: expression7 . BIT_OR expression6
+  106 expression8: expression7 .
+  109 expression7: expression7 . BIT_OR expression6
 
     BIT_OR  shift, and go to state 169
 
-    $default  reduce using rule 107 (expression8)
+    $default  reduce using rule 106 (expression8)
 
 
 state 102
 
-  109 expression7: expression6 .
-  112 expression6: expression6 . BIT_XOR expression5
+  108 expression7: expression6 .
+  111 expression6: expression6 . BIT_XOR expression5
 
     BIT_XOR  shift, and go to state 170
 
-    $default  reduce using rule 109 (expression7)
+    $default  reduce using rule 108 (expression7)
 
 
 state 103
 
-  111 expression6: expression5 .
-  114 expression5: expression5 . BIT_AND expression4
+  110 expression6: expression5 .
+  113 expression5: expression5 . BIT_AND expression4
 
     BIT_AND  shift, and go to state 171
 
-    $default  reduce using rule 111 (expression6)
+    $default  reduce using rule 110 (expression6)
 
 
 state 104
 
-  113 expression5: expression4 .
-  116 expression4: expression4 . EQ expression3
-  117            | expression4 . NEQ expression3
+  112 expression5: expression4 .
+  115 expression4: expression4 . EQ expression3
+  116            | expression4 . NEQ expression3
 
     EQ   shift, and go to state 172
     NEQ  shift, and go to state 173
 
-    $default  reduce using rule 113 (expression5)
+    $default  reduce using rule 112 (expression5)
 
 
 state 105
 
-  115 expression4: expression3 .
-  119 expression3: expression3 . GT expression2
-  120            | expression3 . LT expression2
-  121            | expression3 . GE expression2
-  122            | expression3 . LE expression2
+  114 expression4: expression3 .
+  118 expression3: expression3 . GT expression2
+  119            | expression3 . LT expression2
+  120            | expression3 . GE expression2
+  121            | expression3 . LE expression2
 
     GT  shift, and go to state 174
     LT  shift, and go to state 175
     GE  shift, and go to state 176
     LE  shift, and go to state 177
 
-    $default  reduce using rule 115 (expression4)
+    $default  reduce using rule 114 (expression4)
 
 
 state 106
 
-  118 expression3: expression2 .
-  124 expression2: expression2 . LSHIFT expression1
-  125            | expression2 . RSHIFT expression1
+  117 expression3: expression2 .
+  123 expression2: expression2 . LSHIFT expression1
+  124            | expression2 . RSHIFT expression1
 
     LSHIFT  shift, and go to state 178
     RSHIFT  shift, and go to state 179
 
-    $default  reduce using rule 118 (expression3)
+    $default  reduce using rule 117 (expression3)
 
 
 state 107
 
-  123 expression2: expression1 .
-  127 expression1: expression1 . ADD term
-  128            | expression1 . SUB term
+  122 expression2: expression1 .
+  126 expression1: expression1 . ADD term
+  127            | expression1 . SUB term
 
     ADD  shift, and go to state 180
     SUB  shift, and go to state 181
 
-    $default  reduce using rule 123 (expression2)
+    $default  reduce using rule 122 (expression2)
 
 
 state 108
 
-  126 expression1: term .
-  130 term: term . MULT factor
-  131     | term . DIV factor
-  132     | term . MOD factor
+  125 expression1: term .
+  129 term: term . MULT factor
+  130     | term . DIV factor
+  131     | term . MOD factor
 
     MULT  shift, and go to state 182
     DIV   shift, and go to state 183
     MOD   shift, and go to state 184
 
-    $default  reduce using rule 126 (expression1)
+    $default  reduce using rule 125 (expression1)
 
 
 state 109
 
-  129 term: factor .
+  128 term: factor .
 
-    $default  reduce using rule 129 (term)
+    $default  reduce using rule 128 (term)
 
 
 state 110
 
-  102 expression11: unaries . aop expression11
-  133 factor: unaries .
+  101 expression11: unaries . aop expression11
+  132 factor: unaries .
 
     ASSIGN  shift, and go to state 185
     A_PLUS  shift, and go to state 186
@@ -2080,21 +2076,21 @@ state 110
     A_AND   shift, and go to state 194
     A_OR    shift, and go to state 195
 
-    $default  reduce using rule 133 (factor)
+    $default  reduce using rule 132 (factor)
 
     aop  go to state 196
 
 
 state 111
 
-  135 unaries: postfix .
-  142 postfix: postfix . LSBSCRPT expression RSBSCRPT
-  143        | postfix . DOT ID
-  144        | postfix . ARROW ID
-  145        | postfix . PP
-  146        | postfix . SS
-  169 function_call: postfix . LB RB
-  170              | postfix . LB args_list RB
+  134 unaries: postfix .
+  141 postfix: postfix . LSBSCRPT expression RSBSCRPT
+  142        | postfix . DOT ID
+  143        | postfix . ARROW ID
+  144        | postfix . PP
+  145        | postfix . SS
+  168 function_call: postfix . LB RB
+  169              | postfix . LB args_list RB
 
     DOT       shift, and go to state 197
     ARROW     shift, and go to state 198
@@ -2103,19 +2099,19 @@ state 111
     PP        shift, and go to state 201
     SS        shift, and go to state 202
 
-    $default  reduce using rule 135 (unaries)
+    $default  reduce using rule 134 (unaries)
 
 
 state 112
 
-  141 postfix: single .
+  140 postfix: single .
 
-    $default  reduce using rule 141 (postfix)
+    $default  reduce using rule 140 (postfix)
 
 
 state 113
 
-  138 unaries: uop . factor
+  137 unaries: uop . factor
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2141,30 +2137,30 @@ state 113
 
 state 114
 
-  147 postfix: function_call .
+  146 postfix: function_call .
 
-    $default  reduce using rule 147 (postfix)
+    $default  reduce using rule 146 (postfix)
 
 
 state 115
 
-   33 direct_declarator: direct_declarator LB RB .
+   32 direct_declarator: direct_declarator LB RB .
 
-    $default  reduce using rule 33 (direct_declarator)
+    $default  reduce using rule 32 (direct_declarator)
 
 
 state 116
 
-   50 param_decl: decl_specs . declarator
-   51           | decl_specs . abstract_declarator
-   52           | decl_specs .
+   49 param_decl: decl_specs . declarator
+   50           | decl_specs . abstract_declarator
+   51           | decl_specs .
 
     ID        shift, and go to state 1
     MULT      shift, and go to state 9
     LB        shift, and go to state 204
     LSBSCRPT  shift, and go to state 205
 
-    $default  reduce using rule 52 (param_decl)
+    $default  reduce using rule 51 (param_decl)
 
     declarator                  go to state 206
     direct_declarator           go to state 21
@@ -2175,60 +2171,60 @@ state 116
 
 state 117
 
-   32 direct_declarator: direct_declarator LB param_type_list . RB
+   31 direct_declarator: direct_declarator LB param_type_list . RB
 
     RB  shift, and go to state 210
 
 
 state 118
 
-   46 param_type_list: param_list .
-   47                | param_list . COMMA VARGS
-   49 param_list: param_list . COMMA param_decl
+   45 param_type_list: param_list .
+   46                | param_list . COMMA VARGS
+   48 param_list: param_list . COMMA param_decl
 
     COMMA  shift, and go to state 211
 
-    $default  reduce using rule 46 (param_type_list)
+    $default  reduce using rule 45 (param_type_list)
 
 
 state 119
 
-   48 param_list: param_decl .
+   47 param_list: param_decl .
 
-    $default  reduce using rule 48 (param_list)
+    $default  reduce using rule 47 (param_list)
 
 
 state 120
 
-  150 single: ID .
+  149 single: ID .
 
-    $default  reduce using rule 150 (single)
+    $default  reduce using rule 149 (single)
 
 
 state 121
 
-   31 direct_declarator: direct_declarator LSBSCRPT RSBSCRPT .
+   30 direct_declarator: direct_declarator LSBSCRPT RSBSCRPT .
 
-    $default  reduce using rule 31 (direct_declarator)
+    $default  reduce using rule 30 (direct_declarator)
 
 
 state 122
 
-   30 direct_declarator: direct_declarator LSBSCRPT expression10 . RSBSCRPT
+   29 direct_declarator: direct_declarator LSBSCRPT expression10 . RSBSCRPT
 
     RSBSCRPT  shift, and go to state 212
 
 
 state 123
 
-  133 factor: unaries .
+  132 factor: unaries .
 
-    $default  reduce using rule 133 (factor)
+    $default  reduce using rule 132 (factor)
 
 
 state 124
 
-  178 struct_or_union_spec: struct_or_union ID LSCOPE . struct_decl_list RSCOPE
+  177 struct_or_union_spec: struct_or_union ID LSCOPE . struct_decl_list RSCOPE
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -2250,8 +2246,8 @@ state 124
 
 state 125
 
-  186 spec_qualifier_list: type_spec . spec_qualifier_list
-  187                    | type_spec .
+  185 spec_qualifier_list: type_spec . spec_qualifier_list
+  186                    | type_spec .
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -2259,7 +2255,7 @@ state 125
     UNION   shift, and go to state 7
     ENUM    shift, and go to state 8
 
-    $default  reduce using rule 187 (spec_qualifier_list)
+    $default  reduce using rule 186 (spec_qualifier_list)
 
     type_spec             go to state 125
     type_qualifier        go to state 126
@@ -2273,8 +2269,8 @@ state 125
 
 state 126
 
-  188 spec_qualifier_list: type_qualifier . spec_qualifier_list
-  189                    | type_qualifier .
+  187 spec_qualifier_list: type_qualifier . spec_qualifier_list
+  188                    | type_qualifier .
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -2282,7 +2278,7 @@ state 126
     UNION   shift, and go to state 7
     ENUM    shift, and go to state 8
 
-    $default  reduce using rule 189 (spec_qualifier_list)
+    $default  reduce using rule 188 (spec_qualifier_list)
 
     type_spec             go to state 125
     type_qualifier        go to state 126
@@ -2296,8 +2292,8 @@ state 126
 
 state 127
 
-  179 struct_or_union_spec: struct_or_union LSCOPE struct_decl_list . RSCOPE
-  184 struct_decl_list: struct_decl_list . struct_decl
+  178 struct_or_union_spec: struct_or_union LSCOPE struct_decl_list . RSCOPE
+  183 struct_decl_list: struct_decl_list . struct_decl
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -2319,14 +2315,14 @@ state 127
 
 state 128
 
-  183 struct_decl_list: struct_decl .
+  182 struct_decl_list: struct_decl .
 
-    $default  reduce using rule 183 (struct_decl_list)
+    $default  reduce using rule 182 (struct_decl_list)
 
 
 state 129
 
-  185 struct_decl: spec_qualifier_list . struct_declarator_list SEMI
+  184 struct_decl: spec_qualifier_list . struct_declarator_list SEMI
 
     ID    shift, and go to state 1
     MULT  shift, and go to state 9
@@ -2341,7 +2337,7 @@ state 129
 
 state 130
 
-  193 enum_spec: enum_const ID LSCOPE . enumerator_list RSCOPE
+  192 enum_spec: enum_const ID LSCOPE . enumerator_list RSCOPE
 
     ID  shift, and go to state 131
 
@@ -2351,18 +2347,18 @@ state 130
 
 state 131
 
-  198 enumerator: ID .
-  199           | ID . ASSIGN expression10
+  197 enumerator: ID .
+  198           | ID . ASSIGN expression10
 
     ASSIGN  shift, and go to state 222
 
-    $default  reduce using rule 198 (enumerator)
+    $default  reduce using rule 197 (enumerator)
 
 
 state 132
 
-  194 enum_spec: enum_const LSCOPE enumerator_list . RSCOPE
-  197 enumerator_list: enumerator_list . COMMA enumerator
+  193 enum_spec: enum_const LSCOPE enumerator_list . RSCOPE
+  196 enumerator_list: enumerator_list . COMMA enumerator
 
     COMMA   shift, and go to state 223
     RSCOPE  shift, and go to state 224
@@ -2370,22 +2366,22 @@ state 132
 
 state 133
 
-  196 enumerator_list: enumerator .
+  195 enumerator_list: enumerator .
 
-    $default  reduce using rule 196 (enumerator_list)
+    $default  reduce using rule 195 (enumerator_list)
 
 
 state 134
 
-   23 init_declarator_list: init_declarator_list COMMA init_declarator .
+   22 init_declarator_list: init_declarator_list COMMA init_declarator .
 
-    $default  reduce using rule 23 (init_declarator_list)
+    $default  reduce using rule 22 (init_declarator_list)
 
 
 state 135
 
-   60 initializer: LSCOPE . initializer_list RSCOPE
-   61            | LSCOPE . initializer_list COMMA RSCOPE
+   59 initializer: LSCOPE . initializer_list RSCOPE
+   60            | LSCOPE . initializer_list COMMA RSCOPE
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2426,21 +2422,21 @@ state 135
 
 state 136
 
-   25 init_declarator: declarator ASSIGN initializer .
+   24 init_declarator: declarator ASSIGN initializer .
 
-    $default  reduce using rule 25 (init_declarator)
+    $default  reduce using rule 24 (init_declarator)
 
 
 state 137
 
-   59 initializer: expression11 .
+   58 initializer: expression11 .
 
-    $default  reduce using rule 59 (initializer)
+    $default  reduce using rule 58 (initializer)
 
 
 state 138
 
-   70 labeled_stat: ID T2 . stat
+   69 labeled_stat: ID T2 . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -2499,36 +2495,36 @@ state 138
 
 state 139
 
-   94 jump_stat: GOTO ID . SEMI
+   93 jump_stat: GOTO ID . SEMI
 
     SEMI  shift, and go to state 228
 
 
 state 140
 
-   96 jump_stat: BREAK SEMI .
-
-    $default  reduce using rule 96 (jump_stat)
-
-
-state 141
-
-   95 jump_stat: CONTINUE SEMI .
+   95 jump_stat: BREAK SEMI .
 
     $default  reduce using rule 95 (jump_stat)
 
 
+state 141
+
+   94 jump_stat: CONTINUE SEMI .
+
+    $default  reduce using rule 94 (jump_stat)
+
+
 state 142
 
-   98 jump_stat: RETURN SEMI .
+   97 jump_stat: RETURN SEMI .
 
-    $default  reduce using rule 98 (jump_stat)
+    $default  reduce using rule 97 (jump_stat)
 
 
 state 143
 
-   97 jump_stat: RETURN expression . SEMI
-  100 expression: expression . COMMA expression11
+   96 jump_stat: RETURN expression . SEMI
+   99 expression: expression . COMMA expression11
 
     SEMI   shift, and go to state 229
     COMMA  shift, and go to state 165
@@ -2536,8 +2532,8 @@ state 143
 
 state 144
 
-  100 expression: expression . COMMA expression11
-  151 single: LB expression . RB
+   99 expression: expression . COMMA expression11
+  150 single: LB expression . RB
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 230
@@ -2545,21 +2541,21 @@ state 144
 
 state 145
 
-  134 factor: LB type_name_cast . RB factor
+  133 factor: LB type_name_cast . RB factor
 
     RB  shift, and go to state 231
 
 
 state 146
 
-  173 type_name_cast: spec_qualifier_list . abstract_declarator
-  174               | spec_qualifier_list .
+  172 type_name_cast: spec_qualifier_list . abstract_declarator
+  173               | spec_qualifier_list .
 
     MULT      shift, and go to state 9
     LB        shift, and go to state 232
     LSBSCRPT  shift, and go to state 205
 
-    $default  reduce using rule 174 (type_name_cast)
+    $default  reduce using rule 173 (type_name_cast)
 
     abstract_declarator         go to state 233
     direct_abstract_declarator  go to state 208
@@ -2568,7 +2564,7 @@ state 146
 
 state 147
 
-  151 single: LB . expression RB
+  150 single: LB . expression RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2607,22 +2603,22 @@ state 147
 
 state 148
 
-  136 unaries: PP unaries .
+  135 unaries: PP unaries .
 
-    $default  reduce using rule 136 (unaries)
+    $default  reduce using rule 135 (unaries)
 
 
 state 149
 
-  137 unaries: SS unaries .
+  136 unaries: SS unaries .
 
-    $default  reduce using rule 137 (unaries)
+    $default  reduce using rule 136 (unaries)
 
 
 state 150
 
-  140 unaries: SIZE_OF LB . type_name RB
-  151 single: LB . expression RB
+  139 unaries: SIZE_OF LB . type_name RB
+  150 single: LB . expression RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2670,15 +2666,15 @@ state 150
 
 state 151
 
-  139 unaries: SIZE_OF unaries .
+  138 unaries: SIZE_OF unaries .
 
-    $default  reduce using rule 139 (unaries)
+    $default  reduce using rule 138 (unaries)
 
 
 state 152
 
-   81 selection_stat: IF LB . expression RB stat
-   82               | IF LB . expression RB stat ELSE stat
+   80 selection_stat: IF LB . expression RB stat
+   81               | IF LB . expression RB stat ELSE stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2717,7 +2713,7 @@ state 152
 
 state 153
 
-   84 iteration_stat: WHILE LB . expression RB stat
+   83 iteration_stat: WHILE LB . expression RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2756,21 +2752,21 @@ state 153
 
 state 154
 
-   85 iteration_stat: DO stat . WHILE LB expression RB SEMI
+   84 iteration_stat: DO stat . WHILE LB expression RB SEMI
 
     WHILE  shift, and go to state 238
 
 
 state 155
 
-   86 iteration_stat: FOR LB . expression SEMI expression SEMI expression RB stat
-   87               | FOR LB . expression SEMI expression SEMI RB stat
-   88               | FOR LB . expression SEMI SEMI expression RB stat
-   89               | FOR LB . expression SEMI SEMI RB stat
-   90               | FOR LB . SEMI expression SEMI expression RB stat
-   91               | FOR LB . SEMI expression SEMI RB stat
-   92               | FOR LB . SEMI SEMI expression RB stat
-   93               | FOR LB . SEMI SEMI RB stat
+   85 iteration_stat: FOR LB . expression SEMI expression SEMI expression RB stat
+   86               | FOR LB . expression SEMI expression SEMI RB stat
+   87               | FOR LB . expression SEMI SEMI expression RB stat
+   88               | FOR LB . expression SEMI SEMI RB stat
+   89               | FOR LB . SEMI expression SEMI expression RB stat
+   90               | FOR LB . SEMI expression SEMI RB stat
+   91               | FOR LB . SEMI SEMI expression RB stat
+   92               | FOR LB . SEMI SEMI RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2810,7 +2806,7 @@ state 155
 
 state 156
 
-   83 selection_stat: SWITCH LB . expression RB stat
+   82 selection_stat: SWITCH LB . expression RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2849,14 +2845,14 @@ state 156
 
 state 157
 
-   71 labeled_stat: CASE expression10 . T2 stat
+   70 labeled_stat: CASE expression10 . T2 stat
 
     T2  shift, and go to state 242
 
 
 state 158
 
-   72 labeled_stat: DEFAULT T2 . stat
+   71 labeled_stat: DEFAULT T2 . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -2915,9 +2911,9 @@ state 158
 
 state 159
 
-   77 compound_stat: LSCOPE decl_list RSCOPE .
+   76 compound_stat: LSCOPE decl_list RSCOPE .
 
-    $default  reduce using rule 77 (compound_stat)
+    $default  reduce using rule 76 (compound_stat)
 
 
 state 160
@@ -2929,8 +2925,8 @@ state 160
 
 state 161
 
-   75 compound_stat: LSCOPE decl_list stat_list . RSCOPE
-   80 stat_list: stat_list . stat
+   74 compound_stat: LSCOPE decl_list stat_list . RSCOPE
+   79 stat_list: stat_list . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -2990,28 +2986,28 @@ state 161
 
 state 162
 
-   76 compound_stat: LSCOPE stat_list RSCOPE .
+   75 compound_stat: LSCOPE stat_list RSCOPE .
 
-    $default  reduce using rule 76 (compound_stat)
+    $default  reduce using rule 75 (compound_stat)
 
 
 state 163
 
-   80 stat_list: stat_list stat .
+   79 stat_list: stat_list stat .
 
-    $default  reduce using rule 80 (stat_list)
+    $default  reduce using rule 79 (stat_list)
 
 
 state 164
 
-   73 exp_stat: expression SEMI .
+   72 exp_stat: expression SEMI .
 
-    $default  reduce using rule 73 (exp_stat)
+    $default  reduce using rule 72 (exp_stat)
 
 
 state 165
 
-  100 expression: expression COMMA . expression11
+   99 expression: expression COMMA . expression11
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3049,7 +3045,7 @@ state 165
 
 state 166
 
-  106 expression9: expression9 LOGIC_OR . expression8
+  105 expression9: expression9 LOGIC_OR . expression8
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3084,7 +3080,7 @@ state 166
 
 state 167
 
-  104 expression10: expression9 T1 . expression T2 expression10
+  103 expression10: expression9 T1 . expression T2 expression10
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3123,7 +3119,7 @@ state 167
 
 state 168
 
-  108 expression8: expression8 LOGIC_AND . expression7
+  107 expression8: expression8 LOGIC_AND . expression7
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3157,7 +3153,7 @@ state 168
 
 state 169
 
-  110 expression7: expression7 BIT_OR . expression6
+  109 expression7: expression7 BIT_OR . expression6
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3190,7 +3186,7 @@ state 169
 
 state 170
 
-  112 expression6: expression6 BIT_XOR . expression5
+  111 expression6: expression6 BIT_XOR . expression5
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3222,7 +3218,7 @@ state 170
 
 state 171
 
-  114 expression5: expression5 BIT_AND . expression4
+  113 expression5: expression5 BIT_AND . expression4
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3253,7 +3249,7 @@ state 171
 
 state 172
 
-  116 expression4: expression4 EQ . expression3
+  115 expression4: expression4 EQ . expression3
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3283,7 +3279,7 @@ state 172
 
 state 173
 
-  117 expression4: expression4 NEQ . expression3
+  116 expression4: expression4 NEQ . expression3
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3313,7 +3309,7 @@ state 173
 
 state 174
 
-  119 expression3: expression3 GT . expression2
+  118 expression3: expression3 GT . expression2
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3342,7 +3338,7 @@ state 174
 
 state 175
 
-  120 expression3: expression3 LT . expression2
+  119 expression3: expression3 LT . expression2
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3371,7 +3367,7 @@ state 175
 
 state 176
 
-  121 expression3: expression3 GE . expression2
+  120 expression3: expression3 GE . expression2
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3400,7 +3396,7 @@ state 176
 
 state 177
 
-  122 expression3: expression3 LE . expression2
+  121 expression3: expression3 LE . expression2
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3429,7 +3425,7 @@ state 177
 
 state 178
 
-  124 expression2: expression2 LSHIFT . expression1
+  123 expression2: expression2 LSHIFT . expression1
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3457,7 +3453,7 @@ state 178
 
 state 179
 
-  125 expression2: expression2 RSHIFT . expression1
+  124 expression2: expression2 RSHIFT . expression1
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3485,7 +3481,7 @@ state 179
 
 state 180
 
-  127 expression1: expression1 ADD . term
+  126 expression1: expression1 ADD . term
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3512,7 +3508,7 @@ state 180
 
 state 181
 
-  128 expression1: expression1 SUB . term
+  127 expression1: expression1 SUB . term
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3539,7 +3535,7 @@ state 181
 
 state 182
 
-  130 term: term MULT . factor
+  129 term: term MULT . factor
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3565,7 +3561,7 @@ state 182
 
 state 183
 
-  131 term: term DIV . factor
+  130 term: term DIV . factor
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3591,7 +3587,7 @@ state 183
 
 state 184
 
-  132 term: term MOD . factor
+  131 term: term MOD . factor
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3617,84 +3613,84 @@ state 184
 
 state 185
 
-  152 aop: ASSIGN .
+  151 aop: ASSIGN .
 
-    $default  reduce using rule 152 (aop)
+    $default  reduce using rule 151 (aop)
 
 
 state 186
 
-  155 aop: A_PLUS .
-
-    $default  reduce using rule 155 (aop)
-
-
-state 187
-
-  156 aop: A_SUB .
-
-    $default  reduce using rule 156 (aop)
-
-
-state 188
-
-  157 aop: A_MULT .
-
-    $default  reduce using rule 157 (aop)
-
-
-state 189
-
-  154 aop: A_DIV .
+  154 aop: A_PLUS .
 
     $default  reduce using rule 154 (aop)
 
 
-state 190
+state 187
 
-  162 aop: A_MOD .
+  155 aop: A_SUB .
 
-    $default  reduce using rule 162 (aop)
-
-
-state 191
-
-  158 aop: A_LS .
-
-    $default  reduce using rule 158 (aop)
+    $default  reduce using rule 155 (aop)
 
 
-state 192
+state 188
 
-  159 aop: A_RS .
+  156 aop: A_MULT .
 
-    $default  reduce using rule 159 (aop)
-
-
-state 193
-
-  161 aop: A_XOR .
-
-    $default  reduce using rule 161 (aop)
+    $default  reduce using rule 156 (aop)
 
 
-state 194
+state 189
 
-  153 aop: A_AND .
+  153 aop: A_DIV .
 
     $default  reduce using rule 153 (aop)
 
 
-state 195
+state 190
 
-  160 aop: A_OR .
+  161 aop: A_MOD .
+
+    $default  reduce using rule 161 (aop)
+
+
+state 191
+
+  157 aop: A_LS .
+
+    $default  reduce using rule 157 (aop)
+
+
+state 192
+
+  158 aop: A_RS .
+
+    $default  reduce using rule 158 (aop)
+
+
+state 193
+
+  160 aop: A_XOR .
 
     $default  reduce using rule 160 (aop)
 
 
+state 194
+
+  152 aop: A_AND .
+
+    $default  reduce using rule 152 (aop)
+
+
+state 195
+
+  159 aop: A_OR .
+
+    $default  reduce using rule 159 (aop)
+
+
 state 196
 
-  102 expression11: unaries aop . expression11
+  101 expression11: unaries aop . expression11
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3732,22 +3728,22 @@ state 196
 
 state 197
 
-  143 postfix: postfix DOT . ID
+  142 postfix: postfix DOT . ID
 
     ID  shift, and go to state 266
 
 
 state 198
 
-  144 postfix: postfix ARROW . ID
+  143 postfix: postfix ARROW . ID
 
     ID  shift, and go to state 267
 
 
 state 199
 
-  169 function_call: postfix LB . RB
-  170              | postfix LB . args_list RB
+  168 function_call: postfix LB . RB
+  169              | postfix LB . args_list RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3788,7 +3784,7 @@ state 199
 
 state 200
 
-  142 postfix: postfix LSBSCRPT . expression RSBSCRPT
+  141 postfix: postfix LSBSCRPT . expression RSBSCRPT
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3827,31 +3823,31 @@ state 200
 
 state 201
 
-  145 postfix: postfix PP .
+  144 postfix: postfix PP .
 
-    $default  reduce using rule 145 (postfix)
+    $default  reduce using rule 144 (postfix)
 
 
 state 202
 
-  146 postfix: postfix SS .
+  145 postfix: postfix SS .
 
-    $default  reduce using rule 146 (postfix)
+    $default  reduce using rule 145 (postfix)
 
 
 state 203
 
-  138 unaries: uop factor .
+  137 unaries: uop factor .
 
-    $default  reduce using rule 138 (unaries)
+    $default  reduce using rule 137 (unaries)
 
 
 state 204
 
-   29 direct_declarator: LB . declarator RB
-   37 direct_abstract_declarator: LB . abstract_declarator RB
-   43                           | LB . param_type_list RB
-   45                           | LB . RB
+   28 direct_declarator: LB . declarator RB
+   36 direct_abstract_declarator: LB . abstract_declarator RB
+   42                           | LB . param_type_list RB
+   44                           | LB . RB
 
     ID        shift, and go to state 1
     TYPE      shift, and go to state 2
@@ -3886,8 +3882,8 @@ state 204
 
 state 205
 
-   39 direct_abstract_declarator: LSBSCRPT . expression10 RSBSCRPT
-   41                           | LSBSCRPT . RSBSCRPT
+   38 direct_abstract_declarator: LSBSCRPT . expression10 RSBSCRPT
+   40                           | LSBSCRPT . RSBSCRPT
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3925,43 +3921,43 @@ state 205
 
 state 206
 
-   50 param_decl: decl_specs declarator .
+   49 param_decl: decl_specs declarator .
 
-    $default  reduce using rule 50 (param_decl)
+    $default  reduce using rule 49 (param_decl)
 
 
 state 207
 
-   51 param_decl: decl_specs abstract_declarator .
+   50 param_decl: decl_specs abstract_declarator .
 
-    $default  reduce using rule 51 (param_decl)
+    $default  reduce using rule 50 (param_decl)
 
 
 state 208
 
-   36 abstract_declarator: direct_abstract_declarator .
-   38 direct_abstract_declarator: direct_abstract_declarator . LSBSCRPT expression10 RSBSCRPT
-   40                           | direct_abstract_declarator . LSBSCRPT RSBSCRPT
-   42                           | direct_abstract_declarator . LB param_type_list RB
-   44                           | direct_abstract_declarator . LB RB
+   35 abstract_declarator: direct_abstract_declarator .
+   37 direct_abstract_declarator: direct_abstract_declarator . LSBSCRPT expression10 RSBSCRPT
+   39                           | direct_abstract_declarator . LSBSCRPT RSBSCRPT
+   41                           | direct_abstract_declarator . LB param_type_list RB
+   43                           | direct_abstract_declarator . LB RB
 
     LB        shift, and go to state 277
     LSBSCRPT  shift, and go to state 278
 
-    $default  reduce using rule 36 (abstract_declarator)
+    $default  reduce using rule 35 (abstract_declarator)
 
 
 state 209
 
-   26 declarator: pointer . direct_declarator
-   34 abstract_declarator: pointer .
-   35                    | pointer . direct_abstract_declarator
+   25 declarator: pointer . direct_declarator
+   33 abstract_declarator: pointer .
+   34                    | pointer . direct_abstract_declarator
 
     ID        shift, and go to state 1
     LB        shift, and go to state 204
     LSBSCRPT  shift, and go to state 205
 
-    $default  reduce using rule 34 (abstract_declarator)
+    $default  reduce using rule 33 (abstract_declarator)
 
     direct_declarator           go to state 47
     direct_abstract_declarator  go to state 279
@@ -3969,15 +3965,15 @@ state 209
 
 state 210
 
-   32 direct_declarator: direct_declarator LB param_type_list RB .
+   31 direct_declarator: direct_declarator LB param_type_list RB .
 
-    $default  reduce using rule 32 (direct_declarator)
+    $default  reduce using rule 31 (direct_declarator)
 
 
 state 211
 
-   47 param_type_list: param_list COMMA . VARGS
-   49 param_list: param_list COMMA . param_decl
+   46 param_type_list: param_list COMMA . VARGS
+   48 param_list: param_list COMMA . param_decl
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -4001,15 +3997,15 @@ state 211
 
 state 212
 
-   30 direct_declarator: direct_declarator LSBSCRPT expression10 RSBSCRPT .
+   29 direct_declarator: direct_declarator LSBSCRPT expression10 RSBSCRPT .
 
-    $default  reduce using rule 30 (direct_declarator)
+    $default  reduce using rule 29 (direct_declarator)
 
 
 state 213
 
-  178 struct_or_union_spec: struct_or_union ID LSCOPE struct_decl_list . RSCOPE
-  184 struct_decl_list: struct_decl_list . struct_decl
+  177 struct_or_union_spec: struct_or_union ID LSCOPE struct_decl_list . RSCOPE
+  183 struct_decl_list: struct_decl_list . struct_decl
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -4031,43 +4027,43 @@ state 213
 
 state 214
 
-  186 spec_qualifier_list: type_spec spec_qualifier_list .
+  185 spec_qualifier_list: type_spec spec_qualifier_list .
 
-    $default  reduce using rule 186 (spec_qualifier_list)
+    $default  reduce using rule 185 (spec_qualifier_list)
 
 
 state 215
 
-  188 spec_qualifier_list: type_qualifier spec_qualifier_list .
+  187 spec_qualifier_list: type_qualifier spec_qualifier_list .
 
-    $default  reduce using rule 188 (spec_qualifier_list)
+    $default  reduce using rule 187 (spec_qualifier_list)
 
 
 state 216
 
-  179 struct_or_union_spec: struct_or_union LSCOPE struct_decl_list RSCOPE .
+  178 struct_or_union_spec: struct_or_union LSCOPE struct_decl_list RSCOPE .
 
-    $default  reduce using rule 179 (struct_or_union_spec)
+    $default  reduce using rule 178 (struct_or_union_spec)
 
 
 state 217
 
-  184 struct_decl_list: struct_decl_list struct_decl .
+  183 struct_decl_list: struct_decl_list struct_decl .
 
-    $default  reduce using rule 184 (struct_decl_list)
+    $default  reduce using rule 183 (struct_decl_list)
 
 
 state 218
 
-  192 struct_declarator: declarator .
+  191 struct_declarator: declarator .
 
-    $default  reduce using rule 192 (struct_declarator)
+    $default  reduce using rule 191 (struct_declarator)
 
 
 state 219
 
-  185 struct_decl: spec_qualifier_list struct_declarator_list . SEMI
-  191 struct_declarator_list: struct_declarator_list . COMMA struct_declarator
+  184 struct_decl: spec_qualifier_list struct_declarator_list . SEMI
+  190 struct_declarator_list: struct_declarator_list . COMMA struct_declarator
 
     SEMI   shift, and go to state 283
     COMMA  shift, and go to state 284
@@ -4075,15 +4071,15 @@ state 219
 
 state 220
 
-  190 struct_declarator_list: struct_declarator .
+  189 struct_declarator_list: struct_declarator .
 
-    $default  reduce using rule 190 (struct_declarator_list)
+    $default  reduce using rule 189 (struct_declarator_list)
 
 
 state 221
 
-  193 enum_spec: enum_const ID LSCOPE enumerator_list . RSCOPE
-  197 enumerator_list: enumerator_list . COMMA enumerator
+  192 enum_spec: enum_const ID LSCOPE enumerator_list . RSCOPE
+  196 enumerator_list: enumerator_list . COMMA enumerator
 
     COMMA   shift, and go to state 223
     RSCOPE  shift, and go to state 285
@@ -4091,7 +4087,7 @@ state 221
 
 state 222
 
-  199 enumerator: ID ASSIGN . expression10
+  198 enumerator: ID ASSIGN . expression10
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -4128,7 +4124,7 @@ state 222
 
 state 223
 
-  197 enumerator_list: enumerator_list COMMA . enumerator
+  196 enumerator_list: enumerator_list COMMA . enumerator
 
     ID  shift, and go to state 131
 
@@ -4137,23 +4133,23 @@ state 223
 
 state 224
 
-  194 enum_spec: enum_const LSCOPE enumerator_list RSCOPE .
+  193 enum_spec: enum_const LSCOPE enumerator_list RSCOPE .
 
-    $default  reduce using rule 194 (enum_spec)
+    $default  reduce using rule 193 (enum_spec)
 
 
 state 225
 
-   62 initializer_list: initializer .
+   61 initializer_list: initializer .
 
-    $default  reduce using rule 62 (initializer_list)
+    $default  reduce using rule 61 (initializer_list)
 
 
 state 226
 
-   60 initializer: LSCOPE initializer_list . RSCOPE
-   61            | LSCOPE initializer_list . COMMA RSCOPE
-   63 initializer_list: initializer_list . COMMA initializer
+   59 initializer: LSCOPE initializer_list . RSCOPE
+   60            | LSCOPE initializer_list . COMMA RSCOPE
+   62 initializer_list: initializer_list . COMMA initializer
 
     COMMA   shift, and go to state 288
     RSCOPE  shift, and go to state 289
@@ -4161,35 +4157,35 @@ state 226
 
 state 227
 
-   70 labeled_stat: ID T2 stat .
+   69 labeled_stat: ID T2 stat .
 
-    $default  reduce using rule 70 (labeled_stat)
+    $default  reduce using rule 69 (labeled_stat)
 
 
 state 228
 
-   94 jump_stat: GOTO ID SEMI .
+   93 jump_stat: GOTO ID SEMI .
 
-    $default  reduce using rule 94 (jump_stat)
+    $default  reduce using rule 93 (jump_stat)
 
 
 state 229
 
-   97 jump_stat: RETURN expression SEMI .
+   96 jump_stat: RETURN expression SEMI .
 
-    $default  reduce using rule 97 (jump_stat)
+    $default  reduce using rule 96 (jump_stat)
 
 
 state 230
 
-  151 single: LB expression RB .
+  150 single: LB expression RB .
 
-    $default  reduce using rule 151 (single)
+    $default  reduce using rule 150 (single)
 
 
 state 231
 
-  134 factor: LB type_name_cast RB . factor
+  133 factor: LB type_name_cast RB . factor
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -4215,9 +4211,9 @@ state 231
 
 state 232
 
-   37 direct_abstract_declarator: LB . abstract_declarator RB
-   43                           | LB . param_type_list RB
-   45                           | LB . RB
+   36 direct_abstract_declarator: LB . abstract_declarator RB
+   42                           | LB . param_type_list RB
+   44                           | LB . RB
 
     TYPE      shift, and go to state 2
     CONST     shift, and go to state 3
@@ -4249,36 +4245,36 @@ state 232
 
 state 233
 
-  173 type_name_cast: spec_qualifier_list abstract_declarator .
+  172 type_name_cast: spec_qualifier_list abstract_declarator .
 
-    $default  reduce using rule 173 (type_name_cast)
+    $default  reduce using rule 172 (type_name_cast)
 
 
 state 234
 
-   34 abstract_declarator: pointer .
-   35                    | pointer . direct_abstract_declarator
+   33 abstract_declarator: pointer .
+   34                    | pointer . direct_abstract_declarator
 
     LB        shift, and go to state 232
     LSBSCRPT  shift, and go to state 205
 
-    $default  reduce using rule 34 (abstract_declarator)
+    $default  reduce using rule 33 (abstract_declarator)
 
     direct_abstract_declarator  go to state 279
 
 
 state 235
 
-  140 unaries: SIZE_OF LB type_name . RB
+  139 unaries: SIZE_OF LB type_name . RB
 
     RB  shift, and go to state 291
 
 
 state 236
 
-   81 selection_stat: IF LB expression . RB stat
-   82               | IF LB expression . RB stat ELSE stat
-  100 expression: expression . COMMA expression11
+   80 selection_stat: IF LB expression . RB stat
+   81               | IF LB expression . RB stat ELSE stat
+   99 expression: expression . COMMA expression11
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 292
@@ -4286,8 +4282,8 @@ state 236
 
 state 237
 
-   84 iteration_stat: WHILE LB expression . RB stat
-  100 expression: expression . COMMA expression11
+   83 iteration_stat: WHILE LB expression . RB stat
+   99 expression: expression . COMMA expression11
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 293
@@ -4295,17 +4291,17 @@ state 237
 
 state 238
 
-   85 iteration_stat: DO stat WHILE . LB expression RB SEMI
+   84 iteration_stat: DO stat WHILE . LB expression RB SEMI
 
     LB  shift, and go to state 294
 
 
 state 239
 
-   90 iteration_stat: FOR LB SEMI . expression SEMI expression RB stat
-   91               | FOR LB SEMI . expression SEMI RB stat
-   92               | FOR LB SEMI . SEMI expression RB stat
-   93               | FOR LB SEMI . SEMI RB stat
+   89 iteration_stat: FOR LB SEMI . expression SEMI expression RB stat
+   90               | FOR LB SEMI . expression SEMI RB stat
+   91               | FOR LB SEMI . SEMI expression RB stat
+   92               | FOR LB SEMI . SEMI RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -4345,11 +4341,11 @@ state 239
 
 state 240
 
-   86 iteration_stat: FOR LB expression . SEMI expression SEMI expression RB stat
-   87               | FOR LB expression . SEMI expression SEMI RB stat
-   88               | FOR LB expression . SEMI SEMI expression RB stat
-   89               | FOR LB expression . SEMI SEMI RB stat
-  100 expression: expression . COMMA expression11
+   85 iteration_stat: FOR LB expression . SEMI expression SEMI expression RB stat
+   86               | FOR LB expression . SEMI expression SEMI RB stat
+   87               | FOR LB expression . SEMI SEMI expression RB stat
+   88               | FOR LB expression . SEMI SEMI RB stat
+   99 expression: expression . COMMA expression11
 
     SEMI   shift, and go to state 297
     COMMA  shift, and go to state 165
@@ -4357,8 +4353,8 @@ state 240
 
 state 241
 
-   83 selection_stat: SWITCH LB expression . RB stat
-  100 expression: expression . COMMA expression11
+   82 selection_stat: SWITCH LB expression . RB stat
+   99 expression: expression . COMMA expression11
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 298
@@ -4366,7 +4362,7 @@ state 241
 
 state 242
 
-   71 labeled_stat: CASE expression10 T2 . stat
+   70 labeled_stat: CASE expression10 T2 . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -4425,39 +4421,39 @@ state 242
 
 state 243
 
-   72 labeled_stat: DEFAULT T2 stat .
+   71 labeled_stat: DEFAULT T2 stat .
 
-    $default  reduce using rule 72 (labeled_stat)
+    $default  reduce using rule 71 (labeled_stat)
 
 
 state 244
 
-   75 compound_stat: LSCOPE decl_list stat_list RSCOPE .
+   74 compound_stat: LSCOPE decl_list stat_list RSCOPE .
 
-    $default  reduce using rule 75 (compound_stat)
+    $default  reduce using rule 74 (compound_stat)
 
 
 state 245
 
-  100 expression: expression COMMA expression11 .
+   99 expression: expression COMMA expression11 .
 
-    $default  reduce using rule 100 (expression)
+    $default  reduce using rule 99 (expression)
 
 
 state 246
 
-  106 expression9: expression9 LOGIC_OR expression8 .
-  108 expression8: expression8 . LOGIC_AND expression7
+  105 expression9: expression9 LOGIC_OR expression8 .
+  107 expression8: expression8 . LOGIC_AND expression7
 
     LOGIC_AND  shift, and go to state 168
 
-    $default  reduce using rule 106 (expression9)
+    $default  reduce using rule 105 (expression9)
 
 
 state 247
 
-  100 expression: expression . COMMA expression11
-  104 expression10: expression9 T1 expression . T2 expression10
+   99 expression: expression . COMMA expression11
+  103 expression10: expression9 T1 expression . T2 expression10
 
     COMMA  shift, and go to state 165
     T2     shift, and go to state 300
@@ -4465,53 +4461,69 @@ state 247
 
 state 248
 
-  108 expression8: expression8 LOGIC_AND expression7 .
-  110 expression7: expression7 . BIT_OR expression6
+  107 expression8: expression8 LOGIC_AND expression7 .
+  109 expression7: expression7 . BIT_OR expression6
 
     BIT_OR  shift, and go to state 169
 
-    $default  reduce using rule 108 (expression8)
+    $default  reduce using rule 107 (expression8)
 
 
 state 249
 
-  110 expression7: expression7 BIT_OR expression6 .
-  112 expression6: expression6 . BIT_XOR expression5
+  109 expression7: expression7 BIT_OR expression6 .
+  111 expression6: expression6 . BIT_XOR expression5
 
     BIT_XOR  shift, and go to state 170
 
-    $default  reduce using rule 110 (expression7)
+    $default  reduce using rule 109 (expression7)
 
 
 state 250
 
-  112 expression6: expression6 BIT_XOR expression5 .
-  114 expression5: expression5 . BIT_AND expression4
+  111 expression6: expression6 BIT_XOR expression5 .
+  113 expression5: expression5 . BIT_AND expression4
 
     BIT_AND  shift, and go to state 171
 
-    $default  reduce using rule 112 (expression6)
+    $default  reduce using rule 111 (expression6)
 
 
 state 251
 
-  114 expression5: expression5 BIT_AND expression4 .
-  116 expression4: expression4 . EQ expression3
-  117            | expression4 . NEQ expression3
+  113 expression5: expression5 BIT_AND expression4 .
+  115 expression4: expression4 . EQ expression3
+  116            | expression4 . NEQ expression3
 
     EQ   shift, and go to state 172
     NEQ  shift, and go to state 173
 
-    $default  reduce using rule 114 (expression5)
+    $default  reduce using rule 113 (expression5)
 
 
 state 252
 
-  116 expression4: expression4 EQ expression3 .
-  119 expression3: expression3 . GT expression2
-  120            | expression3 . LT expression2
-  121            | expression3 . GE expression2
-  122            | expression3 . LE expression2
+  115 expression4: expression4 EQ expression3 .
+  118 expression3: expression3 . GT expression2
+  119            | expression3 . LT expression2
+  120            | expression3 . GE expression2
+  121            | expression3 . LE expression2
+
+    GT  shift, and go to state 174
+    LT  shift, and go to state 175
+    GE  shift, and go to state 176
+    LE  shift, and go to state 177
+
+    $default  reduce using rule 115 (expression4)
+
+
+state 253
+
+  116 expression4: expression4 NEQ expression3 .
+  118 expression3: expression3 . GT expression2
+  119            | expression3 . LT expression2
+  120            | expression3 . GE expression2
+  121            | expression3 . LE expression2
 
     GT  shift, and go to state 174
     LT  shift, and go to state 175
@@ -4521,27 +4533,23 @@ state 252
     $default  reduce using rule 116 (expression4)
 
 
-state 253
-
-  117 expression4: expression4 NEQ expression3 .
-  119 expression3: expression3 . GT expression2
-  120            | expression3 . LT expression2
-  121            | expression3 . GE expression2
-  122            | expression3 . LE expression2
-
-    GT  shift, and go to state 174
-    LT  shift, and go to state 175
-    GE  shift, and go to state 176
-    LE  shift, and go to state 177
-
-    $default  reduce using rule 117 (expression4)
-
-
 state 254
 
-  119 expression3: expression3 GT expression2 .
-  124 expression2: expression2 . LSHIFT expression1
-  125            | expression2 . RSHIFT expression1
+  118 expression3: expression3 GT expression2 .
+  123 expression2: expression2 . LSHIFT expression1
+  124            | expression2 . RSHIFT expression1
+
+    LSHIFT  shift, and go to state 178
+    RSHIFT  shift, and go to state 179
+
+    $default  reduce using rule 118 (expression3)
+
+
+state 255
+
+  119 expression3: expression3 LT expression2 .
+  123 expression2: expression2 . LSHIFT expression1
+  124            | expression2 . RSHIFT expression1
 
     LSHIFT  shift, and go to state 178
     RSHIFT  shift, and go to state 179
@@ -4549,11 +4557,11 @@ state 254
     $default  reduce using rule 119 (expression3)
 
 
-state 255
+state 256
 
-  120 expression3: expression3 LT expression2 .
-  124 expression2: expression2 . LSHIFT expression1
-  125            | expression2 . RSHIFT expression1
+  120 expression3: expression3 GE expression2 .
+  123 expression2: expression2 . LSHIFT expression1
+  124            | expression2 . RSHIFT expression1
 
     LSHIFT  shift, and go to state 178
     RSHIFT  shift, and go to state 179
@@ -4561,11 +4569,11 @@ state 255
     $default  reduce using rule 120 (expression3)
 
 
-state 256
+state 257
 
-  121 expression3: expression3 GE expression2 .
-  124 expression2: expression2 . LSHIFT expression1
-  125            | expression2 . RSHIFT expression1
+  121 expression3: expression3 LE expression2 .
+  123 expression2: expression2 . LSHIFT expression1
+  124            | expression2 . RSHIFT expression1
 
     LSHIFT  shift, and go to state 178
     RSHIFT  shift, and go to state 179
@@ -4573,23 +4581,23 @@ state 256
     $default  reduce using rule 121 (expression3)
 
 
-state 257
-
-  122 expression3: expression3 LE expression2 .
-  124 expression2: expression2 . LSHIFT expression1
-  125            | expression2 . RSHIFT expression1
-
-    LSHIFT  shift, and go to state 178
-    RSHIFT  shift, and go to state 179
-
-    $default  reduce using rule 122 (expression3)
-
-
 state 258
 
-  124 expression2: expression2 LSHIFT expression1 .
-  127 expression1: expression1 . ADD term
-  128            | expression1 . SUB term
+  123 expression2: expression2 LSHIFT expression1 .
+  126 expression1: expression1 . ADD term
+  127            | expression1 . SUB term
+
+    ADD  shift, and go to state 180
+    SUB  shift, and go to state 181
+
+    $default  reduce using rule 123 (expression2)
+
+
+state 259
+
+  124 expression2: expression2 RSHIFT expression1 .
+  126 expression1: expression1 . ADD term
+  127            | expression1 . SUB term
 
     ADD  shift, and go to state 180
     SUB  shift, and go to state 181
@@ -4597,24 +4605,26 @@ state 258
     $default  reduce using rule 124 (expression2)
 
 
-state 259
-
-  125 expression2: expression2 RSHIFT expression1 .
-  127 expression1: expression1 . ADD term
-  128            | expression1 . SUB term
-
-    ADD  shift, and go to state 180
-    SUB  shift, and go to state 181
-
-    $default  reduce using rule 125 (expression2)
-
-
 state 260
 
-  127 expression1: expression1 ADD term .
-  130 term: term . MULT factor
-  131     | term . DIV factor
-  132     | term . MOD factor
+  126 expression1: expression1 ADD term .
+  129 term: term . MULT factor
+  130     | term . DIV factor
+  131     | term . MOD factor
+
+    MULT  shift, and go to state 182
+    DIV   shift, and go to state 183
+    MOD   shift, and go to state 184
+
+    $default  reduce using rule 126 (expression1)
+
+
+state 261
+
+  127 expression1: expression1 SUB term .
+  129 term: term . MULT factor
+  130     | term . DIV factor
+  131     | term . MOD factor
 
     MULT  shift, and go to state 182
     DIV   shift, and go to state 183
@@ -4623,84 +4633,70 @@ state 260
     $default  reduce using rule 127 (expression1)
 
 
-state 261
-
-  128 expression1: expression1 SUB term .
-  130 term: term . MULT factor
-  131     | term . DIV factor
-  132     | term . MOD factor
-
-    MULT  shift, and go to state 182
-    DIV   shift, and go to state 183
-    MOD   shift, and go to state 184
-
-    $default  reduce using rule 128 (expression1)
-
-
 state 262
 
-  130 term: term MULT factor .
+  129 term: term MULT factor .
 
-    $default  reduce using rule 130 (term)
+    $default  reduce using rule 129 (term)
 
 
 state 263
 
-  131 term: term DIV factor .
+  130 term: term DIV factor .
 
-    $default  reduce using rule 131 (term)
+    $default  reduce using rule 130 (term)
 
 
 state 264
 
-  132 term: term MOD factor .
+  131 term: term MOD factor .
 
-    $default  reduce using rule 132 (term)
+    $default  reduce using rule 131 (term)
 
 
 state 265
 
-  102 expression11: unaries aop expression11 .
+  101 expression11: unaries aop expression11 .
 
-    $default  reduce using rule 102 (expression11)
+    $default  reduce using rule 101 (expression11)
 
 
 state 266
 
-  143 postfix: postfix DOT ID .
+  142 postfix: postfix DOT ID .
 
-    $default  reduce using rule 143 (postfix)
+    $default  reduce using rule 142 (postfix)
 
 
 state 267
 
-  144 postfix: postfix ARROW ID .
+  143 postfix: postfix ARROW ID .
 
-    $default  reduce using rule 144 (postfix)
+    $default  reduce using rule 143 (postfix)
 
 
 state 268
 
-  169 function_call: postfix LB RB .
+  168 function_call: postfix LB RB .
 
-    $default  reduce using rule 169 (function_call)
+    $default  reduce using rule 168 (function_call)
 
 
 state 269
 
-  100 expression: expression . COMMA expression11
-  171 args_list: expression .
+   99 expression: expression . COMMA expression11
+  170 args_list: expression .
 
     COMMA  shift, and go to state 165
 
-    COMMA     [reduce using rule 171 (args_list)]
-    $default  reduce using rule 171 (args_list)
+    COMMA     [reduce using rule 170 (args_list)]
+    $default  reduce using rule 170 (args_list)
 
 
 state 270
 
-  170 function_call: postfix LB args_list . RB
-  172 args_list: args_list . COMMA expression
+  169 function_call: postfix LB args_list . RB
+  171 args_list: args_list . COMMA expression
 
     COMMA  shift, and go to state 301
     RB     shift, and go to state 302
@@ -4708,8 +4704,8 @@ state 270
 
 state 271
 
-  100 expression: expression . COMMA expression11
-  142 postfix: postfix LSBSCRPT expression . RSBSCRPT
+   99 expression: expression . COMMA expression11
+  141 postfix: postfix LSBSCRPT expression . RSBSCRPT
 
     COMMA     shift, and go to state 165
     RSBSCRPT  shift, and go to state 303
@@ -4717,43 +4713,43 @@ state 271
 
 state 272
 
-   45 direct_abstract_declarator: LB RB .
+   44 direct_abstract_declarator: LB RB .
 
-    $default  reduce using rule 45 (direct_abstract_declarator)
+    $default  reduce using rule 44 (direct_abstract_declarator)
 
 
 state 273
 
-   37 direct_abstract_declarator: LB abstract_declarator . RB
+   36 direct_abstract_declarator: LB abstract_declarator . RB
 
     RB  shift, and go to state 304
 
 
 state 274
 
-   43 direct_abstract_declarator: LB param_type_list . RB
+   42 direct_abstract_declarator: LB param_type_list . RB
 
     RB  shift, and go to state 305
 
 
 state 275
 
-   41 direct_abstract_declarator: LSBSCRPT RSBSCRPT .
+   40 direct_abstract_declarator: LSBSCRPT RSBSCRPT .
 
-    $default  reduce using rule 41 (direct_abstract_declarator)
+    $default  reduce using rule 40 (direct_abstract_declarator)
 
 
 state 276
 
-   39 direct_abstract_declarator: LSBSCRPT expression10 . RSBSCRPT
+   38 direct_abstract_declarator: LSBSCRPT expression10 . RSBSCRPT
 
     RSBSCRPT  shift, and go to state 306
 
 
 state 277
 
-   42 direct_abstract_declarator: direct_abstract_declarator LB . param_type_list RB
-   44                           | direct_abstract_declarator LB . RB
+   41 direct_abstract_declarator: direct_abstract_declarator LB . param_type_list RB
+   43                           | direct_abstract_declarator LB . RB
 
     TYPE    shift, and go to state 2
     CONST   shift, and go to state 3
@@ -4779,8 +4775,8 @@ state 277
 
 state 278
 
-   38 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT . expression10 RSBSCRPT
-   40                           | direct_abstract_declarator LSBSCRPT . RSBSCRPT
+   37 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT . expression10 RSBSCRPT
+   39                           | direct_abstract_declarator LSBSCRPT . RSBSCRPT
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -4818,49 +4814,49 @@ state 278
 
 state 279
 
-   35 abstract_declarator: pointer direct_abstract_declarator .
-   38 direct_abstract_declarator: direct_abstract_declarator . LSBSCRPT expression10 RSBSCRPT
-   40                           | direct_abstract_declarator . LSBSCRPT RSBSCRPT
-   42                           | direct_abstract_declarator . LB param_type_list RB
-   44                           | direct_abstract_declarator . LB RB
+   34 abstract_declarator: pointer direct_abstract_declarator .
+   37 direct_abstract_declarator: direct_abstract_declarator . LSBSCRPT expression10 RSBSCRPT
+   39                           | direct_abstract_declarator . LSBSCRPT RSBSCRPT
+   41                           | direct_abstract_declarator . LB param_type_list RB
+   43                           | direct_abstract_declarator . LB RB
 
     LB        shift, and go to state 277
     LSBSCRPT  shift, and go to state 278
 
-    $default  reduce using rule 35 (abstract_declarator)
+    $default  reduce using rule 34 (abstract_declarator)
 
 
 state 280
 
-   47 param_type_list: param_list COMMA VARGS .
+   46 param_type_list: param_list COMMA VARGS .
 
-    $default  reduce using rule 47 (param_type_list)
+    $default  reduce using rule 46 (param_type_list)
 
 
 state 281
 
-   49 param_list: param_list COMMA param_decl .
+   48 param_list: param_list COMMA param_decl .
 
-    $default  reduce using rule 49 (param_list)
+    $default  reduce using rule 48 (param_list)
 
 
 state 282
 
-  178 struct_or_union_spec: struct_or_union ID LSCOPE struct_decl_list RSCOPE .
+  177 struct_or_union_spec: struct_or_union ID LSCOPE struct_decl_list RSCOPE .
 
-    $default  reduce using rule 178 (struct_or_union_spec)
+    $default  reduce using rule 177 (struct_or_union_spec)
 
 
 state 283
 
-  185 struct_decl: spec_qualifier_list struct_declarator_list SEMI .
+  184 struct_decl: spec_qualifier_list struct_declarator_list SEMI .
 
-    $default  reduce using rule 185 (struct_decl)
+    $default  reduce using rule 184 (struct_decl)
 
 
 state 284
 
-  191 struct_declarator_list: struct_declarator_list COMMA . struct_declarator
+  190 struct_declarator_list: struct_declarator_list COMMA . struct_declarator
 
     ID    shift, and go to state 1
     MULT  shift, and go to state 9
@@ -4874,29 +4870,29 @@ state 284
 
 state 285
 
-  193 enum_spec: enum_const ID LSCOPE enumerator_list RSCOPE .
+  192 enum_spec: enum_const ID LSCOPE enumerator_list RSCOPE .
 
-    $default  reduce using rule 193 (enum_spec)
+    $default  reduce using rule 192 (enum_spec)
 
 
 state 286
 
-  199 enumerator: ID ASSIGN expression10 .
+  198 enumerator: ID ASSIGN expression10 .
 
-    $default  reduce using rule 199 (enumerator)
+    $default  reduce using rule 198 (enumerator)
 
 
 state 287
 
-  197 enumerator_list: enumerator_list COMMA enumerator .
+  196 enumerator_list: enumerator_list COMMA enumerator .
 
-    $default  reduce using rule 197 (enumerator_list)
+    $default  reduce using rule 196 (enumerator_list)
 
 
 state 288
 
-   61 initializer: LSCOPE initializer_list COMMA . RSCOPE
-   63 initializer_list: initializer_list COMMA . initializer
+   60 initializer: LSCOPE initializer_list COMMA . RSCOPE
+   62 initializer_list: initializer_list COMMA . initializer
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -4937,29 +4933,29 @@ state 288
 
 state 289
 
-   60 initializer: LSCOPE initializer_list RSCOPE .
+   59 initializer: LSCOPE initializer_list RSCOPE .
 
-    $default  reduce using rule 60 (initializer)
+    $default  reduce using rule 59 (initializer)
 
 
 state 290
 
-  134 factor: LB type_name_cast RB factor .
+  133 factor: LB type_name_cast RB factor .
 
-    $default  reduce using rule 134 (factor)
+    $default  reduce using rule 133 (factor)
 
 
 state 291
 
-  140 unaries: SIZE_OF LB type_name RB .
+  139 unaries: SIZE_OF LB type_name RB .
 
-    $default  reduce using rule 140 (unaries)
+    $default  reduce using rule 139 (unaries)
 
 
 state 292
 
-   81 selection_stat: IF LB expression RB . stat
-   82               | IF LB expression RB . stat ELSE stat
+   80 selection_stat: IF LB expression RB . stat
+   81               | IF LB expression RB . stat ELSE stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -5018,7 +5014,7 @@ state 292
 
 state 293
 
-   84 iteration_stat: WHILE LB expression RB . stat
+   83 iteration_stat: WHILE LB expression RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -5077,7 +5073,7 @@ state 293
 
 state 294
 
-   85 iteration_stat: DO stat WHILE LB . expression RB SEMI
+   84 iteration_stat: DO stat WHILE LB . expression RB SEMI
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5116,8 +5112,8 @@ state 294
 
 state 295
 
-   92 iteration_stat: FOR LB SEMI SEMI . expression RB stat
-   93               | FOR LB SEMI SEMI . RB stat
+   91 iteration_stat: FOR LB SEMI SEMI . expression RB stat
+   92               | FOR LB SEMI SEMI . RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5157,9 +5153,9 @@ state 295
 
 state 296
 
-   90 iteration_stat: FOR LB SEMI expression . SEMI expression RB stat
-   91               | FOR LB SEMI expression . SEMI RB stat
-  100 expression: expression . COMMA expression11
+   89 iteration_stat: FOR LB SEMI expression . SEMI expression RB stat
+   90               | FOR LB SEMI expression . SEMI RB stat
+   99 expression: expression . COMMA expression11
 
     SEMI   shift, and go to state 319
     COMMA  shift, and go to state 165
@@ -5167,10 +5163,10 @@ state 296
 
 state 297
 
-   86 iteration_stat: FOR LB expression SEMI . expression SEMI expression RB stat
-   87               | FOR LB expression SEMI . expression SEMI RB stat
-   88               | FOR LB expression SEMI . SEMI expression RB stat
-   89               | FOR LB expression SEMI . SEMI RB stat
+   85 iteration_stat: FOR LB expression SEMI . expression SEMI expression RB stat
+   86               | FOR LB expression SEMI . expression SEMI RB stat
+   87               | FOR LB expression SEMI . SEMI expression RB stat
+   88               | FOR LB expression SEMI . SEMI RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5210,7 +5206,7 @@ state 297
 
 state 298
 
-   83 selection_stat: SWITCH LB expression RB . stat
+   82 selection_stat: SWITCH LB expression RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -5269,14 +5265,14 @@ state 298
 
 state 299
 
-   71 labeled_stat: CASE expression10 T2 stat .
+   70 labeled_stat: CASE expression10 T2 stat .
 
-    $default  reduce using rule 71 (labeled_stat)
+    $default  reduce using rule 70 (labeled_stat)
 
 
 state 300
 
-  104 expression10: expression9 T1 expression T2 . expression10
+  103 expression10: expression9 T1 expression T2 . expression10
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5313,7 +5309,7 @@ state 300
 
 state 301
 
-  172 args_list: args_list COMMA . expression
+  171 args_list: args_list COMMA . expression
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5352,109 +5348,109 @@ state 301
 
 state 302
 
-  170 function_call: postfix LB args_list RB .
+  169 function_call: postfix LB args_list RB .
 
-    $default  reduce using rule 170 (function_call)
+    $default  reduce using rule 169 (function_call)
 
 
 state 303
 
-  142 postfix: postfix LSBSCRPT expression RSBSCRPT .
+  141 postfix: postfix LSBSCRPT expression RSBSCRPT .
 
-    $default  reduce using rule 142 (postfix)
+    $default  reduce using rule 141 (postfix)
 
 
 state 304
 
-   37 direct_abstract_declarator: LB abstract_declarator RB .
+   36 direct_abstract_declarator: LB abstract_declarator RB .
 
-    $default  reduce using rule 37 (direct_abstract_declarator)
+    $default  reduce using rule 36 (direct_abstract_declarator)
 
 
 state 305
 
-   43 direct_abstract_declarator: LB param_type_list RB .
+   42 direct_abstract_declarator: LB param_type_list RB .
 
-    $default  reduce using rule 43 (direct_abstract_declarator)
+    $default  reduce using rule 42 (direct_abstract_declarator)
 
 
 state 306
 
-   39 direct_abstract_declarator: LSBSCRPT expression10 RSBSCRPT .
+   38 direct_abstract_declarator: LSBSCRPT expression10 RSBSCRPT .
 
-    $default  reduce using rule 39 (direct_abstract_declarator)
+    $default  reduce using rule 38 (direct_abstract_declarator)
 
 
 state 307
 
-   44 direct_abstract_declarator: direct_abstract_declarator LB RB .
+   43 direct_abstract_declarator: direct_abstract_declarator LB RB .
 
-    $default  reduce using rule 44 (direct_abstract_declarator)
+    $default  reduce using rule 43 (direct_abstract_declarator)
 
 
 state 308
 
-   42 direct_abstract_declarator: direct_abstract_declarator LB param_type_list . RB
+   41 direct_abstract_declarator: direct_abstract_declarator LB param_type_list . RB
 
     RB  shift, and go to state 325
 
 
 state 309
 
-   40 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT RSBSCRPT .
+   39 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT RSBSCRPT .
 
-    $default  reduce using rule 40 (direct_abstract_declarator)
+    $default  reduce using rule 39 (direct_abstract_declarator)
 
 
 state 310
 
-   38 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT expression10 . RSBSCRPT
+   37 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT expression10 . RSBSCRPT
 
     RSBSCRPT  shift, and go to state 326
 
 
 state 311
 
-  191 struct_declarator_list: struct_declarator_list COMMA struct_declarator .
+  190 struct_declarator_list: struct_declarator_list COMMA struct_declarator .
 
-    $default  reduce using rule 191 (struct_declarator_list)
+    $default  reduce using rule 190 (struct_declarator_list)
 
 
 state 312
 
-   61 initializer: LSCOPE initializer_list COMMA RSCOPE .
+   60 initializer: LSCOPE initializer_list COMMA RSCOPE .
 
-    $default  reduce using rule 61 (initializer)
+    $default  reduce using rule 60 (initializer)
 
 
 state 313
 
-   63 initializer_list: initializer_list COMMA initializer .
+   62 initializer_list: initializer_list COMMA initializer .
 
-    $default  reduce using rule 63 (initializer_list)
+    $default  reduce using rule 62 (initializer_list)
 
 
 state 314
 
-   81 selection_stat: IF LB expression RB stat .
-   82               | IF LB expression RB stat . ELSE stat
+   80 selection_stat: IF LB expression RB stat .
+   81               | IF LB expression RB stat . ELSE stat
 
     ELSE  shift, and go to state 327
 
-    $default  reduce using rule 81 (selection_stat)
+    $default  reduce using rule 80 (selection_stat)
 
 
 state 315
 
-   84 iteration_stat: WHILE LB expression RB stat .
+   83 iteration_stat: WHILE LB expression RB stat .
 
-    $default  reduce using rule 84 (iteration_stat)
+    $default  reduce using rule 83 (iteration_stat)
 
 
 state 316
 
-   85 iteration_stat: DO stat WHILE LB expression . RB SEMI
-  100 expression: expression . COMMA expression11
+   84 iteration_stat: DO stat WHILE LB expression . RB SEMI
+   99 expression: expression . COMMA expression11
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 328
@@ -5462,7 +5458,7 @@ state 316
 
 state 317
 
-   93 iteration_stat: FOR LB SEMI SEMI RB . stat
+   92 iteration_stat: FOR LB SEMI SEMI RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -5521,8 +5517,8 @@ state 317
 
 state 318
 
-   92 iteration_stat: FOR LB SEMI SEMI expression . RB stat
-  100 expression: expression . COMMA expression11
+   91 iteration_stat: FOR LB SEMI SEMI expression . RB stat
+   99 expression: expression . COMMA expression11
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 330
@@ -5530,8 +5526,8 @@ state 318
 
 state 319
 
-   90 iteration_stat: FOR LB SEMI expression SEMI . expression RB stat
-   91               | FOR LB SEMI expression SEMI . RB stat
+   89 iteration_stat: FOR LB SEMI expression SEMI . expression RB stat
+   90               | FOR LB SEMI expression SEMI . RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5571,8 +5567,8 @@ state 319
 
 state 320
 
-   88 iteration_stat: FOR LB expression SEMI SEMI . expression RB stat
-   89               | FOR LB expression SEMI SEMI . RB stat
+   87 iteration_stat: FOR LB expression SEMI SEMI . expression RB stat
+   88               | FOR LB expression SEMI SEMI . RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5612,9 +5608,9 @@ state 320
 
 state 321
 
-   86 iteration_stat: FOR LB expression SEMI expression . SEMI expression RB stat
-   87               | FOR LB expression SEMI expression . SEMI RB stat
-  100 expression: expression . COMMA expression11
+   85 iteration_stat: FOR LB expression SEMI expression . SEMI expression RB stat
+   86               | FOR LB expression SEMI expression . SEMI RB stat
+   99 expression: expression . COMMA expression11
 
     SEMI   shift, and go to state 335
     COMMA  shift, and go to state 165
@@ -5622,46 +5618,46 @@ state 321
 
 state 322
 
-   83 selection_stat: SWITCH LB expression RB stat .
+   82 selection_stat: SWITCH LB expression RB stat .
 
-    $default  reduce using rule 83 (selection_stat)
+    $default  reduce using rule 82 (selection_stat)
 
 
 state 323
 
-  104 expression10: expression9 T1 expression T2 expression10 .
+  103 expression10: expression9 T1 expression T2 expression10 .
 
-    $default  reduce using rule 104 (expression10)
+    $default  reduce using rule 103 (expression10)
 
 
 state 324
 
-  100 expression: expression . COMMA expression11
-  172 args_list: args_list COMMA expression .
+   99 expression: expression . COMMA expression11
+  171 args_list: args_list COMMA expression .
 
     COMMA  shift, and go to state 165
 
-    COMMA     [reduce using rule 172 (args_list)]
-    $default  reduce using rule 172 (args_list)
+    COMMA     [reduce using rule 171 (args_list)]
+    $default  reduce using rule 171 (args_list)
 
 
 state 325
 
-   42 direct_abstract_declarator: direct_abstract_declarator LB param_type_list RB .
+   41 direct_abstract_declarator: direct_abstract_declarator LB param_type_list RB .
 
-    $default  reduce using rule 42 (direct_abstract_declarator)
+    $default  reduce using rule 41 (direct_abstract_declarator)
 
 
 state 326
 
-   38 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT expression10 RSBSCRPT .
+   37 direct_abstract_declarator: direct_abstract_declarator LSBSCRPT expression10 RSBSCRPT .
 
-    $default  reduce using rule 38 (direct_abstract_declarator)
+    $default  reduce using rule 37 (direct_abstract_declarator)
 
 
 state 327
 
-   82 selection_stat: IF LB expression RB stat ELSE . stat
+   81 selection_stat: IF LB expression RB stat ELSE . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -5720,21 +5716,21 @@ state 327
 
 state 328
 
-   85 iteration_stat: DO stat WHILE LB expression RB . SEMI
+   84 iteration_stat: DO stat WHILE LB expression RB . SEMI
 
     SEMI  shift, and go to state 337
 
 
 state 329
 
-   93 iteration_stat: FOR LB SEMI SEMI RB stat .
+   92 iteration_stat: FOR LB SEMI SEMI RB stat .
 
-    $default  reduce using rule 93 (iteration_stat)
+    $default  reduce using rule 92 (iteration_stat)
 
 
 state 330
 
-   92 iteration_stat: FOR LB SEMI SEMI expression RB . stat
+   91 iteration_stat: FOR LB SEMI SEMI expression RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -5793,7 +5789,7 @@ state 330
 
 state 331
 
-   91 iteration_stat: FOR LB SEMI expression SEMI RB . stat
+   90 iteration_stat: FOR LB SEMI expression SEMI RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -5852,8 +5848,8 @@ state 331
 
 state 332
 
-   90 iteration_stat: FOR LB SEMI expression SEMI expression . RB stat
-  100 expression: expression . COMMA expression11
+   89 iteration_stat: FOR LB SEMI expression SEMI expression . RB stat
+   99 expression: expression . COMMA expression11
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 340
@@ -5861,7 +5857,7 @@ state 332
 
 state 333
 
-   89 iteration_stat: FOR LB expression SEMI SEMI RB . stat
+   88 iteration_stat: FOR LB expression SEMI SEMI RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -5920,8 +5916,8 @@ state 333
 
 state 334
 
-   88 iteration_stat: FOR LB expression SEMI SEMI expression . RB stat
-  100 expression: expression . COMMA expression11
+   87 iteration_stat: FOR LB expression SEMI SEMI expression . RB stat
+   99 expression: expression . COMMA expression11
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 342
@@ -5929,8 +5925,8 @@ state 334
 
 state 335
 
-   86 iteration_stat: FOR LB expression SEMI expression SEMI . expression RB stat
-   87               | FOR LB expression SEMI expression SEMI . RB stat
+   85 iteration_stat: FOR LB expression SEMI expression SEMI . expression RB stat
+   86               | FOR LB expression SEMI expression SEMI . RB stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5970,35 +5966,35 @@ state 335
 
 state 336
 
-   82 selection_stat: IF LB expression RB stat ELSE stat .
+   81 selection_stat: IF LB expression RB stat ELSE stat .
 
-    $default  reduce using rule 82 (selection_stat)
+    $default  reduce using rule 81 (selection_stat)
 
 
 state 337
 
-   85 iteration_stat: DO stat WHILE LB expression RB SEMI .
+   84 iteration_stat: DO stat WHILE LB expression RB SEMI .
 
-    $default  reduce using rule 85 (iteration_stat)
+    $default  reduce using rule 84 (iteration_stat)
 
 
 state 338
 
-   92 iteration_stat: FOR LB SEMI SEMI expression RB stat .
-
-    $default  reduce using rule 92 (iteration_stat)
-
-
-state 339
-
-   91 iteration_stat: FOR LB SEMI expression SEMI RB stat .
+   91 iteration_stat: FOR LB SEMI SEMI expression RB stat .
 
     $default  reduce using rule 91 (iteration_stat)
 
 
+state 339
+
+   90 iteration_stat: FOR LB SEMI expression SEMI RB stat .
+
+    $default  reduce using rule 90 (iteration_stat)
+
+
 state 340
 
-   90 iteration_stat: FOR LB SEMI expression SEMI expression RB . stat
+   89 iteration_stat: FOR LB SEMI expression SEMI expression RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -6057,14 +6053,14 @@ state 340
 
 state 341
 
-   89 iteration_stat: FOR LB expression SEMI SEMI RB stat .
+   88 iteration_stat: FOR LB expression SEMI SEMI RB stat .
 
-    $default  reduce using rule 89 (iteration_stat)
+    $default  reduce using rule 88 (iteration_stat)
 
 
 state 342
 
-   88 iteration_stat: FOR LB expression SEMI SEMI expression RB . stat
+   87 iteration_stat: FOR LB expression SEMI SEMI expression RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -6123,7 +6119,7 @@ state 342
 
 state 343
 
-   87 iteration_stat: FOR LB expression SEMI expression SEMI RB . stat
+   86 iteration_stat: FOR LB expression SEMI expression SEMI RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -6182,8 +6178,8 @@ state 343
 
 state 344
 
-   86 iteration_stat: FOR LB expression SEMI expression SEMI expression . RB stat
-  100 expression: expression . COMMA expression11
+   85 iteration_stat: FOR LB expression SEMI expression SEMI expression . RB stat
+   99 expression: expression . COMMA expression11
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 348
@@ -6191,28 +6187,28 @@ state 344
 
 state 345
 
-   90 iteration_stat: FOR LB SEMI expression SEMI expression RB stat .
+   89 iteration_stat: FOR LB SEMI expression SEMI expression RB stat .
 
-    $default  reduce using rule 90 (iteration_stat)
+    $default  reduce using rule 89 (iteration_stat)
 
 
 state 346
 
-   88 iteration_stat: FOR LB expression SEMI SEMI expression RB stat .
-
-    $default  reduce using rule 88 (iteration_stat)
-
-
-state 347
-
-   87 iteration_stat: FOR LB expression SEMI expression SEMI RB stat .
+   87 iteration_stat: FOR LB expression SEMI SEMI expression RB stat .
 
     $default  reduce using rule 87 (iteration_stat)
 
 
+state 347
+
+   86 iteration_stat: FOR LB expression SEMI expression SEMI RB stat .
+
+    $default  reduce using rule 86 (iteration_stat)
+
+
 state 348
 
-   86 iteration_stat: FOR LB expression SEMI expression SEMI expression RB . stat
+   85 iteration_stat: FOR LB expression SEMI expression SEMI expression RB . stat
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 61
@@ -6271,6 +6267,6 @@ state 348
 
 state 349
 
-   86 iteration_stat: FOR LB expression SEMI expression SEMI expression RB stat .
+   85 iteration_stat: FOR LB expression SEMI expression SEMI expression RB stat .
 
-    $default  reduce using rule 86 (iteration_stat)
+    $default  reduce using rule 85 (iteration_stat)
