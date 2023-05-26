@@ -6,7 +6,6 @@
 #include <string>
 #include <llvm/IR/Type.h>
 
-#include "type_factory.h"
 
 static std::map<std::string, llvm::Type *> declared_types;
 

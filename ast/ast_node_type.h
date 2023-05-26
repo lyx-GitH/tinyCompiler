@@ -57,6 +57,7 @@ enum AstNodeType {
     kCharLiteral,
     kStrLiteral,
     kTypeDecl,
+    kVargs
 };
 
 #define IS_NUMBER(TYPE) ((TYPE) >> 2 == 1)

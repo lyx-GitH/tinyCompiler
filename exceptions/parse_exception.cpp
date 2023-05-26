@@ -9,3 +9,7 @@
 void ThrowParseException(const char *e) {
     throw ParseException(e);
 }
+
+void ThrowParseException(const char* e, const struct AstNode* node){
+    throw ParseException(e, node);
+}

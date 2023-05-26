@@ -22,7 +22,13 @@ void show_lexer_error(const char *file_name, int column, int line, int throw_err
 }
 
 extern void ThrowParseException(const char *e);
+extern void ThrowParseException(const char* e, const struct AstNode* node);
 
 void throw_parse_exception(const char *e){
     ThrowParseException(e);
 }
+
+void throw_code_gen_exception(const struct AstNode* node, const char *e){
+    ThrowParseException(e, node);
+}
+

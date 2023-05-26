@@ -58,6 +58,7 @@
 #include "../types/type_factory.h"
 #include "../types/type_checks.h"
 #include "../parser/tc_parser.h"
+#include "../exceptions/parser_error.h"
 
 extern "C" {
 #include "../ast/ast.h"
@@ -67,8 +68,8 @@ extern "C" {
 
 #define MAX_GEN_NUM 1024
 #define GEN_NAME(t) gen_##t
-#define GEN_DECL(t) static pValue GEN_NAME(t) (const AstNode* node)
-#define GEN_DEF(t) CodeGenerator::pValue CodeGenerator:: GEN_NAME(t) (const AstNode* node)
+#define DECL_GEN(t) static pValue GEN_NAME(t) (const AstNode* node)
+#define DEF_GEN(t) CodeGenerator::pValue CodeGenerator:: GEN_NAME(t) (const AstNode* node)
 #define LOAD_GEN(t) LOAD_F(t, CodeGenerator:: GEN_NAME(t))
 #define LOAD_F(idx, f) CodeGenerator::generators.at(idx) = (f)
 #define CALL_GEN(n) CodeGenerator::generators.at((n)->type_)((n))
@@ -93,16 +94,15 @@ public:
         InScope();
         InitGenerators();
         InitBasicTypes();
-        module_ = new llvm::Module("main", context);
-        data_layout_ = new llvm::DataLayout(module_);
-        test();
-        test2();
+//       module
+//        test();
+//        test2();
     };
 
     ~CodeGenerator() {
         OffScope();
-        delete data_layout_;
-        delete module_;
+//        delete data_layout_;
+//        delete module_;
     }
 
     void SetAstRoot(pAstNode root) {
@@ -135,8 +135,19 @@ public:
         }
     };
 
+    class VarInitGuard {
+    public:
+        ~VarInitGuard() {
+            cur_init_ = false;
+        }
+
+        VarInitGuard() {
+            cur_init_ = true;
+        }
+    };
+
     void test() {
-        auto int_type = GetSymbol("int")->GetType();
+        auto int_type = GetType("int");
         assert(int_type->isIntOrIntVectorTy());
 
         auto const_int_type = TypeFactory::GetConstTypeOf(int_type);
@@ -148,7 +159,7 @@ public:
     }
 
     void test2() {
-        auto int_type = GetSymbol("int")->GetType();
+        auto int_type = GetType("int");
         assert(!TypeFactory::IsConst(int_type));
         assert(int_type != IR_builder.getInt32Ty());
         assert(int_type->isIntOrIntVectorTy());
@@ -160,6 +171,14 @@ public:
         std::cout << "const int:" << const_int_type << " " << "const int*: " << const_int_ptr_type << std::endl;
         auto int_ptr_type = TypeFactory::Get<llvm::PointerType>(int_type, 0U);
         std::cout << "int* : " << int_ptr_type << std::endl;
+        auto f_cst_type = TypeFactory::Get<llvm::FunctionType>(int_type, std::vector<llvm::Type *>{}, false);
+        auto f_int_type = TypeFactory::Get<llvm::FunctionType>(const_int_type, std::vector<llvm::Type *>{}, false);
+        assert(f_cst_type != f_int_type);
+
+    }
+
+    static inline void PrintIR() {
+        module.print(llvm::outs(), nullptr);
     }
 
 
@@ -172,11 +191,14 @@ private:
     llvm::BasicBlock *TmpBB = nullptr;                            //Temp block for global instruction code generation
     llvm::Function *TmpFunc = nullptr;                            //Temp function for global instruction code generation
 
-    llvm::Module *module_ = nullptr;
+    static llvm::Module module;
+    static llvm::DataLayout data_layout;
     static llvm::LLVMContext context;
     static llvm::IRBuilder<> IR_builder;
     static llvm::Function *cur_func_;
+    static bool cur_init_;
     static std::vector<SymbolTable> symbol_table_stack_;
+    static std::set<std::string> defined_functions;
 
     static void InScope() {
         symbol_table_stack_.emplace_back();
@@ -207,24 +229,46 @@ private:
 
     static Symbol const *GetSymbol(const std::string &name);
 
+    static Symbol const *GetLocalSymbol(const std::string &name);
 
-    GEN_DECL(kRoot);
+    static void CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &collector);
 
-    GEN_DECL(kFuncDef);
 
-    GEN_DECL(kVarDecl);
+    DECL_GEN(kRoot);
 
-    GEN_DECL(kFuncType);
+    DECL_GEN(kFuncDef);
 
-    GEN_DECL(kPtrType);
+    DECL_GEN(kVarDecl);
 
-    GEN_DECL(kArrType);
+    DECL_GEN(kVarInit);
 
-    GEN_DECL(kType);
+    DECL_GEN(kFuncType);
 
-    GEN_DECL(kTypeFeature);
+    DECL_GEN(kPtrType);
 
-    GEN_DECL(kTypeDef);
+    DECL_GEN(kArrType);
+
+    DECL_GEN(kType);
+
+    DECL_GEN(kTypeFeature);
+
+    DECL_GEN(kTypeDef);
+
+    DECL_GEN(kCharLiteral);
+
+    DECL_GEN(kStrLiteral);
+
+    DECL_GEN(kDemNumber);
+
+    DECL_GEN(kHexNumber);
+
+    DECL_GEN(kOctNumber);
+
+    DECL_GEN(kFloatNumber);
+
+    DECL_GEN(kExpr);
+
+    DECL_GEN(kScope);
 
 
 };

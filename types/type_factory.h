@@ -62,6 +62,13 @@ public:
     template<typename T, typename... Args>
     requires
     std::is_base_of_v<llvm::Type, T>
+    static T *GetConst(Args &&...args) {
+        return GetMyType<T>(T::get(std::forward<Args>(args)...), true);
+    }
+
+    template<typename T, typename... Args>
+    requires
+    std::is_base_of_v<llvm::Type, T>
     static T *Get(T *ptr) {
         return GetMyType<T>(ptr);
     }

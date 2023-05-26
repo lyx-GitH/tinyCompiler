@@ -148,10 +148,12 @@ void llvm_test() {
 
 
 int main() {
-    yydebug = 1; // set this to 1 to enable debugging
-    auto parser = CodeGenerator("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/expression.txt");
+    yydebug = 0; // set this to 1 to enable debugging
+    auto parser = CodeGenerator("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.c");
     parser.Parse();
     parser.Visualize(false);
+    parser.Generate();
+    parser.PrintIR();
 
     return 0;
 }

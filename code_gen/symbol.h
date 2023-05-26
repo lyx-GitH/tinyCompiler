@@ -22,20 +22,21 @@ public:
 
     Symbol() : type_(UNDEFINED) {}
 
-    explicit Symbol(llvm::Function *Func) : type_(FUNCTION) { content_.f = Func; }
+    Symbol(llvm::Function *Func) : type_(FUNCTION) { content_.f = Func; }
 
-    explicit Symbol(llvm::Type *Ty) : type_(TYPE) { content_.t = Ty; }
+    Symbol(llvm::Type *Ty) : type_(TYPE) { content_.t = Ty; }
 
 
-    Symbol(llvm::Value *Value, bool isConst) : type_(isConst ? CONSTANT : VARIABLE) { content_.v = Value; }
+    Symbol(llvm::Value *Value, bool isConst = false, bool release = false) : type_(isConst ? CONSTANT : VARIABLE), relase_mem_(
+            true) { content_.v = Value; }
 
-    llvm::Function *GetFunction() const { return this->type_ == FUNCTION ? content_.f : nullptr; }
+    [[nodiscard]] llvm::Function *GetFunction() const { return this->type_ == FUNCTION ? content_.f : nullptr; }
 
-    llvm::Type *GetType() const { return this->type_ == TYPE ? content_.t : nullptr; }
+    [[nodiscard]] llvm::Type *GetType() const { return this->type_ == TYPE ? content_.t : nullptr; }
 
-    llvm::Value *GetVariable() const { return this->type_ == VARIABLE ? content_.v : nullptr; }
+    [[nodiscard]] llvm::Value *GetVariable() const { return content_.v;  }
 
-    llvm::Value *GetConstant() const { return this->type_ == CONSTANT ? content_.v : nullptr; }
+    [[nodiscard]] llvm::Value *GetConstant() const { return this->type_ == CONSTANT ? content_.v : nullptr; }
 
     bool IsConst() const {
         return type_ == CONSTANT;
@@ -64,6 +65,7 @@ public:
 
 private:
     SymbolContent content_;
+    bool relase_mem_ = false;
     enum {
         FUNCTION,
         TYPE,

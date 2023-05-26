@@ -1145,7 +1145,7 @@ YY_RULE_SETUP
 case 21:
 YY_RULE_SETUP
 #line 91 "./lexer.l"
-{MOVE; return VARGS; }
+{MOVE; NODE(kVargs); return VARGS; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP

@@ -88,7 +88,7 @@ ID {LITERAL}+{ID_C}*
 "break"     {MOVE; NODE(kJump); return BREAK;}
 "continue"  {MOVE; NODE(kJump); return CONTINUE;}
 
-"..." {MOVE; return VARGS; }
+"..." {MOVE; NODE(kVargs); return VARGS; }
 "return" {MOVE; NODE(kJump); return RETURN;}
 
 
