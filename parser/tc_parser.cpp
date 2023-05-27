@@ -7,40 +7,50 @@
 #include <iostream>
 
 #include "../exceptions/parse_exception.h"
+#include "../preprocessor/tc_preprocessor.h"
 
 void TCParser::Parse() {
     TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
-    TinyParserBegin();
-    try{
-        TinyParserParse(file_path_.c_str());
-    } catch(ParseException& e) {
-        std::printf("\033[31mfailed \033[0m");
-        e.show();
-        TinyParserEnd();
-        is_ok_ = false;
-        return;
-    }catch(std::runtime_error& e) {
-        // do nothing
+    TCPreProcessor::GenIncludeChain(file_path_);
+    for(const auto& file : TCPreProcessor::GetIncludeChain()){
+        TinyParserBegin();
+        try {
+            TinyParserParse(file.c_str());
+        } catch (ParseException &e) {
+            std::printf("\033[31mfailed \033[0m");
+            e.show();
+            TinyParserEnd();
+            is_ok_ = false;
+            return;
+        } catch (std::runtime_error &e) {
+            // do nothing
+        }
+        is_ok_ = true;
+//        ast_root_ = TinyParserGetRoot();
+        auto root = TinyParserMoveRoot();
+        if(!ast_root_) {
+            ast_root_ = root;
+        } else {
+            merge(ast_root_, root);
+        }
     }
-    is_ok_ = true;
-    ast_root_ = TinyParserGetRoot();
     std::printf("\033[32m done \033[0m\n");
     assert(ast_root_ != nullptr);
 }
 
 void TCParser::Visualize(bool to_file, const std::string &out_file_path) {
-    if(!ast_root_)
+    if (!ast_root_)
         return;
     auto printer = SyntaxTreePrinter(ast_root_);
-    if(!to_file)
+    if (!to_file)
         printer.PrintTree(std::cout);
-    else{
+    else {
         auto fs = std::ofstream{file_path_};
-        printer.PrintTree(static_cast<std::ostream&>(fs));
+        printer.PrintTree(static_cast<std::ostream &>(fs));
     }
 }
 
-pAstNode TCParser::getSyntaxTree() const{
+pAstNode TCParser::getSyntaxTree() const {
     return ast_root_;
 }
 

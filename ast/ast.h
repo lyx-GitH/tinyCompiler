@@ -35,6 +35,8 @@ pAstNode initVar(pAstNode var, pAstNode value);
 
 void addNext(pAstNode target, pAstNode next);
 
+void merge(pAstNode prev, pAstNode next);
+
 pAstNode copyNode(pAstNode target);
 
 pAstNode initAstNode();

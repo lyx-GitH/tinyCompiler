@@ -5,7 +5,7 @@
 #ifndef TINYCOMPILER_TCLEXER_H
 #define TINYCOMPILER_TCLEXER_H
 
-#include "base_lexer.h"
+
 #include "tokens.h"
 #include <string>
 #include <fstream>

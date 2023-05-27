@@ -79,6 +79,12 @@ void addNext(pAstNode target, pAstNode next) {
     n->next_ = next;
 }
 
+void merge(pAstNode prev, pAstNode next){
+    addChild(prev, next->child_);
+    next->child_ = NULL;
+    freeAstNode(next);
+}
+
 void addChildHead(pAstNode target, pAstNode child) {
     if (!target || !child) return;
     if (!target->child_) {

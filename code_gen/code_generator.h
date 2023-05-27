@@ -59,6 +59,7 @@
 #include "../types/type_checks.h"
 #include "../parser/tc_parser.h"
 #include "../exceptions/parser_error.h"
+#include "../exceptions/parse_exception.h"
 
 extern "C" {
 #include "../ast/ast.h"
@@ -74,6 +75,7 @@ extern "C" {
 #define LOAD_F(idx, f) CodeGenerator::generators.at(idx) = (f)
 #define CALL_GEN(n) CodeGenerator::generators.at((n)->type_)((n))
 #define ASSERT_TYPE(n, t) assert((n) && (n)->type_ == (t))
+#define TYPE_GETTER(type, name) static inline llvm::Type * Get##type(){return GetType(name);}
 
 
 class CodeGenerator : public TCParser {
@@ -81,6 +83,7 @@ public:
     using pValue = Symbol;
     using GenFunc = std::function<pValue(const AstNode *)>;
     using SymbolTable = std::map<std::string, pValue>;
+
 
     static void InitGenerators();
 
@@ -225,6 +228,20 @@ private:
 
     static llvm::Type *GetType(const std::string &name);
 
+    TYPE_GETTER(Bool, "_bool");
+
+    TYPE_GETTER(Char, "char");
+
+    TYPE_GETTER(Short, "short");
+
+    TYPE_GETTER(Int, "int");
+
+    TYPE_GETTER(Float, "float");
+
+    TYPE_GETTER(Void, "void");
+
+
+
     static void SetSymbol(const std::string &name, Symbol symbol);
 
     static Symbol const *GetSymbol(const std::string &name);
@@ -232,6 +249,10 @@ private:
     static Symbol const *GetLocalSymbol(const std::string &name);
 
     static void CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &collector);
+
+    friend llvm::Value* CastToType(llvm::Type* type, llvm::Value* value);
+
+    friend llvm::Value* CastToBool(llvm::Value* value);
 
 
     DECL_GEN(kRoot);

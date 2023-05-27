@@ -25,7 +25,7 @@
 %token <ast_node> CONST STATIC TYPE_DEF VARGS
 %token <ast_node> GOTO BREAK CONTINUE RETURN;
 
-%token SEMI
+%token SEMI HEADER
 %token STRUCT UNION ENUM DOT ARROW
 %token ADD SUB MULT DIV MOD COMMA
 %token LB RB
@@ -41,7 +41,7 @@
 %token T1 T2
 %token SIZE_OF
 %token IF ELSE WHILE DO FOR
-%token SWITCH  CASE DEFAULT
+%token SWITCH CASE DEFAULT
 
 %left ADD SUB
 %left MULT DIV

@@ -5,6 +5,12 @@
 #ifndef TINYCOMPILER_PARSER_H
 #define TINYCOMPILER_PARSER_H
 
+
+#include <unistd.h>
+#include <libgen.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "../ast/ast.h"
 
 void TinyParserMove(int line, char *text);
@@ -17,11 +23,17 @@ void TinyParserEnd();
 
 void TinyParserRaiseError(const char*);
 
+void TinyParserInclude(const char*, char, int);
+
 const char* TinyParserGetPwd();
+
+void TinyParserSetPwd(const char* );
 
 pAstNode TinyParserAppendBlock(pAstNode block);
 
 pAstNode TinyParserGetRoot();
+
+pAstNode TinyParserMoveRoot();
 
 pAstNode TinyParserSetRoot(pAstNode node);
 

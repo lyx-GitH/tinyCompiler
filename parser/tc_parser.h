@@ -18,7 +18,7 @@ extern "C" {
 class TCParser {
 public:
     explicit TCParser(std::string file_path) : file_path_(std::move(file_path)), ast_root_{nullptr}, is_ok_{false} {}
-    ~TCParser() { freeAstNode(ast_root_); }
+    ~TCParser() { ; }
 
     void Parse();
 

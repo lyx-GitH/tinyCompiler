@@ -1,3 +1,8 @@
+Terminals which are not used
+
+   HEADER
+
+
 State 269 conflicts: 1 shift/reduce
 State 324 conflicts: 1 shift/reduce
 
@@ -288,205 +293,206 @@ BREAK (267) 95
 CONTINUE (268) 94
 RETURN (269) 96 97
 SEMI (270) 11 12 72 73 84 85 86 87 88 89 90 91 92 93 94 95 96 97 184
-STRUCT (271) 180
-UNION (272) 181
-ENUM (273) 199
-DOT (274) 142
-ARROW (275) 143
-ADD (276) 126 162
-SUB (277) 127 163
-MULT (278) 52 53 54 55 129 167
-DIV (279) 130
-MOD (280) 131
-COMMA (281) 22 46 48 60 62 99 171 190 196
-LB (282) 28 31 32 36 41 42 43 44 80 81 82 83 84 85 86 87 88 89 90 91
+HEADER (271)
+STRUCT (272) 180
+UNION (273) 181
+ENUM (274) 199
+DOT (275) 142
+ARROW (276) 143
+ADD (277) 126 162
+SUB (278) 127 163
+MULT (279) 52 53 54 55 129 167
+DIV (280) 130
+MOD (281) 131
+COMMA (282) 22 46 48 60 62 99 171 190 196
+LB (283) 28 31 32 36 41 42 43 44 80 81 82 83 84 85 86 87 88 89 90 91
     92 133 139 150 168 169
-RB (283) 28 31 32 36 41 42 43 44 80 81 82 83 84 85 86 87 88 89 90 91
+RB (284) 28 31 32 36 41 42 43 44 80 81 82 83 84 85 86 87 88 89 90 91
     92 133 139 150 168 169
-LOGIC_AND (284) 107
-LOGIC_OR (285) 105
-LOGIC_NOT (286) 165
-BIT_OR (287) 109
-BIT_AND (288) 113 164
-BIT_XOR (289) 111
-BIT_NOT (290) 166
-LSHIFT (291) 123
-RSHIFT (292) 124
-LSBSCRPT (293) 29 30 37 38 39 40 141
-RSBSCRPT (294) 29 30 37 38 39 40 141
-LSCOPE (295) 59 60 74 75 76 77 177 178 192 193
-RSCOPE (296) 59 60 74 75 76 77 177 178 192 193
-GT (297) 118
-LT (298) 119
-GE (299) 120
-LE (300) 121
-EQ (301) 115
-NEQ (302) 116
-ASSIGN (303) 24 151 198
-A_PLUS (304) 154
-A_SUB (305) 155
-A_MULT (306) 156
-A_DIV (307) 153
-A_MOD (308) 161
-A_LS (309) 157
-A_RS (310) 158
-A_XOR (311) 160
-A_AND (312) 152
-A_OR (313) 159
-PP (314) 135 144
-SS (315) 136 145
-T1 (316) 103
-T2 (317) 69 70 71 103
-SIZE_OF (318) 138 139
-IF (319) 80 81
-ELSE (320) 81
-WHILE (321) 83 84
-DO (322) 84
-FOR (323) 85 86 87 88 89 90 91 92
-SWITCH (324) 82
-CASE (325) 70
-DEFAULT (326) 71
-"then" (327)
+LOGIC_AND (285) 107
+LOGIC_OR (286) 105
+LOGIC_NOT (287) 165
+BIT_OR (288) 109
+BIT_AND (289) 113 164
+BIT_XOR (290) 111
+BIT_NOT (291) 166
+LSHIFT (292) 123
+RSHIFT (293) 124
+LSBSCRPT (294) 29 30 37 38 39 40 141
+RSBSCRPT (295) 29 30 37 38 39 40 141
+LSCOPE (296) 59 60 74 75 76 77 177 178 192 193
+RSCOPE (297) 59 60 74 75 76 77 177 178 192 193
+GT (298) 118
+LT (299) 119
+GE (300) 120
+LE (301) 121
+EQ (302) 115
+NEQ (303) 116
+ASSIGN (304) 24 151 198
+A_PLUS (305) 154
+A_SUB (306) 155
+A_MULT (307) 156
+A_DIV (308) 153
+A_MOD (309) 161
+A_LS (310) 157
+A_RS (311) 158
+A_XOR (312) 160
+A_AND (313) 152
+A_OR (314) 159
+PP (315) 135 144
+SS (316) 136 145
+T1 (317) 103
+T2 (318) 69 70 71 103
+SIZE_OF (319) 138 139
+IF (320) 80 81
+ELSE (321) 81
+WHILE (322) 83 84
+DO (323) 84
+FOR (324) 85 86 87 88 89 90 91 92
+SWITCH (325) 82
+CASE (326) 70
+DEFAULT (327) 71
+"then" (328)
 
 
 Nonterminals, with rules where they appear
 
-$accept (73)
+$accept (74)
     on left: 0
-program_unit (74)
+program_unit (75)
     on left: 1, on right: 0
-translation_unit (75)
+translation_unit (76)
     on left: 2 3, on right: 1 3
-external_decl (76)
+external_decl (77)
     on left: 4 5 6, on right: 2 3
-function_definition (77)
+function_definition (78)
     on left: 7 8, on right: 4
-decl_list (78)
+decl_list (79)
     on left: 9 10, on right: 10 74 76
-decl (79)
+decl (80)
     on left: 11 12, on right: 5 6 9 10
-decl_specs (80)
+decl_specs (81)
     on left: 13 14 15 16 17, on right: 7 11 12 13 14 16 49 50 51
-storage_class_spec (81)
+storage_class_spec (82)
     on left: 18, on right: 13
-type_spec (82)
+type_spec (83)
     on left: 19, on right: 14 15 185 186
-type_qualifier (83)
+type_qualifier (84)
     on left: 20, on right: 16 17 56 57 187 188
-init_declarator_list (84)
+init_declarator_list (85)
     on left: 21 22, on right: 11 22
-init_declarator (85)
+init_declarator (86)
     on left: 23 24, on right: 21 22
-declarator (86)
+declarator (87)
     on left: 25 26, on right: 7 8 23 24 28 49 191
-direct_declarator (87)
+direct_declarator (88)
     on left: 27 28 29 30 31 32, on right: 25 26 29 30 31 32
-abstract_declarator (88)
+abstract_declarator (89)
     on left: 33 34 35, on right: 36 50 172
-direct_abstract_declarator (89)
+direct_abstract_declarator (90)
     on left: 36 37 38 39 40 41 42 43 44, on right: 34 35 37 39 41 43
-param_type_list (90)
+param_type_list (91)
     on left: 45 46, on right: 31 41 42
-param_list (91)
+param_list (92)
     on left: 47 48, on right: 45 46 48
-param_decl (92)
+param_decl (93)
     on left: 49 50 51, on right: 47 48
-pointer (93)
+pointer (94)
     on left: 52 53 54 55, on right: 25 33 34 54 55
-type_qualifier_list (94)
+type_qualifier_list (95)
     on left: 56 57, on right: 52 54 57
-initializer (95)
+initializer (96)
     on left: 58 59 60, on right: 24 61 62
-initializer_list (96)
+initializer_list (97)
     on left: 61 62, on right: 59 60 62
-stat (97)
+stat (98)
     on left: 63 64 65 66 67 68, on right: 69 70 71 78 79 80 81 82 83
     84 85 86 87 88 89 90 91 92
-labeled_stat (98)
+labeled_stat (99)
     on left: 69 70 71, on right: 63
-exp_stat (99)
+exp_stat (100)
     on left: 72 73, on right: 64
-compound_stat (100)
+compound_stat (101)
     on left: 74 75 76 77, on right: 7 8 65
-stat_list (101)
+stat_list (102)
     on left: 78 79, on right: 74 75 79
-selection_stat (102)
+selection_stat (103)
     on left: 80 81 82, on right: 66
-iteration_stat (103)
+iteration_stat (104)
     on left: 83 84 85 86 87 88 89 90 91 92, on right: 67
-jump_stat (104)
+jump_stat (105)
     on left: 93 94 95 96 97, on right: 68
-expression (105)
+expression (106)
     on left: 98 99, on right: 72 80 81 82 83 84 85 86 87 88 89 90 91
     96 99 103 141 150 170 171
-expression11 (106)
+expression11 (107)
     on left: 100 101, on right: 58 98 99 101
-expression10 (107)
+expression10 (108)
     on left: 102 103, on right: 29 37 38 70 100 103 198
-expression9 (108)
+expression9 (109)
     on left: 104 105, on right: 102 103 105
-expression8 (109)
+expression8 (110)
     on left: 106 107, on right: 104 105 107
-expression7 (110)
+expression7 (111)
     on left: 108 109, on right: 106 107 109
-expression6 (111)
+expression6 (112)
     on left: 110 111, on right: 108 109 111
-expression5 (112)
+expression5 (113)
     on left: 112 113, on right: 110 111 113
-expression4 (113)
+expression4 (114)
     on left: 114 115 116, on right: 112 113 115 116
-expression3 (114)
+expression3 (115)
     on left: 117 118 119 120 121, on right: 114 115 116 118 119 120
     121
-expression2 (115)
+expression2 (116)
     on left: 122 123 124, on right: 117 118 119 120 121 123 124
-expression1 (116)
+expression1 (117)
     on left: 125 126 127, on right: 122 123 124 126 127
-term (117)
+term (118)
     on left: 128 129 130 131, on right: 125 126 127 129 130 131
-factor (118)
+factor (119)
     on left: 132 133, on right: 128 129 130 131 133 137
-unaries (119)
+unaries (120)
     on left: 134 135 136 137 138 139, on right: 101 132 135 136 138
-postfix (120)
+postfix (121)
     on left: 140 141 142 143 144 145 146, on right: 134 141 142 143
     144 145 168 169
-single (121)
+single (122)
     on left: 147 148 149 150, on right: 140
-aop (122)
+aop (123)
     on left: 151 152 153 154 155 156 157 158 159 160 161,
     on right: 101
-uop (123)
+uop (124)
     on left: 162 163 164 165 166 167, on right: 137
-function_call (124)
+function_call (125)
     on left: 168 169, on right: 146
-args_list (125)
+args_list (126)
     on left: 170 171, on right: 169 171
-type_name_cast (126)
+type_name_cast (127)
     on left: 172 173, on right: 133
-type_name (127)
+type_name (128)
     on left: 174 175 176, on right: 19 139
-struct_or_union_spec (128)
+struct_or_union_spec (129)
     on left: 177 178 179, on right: 175
-struct_or_union (129)
+struct_or_union (130)
     on left: 180 181, on right: 177 178 179
-struct_decl_list (130)
+struct_decl_list (131)
     on left: 182 183, on right: 177 178 183
-struct_decl (131)
+struct_decl (132)
     on left: 184, on right: 182 183
-spec_qualifier_list (132)
+spec_qualifier_list (133)
     on left: 185 186 187 188, on right: 172 173 184 185 187
-struct_declarator_list (133)
+struct_declarator_list (134)
     on left: 189 190, on right: 184 190
-struct_declarator (134)
+struct_declarator (135)
     on left: 191, on right: 189 190
-enum_spec (135)
+enum_spec (136)
     on left: 192 193 194, on right: 176
-enumerator_list (136)
+enumerator_list (137)
     on left: 195 196, on right: 192 193 196
-enumerator (137)
+enumerator (138)
     on left: 197 198, on right: 195 196
-enum_const (138)
+enum_const (139)
     on left: 199, on right: 192 193 194
 
 

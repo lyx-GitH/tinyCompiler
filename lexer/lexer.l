@@ -8,6 +8,8 @@
     #include "../parser/tiny_compiler_yacc.h"
 
     extern YYSTYPE yylval;
+    extern int yychar;
+
 %}
 
 %option yylineno
@@ -27,6 +29,10 @@ ID {LITERAL}+{ID_C}*
 
 
 %%
+
+"#include"([ ]+)?((<(\\.|[^>])+>)|(\"(\\.|[^"])+\"))	{
+    MOVE;
+}
 
 ";" {MOVE; return SEMI;}
 

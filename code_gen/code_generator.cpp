@@ -39,6 +39,8 @@ void CodeGenerator::InitGenerators() {
 }
 
 void CodeGenerator::InitBasicTypes() {
+    SetType("void", TypeFactory::Get(IR_builder.getVoidTy()));
+    SetType("_bool", TypeFactory::Get(IR_builder.getInt16Ty()));
     SetType("char", TypeFactory::Get(IR_builder.getInt8Ty()));
     SetType("short", TypeFactory::Get(IR_builder.getInt16Ty()));
     SetType("int", TypeFactory::Get(IR_builder.getInt32Ty()));
@@ -54,8 +56,6 @@ CodeGenerator::pValue CallGenerator(const AstNode *node) {
 }
 
 void CodeGenerator::Optimize(const std::string &opt_level) {
-
-
     static std::map<std::string, llvm::OptimizationLevel> optimizer = {
             {"O0", llvm::OptimizationLevel::O0},
             {"O1", llvm::OptimizationLevel::O1},
@@ -156,8 +156,14 @@ void CodeGenerator::Generate() {
     if (!ast_root_)
         return;
     assert(ast_root_->type_ == kRoot);
-    CallGenerator(ast_root_);
+    try{
+        CallGenerator(ast_root_);
+    } catch (ParseException& e) {
+        e.show();
+    }
+
 }
+
 
 
 DEF_GEN(kRoot) {
@@ -344,8 +350,12 @@ DEF_GEN(kFuncType) {
     std::vector<llvm::Type *> param_types;
     bool is_vargs = false;
     CollectArgTypes(ret_node->next_, param_types);
-    if (!param_types.empty() && param_types.back() == nullptr)
+    // a nullptr is a placeholder for va_args
+    if (!param_types.empty() && param_types.back() == nullptr) {
         is_vargs = true;
+        param_types.pop_back();
+    }
+
 
     auto type = TypeFactory::Get<llvm::FunctionType>(ret_type, param_types, is_vargs);
     return pValue{type};
@@ -469,6 +479,8 @@ DEF_GEN(kScope) {
         }
     }
 }
+
+
 
 //void CodeGenerator::HandleFunctionDecl(const AstNode *func_node, bool is_def) {
 //

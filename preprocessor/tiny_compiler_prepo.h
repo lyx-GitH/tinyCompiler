@@ -1,10 +1,10 @@
-#ifndef yyHEADER_H
-#define yyHEADER_H 1
-#define yyIN_HEADER 1
+#ifndef p_yyHEADER_H
+#define p_yyHEADER_H 1
+#define p_yyIN_HEADER 1
 
-#line 5 "./tiny_compiler_lex.h"
+#line 5 "./tiny_compiler_prepo.h"
 
-#line 7 "./tiny_compiler_lex.h"
+#line 7 "./tiny_compiler_prepo.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -16,6 +16,240 @@
 #define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define p_yy_create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer p_yy_create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define p_yy_delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer p_yy_delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define p_yy_scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer p_yy_scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define p_yy_scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string p_yy_scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define p_yy_scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes p_yy_scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define p_yy_init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer p_yy_init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define p_yy_flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer p_yy_flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define p_yy_load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state p_yy_load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define p_yy_switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer p_yy_switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define p_yypush_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state p_yypush_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define p_yypop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state p_yypop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define p_yyensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack p_yyensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define p_yylex_ALREADY_DEFINED
+#else
+#define yylex p_yylex
+#endif
+
+#ifdef yyrestart
+#define p_yyrestart_ALREADY_DEFINED
+#else
+#define yyrestart p_yyrestart
+#endif
+
+#ifdef yylex_init
+#define p_yylex_init_ALREADY_DEFINED
+#else
+#define yylex_init p_yylex_init
+#endif
+
+#ifdef yylex_init_extra
+#define p_yylex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra p_yylex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define p_yylex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy p_yylex_destroy
+#endif
+
+#ifdef yyget_debug
+#define p_yyget_debug_ALREADY_DEFINED
+#else
+#define yyget_debug p_yyget_debug
+#endif
+
+#ifdef yyset_debug
+#define p_yyset_debug_ALREADY_DEFINED
+#else
+#define yyset_debug p_yyset_debug
+#endif
+
+#ifdef yyget_extra
+#define p_yyget_extra_ALREADY_DEFINED
+#else
+#define yyget_extra p_yyget_extra
+#endif
+
+#ifdef yyset_extra
+#define p_yyset_extra_ALREADY_DEFINED
+#else
+#define yyset_extra p_yyset_extra
+#endif
+
+#ifdef yyget_in
+#define p_yyget_in_ALREADY_DEFINED
+#else
+#define yyget_in p_yyget_in
+#endif
+
+#ifdef yyset_in
+#define p_yyset_in_ALREADY_DEFINED
+#else
+#define yyset_in p_yyset_in
+#endif
+
+#ifdef yyget_out
+#define p_yyget_out_ALREADY_DEFINED
+#else
+#define yyget_out p_yyget_out
+#endif
+
+#ifdef yyset_out
+#define p_yyset_out_ALREADY_DEFINED
+#else
+#define yyset_out p_yyset_out
+#endif
+
+#ifdef yyget_leng
+#define p_yyget_leng_ALREADY_DEFINED
+#else
+#define yyget_leng p_yyget_leng
+#endif
+
+#ifdef yyget_text
+#define p_yyget_text_ALREADY_DEFINED
+#else
+#define yyget_text p_yyget_text
+#endif
+
+#ifdef yyget_lineno
+#define p_yyget_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno p_yyget_lineno
+#endif
+
+#ifdef yyset_lineno
+#define p_yyset_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno p_yyset_lineno
+#endif
+
+#ifdef yywrap
+#define p_yywrap_ALREADY_DEFINED
+#else
+#define yywrap p_yywrap
+#endif
+
+#ifdef yyalloc
+#define p_yyalloc_ALREADY_DEFINED
+#else
+#define yyalloc p_yyalloc
+#endif
+
+#ifdef yyrealloc
+#define p_yyrealloc_ALREADY_DEFINED
+#else
+#define yyrealloc p_yyrealloc
+#endif
+
+#ifdef yyfree
+#define p_yyfree_ALREADY_DEFINED
+#else
+#define yyfree p_yyfree
+#endif
+
+#ifdef yytext
+#define p_yytext_ALREADY_DEFINED
+#else
+#define yytext p_yytext
+#endif
+
+#ifdef yyleng
+#define p_yyleng_ALREADY_DEFINED
+#else
+#define yyleng p_yyleng
+#endif
+
+#ifdef yyin
+#define p_yyin_ALREADY_DEFINED
+#else
+#define yyin p_yyin
+#endif
+
+#ifdef yyout
+#define p_yyout_ALREADY_DEFINED
+#else
+#define yyout p_yyout
+#endif
+
+#ifdef yy_flex_debug
+#define p_yy_flex_debug_ALREADY_DEFINED
+#else
+#define yy_flex_debug p_yy_flex_debug
+#endif
+
+#ifdef yylineno
+#define p_yylineno_ALREADY_DEFINED
+#else
+#define yylineno p_yylineno
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -204,7 +438,7 @@ void yyfree ( void *  );
 
 /* Begin user sect3 */
 
-#define yywrap() (/*CONSTCOND*/1)
+#define p_yywrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
 
 extern int yylineno;
@@ -325,154 +559,154 @@ extern int yylex (void);
 #undef YY_DECL
 #endif
 
-#ifndef yy_create_buffer_ALREADY_DEFINED
+#ifndef p_yy_create_buffer_ALREADY_DEFINED
 #undef yy_create_buffer
 #endif
-#ifndef yy_delete_buffer_ALREADY_DEFINED
+#ifndef p_yy_delete_buffer_ALREADY_DEFINED
 #undef yy_delete_buffer
 #endif
-#ifndef yy_scan_buffer_ALREADY_DEFINED
+#ifndef p_yy_scan_buffer_ALREADY_DEFINED
 #undef yy_scan_buffer
 #endif
-#ifndef yy_scan_string_ALREADY_DEFINED
+#ifndef p_yy_scan_string_ALREADY_DEFINED
 #undef yy_scan_string
 #endif
-#ifndef yy_scan_bytes_ALREADY_DEFINED
+#ifndef p_yy_scan_bytes_ALREADY_DEFINED
 #undef yy_scan_bytes
 #endif
-#ifndef yy_init_buffer_ALREADY_DEFINED
+#ifndef p_yy_init_buffer_ALREADY_DEFINED
 #undef yy_init_buffer
 #endif
-#ifndef yy_flush_buffer_ALREADY_DEFINED
+#ifndef p_yy_flush_buffer_ALREADY_DEFINED
 #undef yy_flush_buffer
 #endif
-#ifndef yy_load_buffer_state_ALREADY_DEFINED
+#ifndef p_yy_load_buffer_state_ALREADY_DEFINED
 #undef yy_load_buffer_state
 #endif
-#ifndef yy_switch_to_buffer_ALREADY_DEFINED
+#ifndef p_yy_switch_to_buffer_ALREADY_DEFINED
 #undef yy_switch_to_buffer
 #endif
-#ifndef yypush_buffer_state_ALREADY_DEFINED
+#ifndef p_yypush_buffer_state_ALREADY_DEFINED
 #undef yypush_buffer_state
 #endif
-#ifndef yypop_buffer_state_ALREADY_DEFINED
+#ifndef p_yypop_buffer_state_ALREADY_DEFINED
 #undef yypop_buffer_state
 #endif
-#ifndef yyensure_buffer_stack_ALREADY_DEFINED
+#ifndef p_yyensure_buffer_stack_ALREADY_DEFINED
 #undef yyensure_buffer_stack
 #endif
-#ifndef yylex_ALREADY_DEFINED
+#ifndef p_yylex_ALREADY_DEFINED
 #undef yylex
 #endif
-#ifndef yyrestart_ALREADY_DEFINED
+#ifndef p_yyrestart_ALREADY_DEFINED
 #undef yyrestart
 #endif
-#ifndef yylex_init_ALREADY_DEFINED
+#ifndef p_yylex_init_ALREADY_DEFINED
 #undef yylex_init
 #endif
-#ifndef yylex_init_extra_ALREADY_DEFINED
+#ifndef p_yylex_init_extra_ALREADY_DEFINED
 #undef yylex_init_extra
 #endif
-#ifndef yylex_destroy_ALREADY_DEFINED
+#ifndef p_yylex_destroy_ALREADY_DEFINED
 #undef yylex_destroy
 #endif
-#ifndef yyget_debug_ALREADY_DEFINED
+#ifndef p_yyget_debug_ALREADY_DEFINED
 #undef yyget_debug
 #endif
-#ifndef yyset_debug_ALREADY_DEFINED
+#ifndef p_yyset_debug_ALREADY_DEFINED
 #undef yyset_debug
 #endif
-#ifndef yyget_extra_ALREADY_DEFINED
+#ifndef p_yyget_extra_ALREADY_DEFINED
 #undef yyget_extra
 #endif
-#ifndef yyset_extra_ALREADY_DEFINED
+#ifndef p_yyset_extra_ALREADY_DEFINED
 #undef yyset_extra
 #endif
-#ifndef yyget_in_ALREADY_DEFINED
+#ifndef p_yyget_in_ALREADY_DEFINED
 #undef yyget_in
 #endif
-#ifndef yyset_in_ALREADY_DEFINED
+#ifndef p_yyset_in_ALREADY_DEFINED
 #undef yyset_in
 #endif
-#ifndef yyget_out_ALREADY_DEFINED
+#ifndef p_yyget_out_ALREADY_DEFINED
 #undef yyget_out
 #endif
-#ifndef yyset_out_ALREADY_DEFINED
+#ifndef p_yyset_out_ALREADY_DEFINED
 #undef yyset_out
 #endif
-#ifndef yyget_leng_ALREADY_DEFINED
+#ifndef p_yyget_leng_ALREADY_DEFINED
 #undef yyget_leng
 #endif
-#ifndef yyget_text_ALREADY_DEFINED
+#ifndef p_yyget_text_ALREADY_DEFINED
 #undef yyget_text
 #endif
-#ifndef yyget_lineno_ALREADY_DEFINED
+#ifndef p_yyget_lineno_ALREADY_DEFINED
 #undef yyget_lineno
 #endif
-#ifndef yyset_lineno_ALREADY_DEFINED
+#ifndef p_yyset_lineno_ALREADY_DEFINED
 #undef yyset_lineno
 #endif
-#ifndef yyget_column_ALREADY_DEFINED
+#ifndef p_yyget_column_ALREADY_DEFINED
 #undef yyget_column
 #endif
-#ifndef yyset_column_ALREADY_DEFINED
+#ifndef p_yyset_column_ALREADY_DEFINED
 #undef yyset_column
 #endif
-#ifndef yywrap_ALREADY_DEFINED
+#ifndef p_yywrap_ALREADY_DEFINED
 #undef yywrap
 #endif
-#ifndef yyget_lval_ALREADY_DEFINED
+#ifndef p_yyget_lval_ALREADY_DEFINED
 #undef yyget_lval
 #endif
-#ifndef yyset_lval_ALREADY_DEFINED
+#ifndef p_yyset_lval_ALREADY_DEFINED
 #undef yyset_lval
 #endif
-#ifndef yyget_lloc_ALREADY_DEFINED
+#ifndef p_yyget_lloc_ALREADY_DEFINED
 #undef yyget_lloc
 #endif
-#ifndef yyset_lloc_ALREADY_DEFINED
+#ifndef p_yyset_lloc_ALREADY_DEFINED
 #undef yyset_lloc
 #endif
-#ifndef yyalloc_ALREADY_DEFINED
+#ifndef p_yyalloc_ALREADY_DEFINED
 #undef yyalloc
 #endif
-#ifndef yyrealloc_ALREADY_DEFINED
+#ifndef p_yyrealloc_ALREADY_DEFINED
 #undef yyrealloc
 #endif
-#ifndef yyfree_ALREADY_DEFINED
+#ifndef p_yyfree_ALREADY_DEFINED
 #undef yyfree
 #endif
-#ifndef yytext_ALREADY_DEFINED
+#ifndef p_yytext_ALREADY_DEFINED
 #undef yytext
 #endif
-#ifndef yyleng_ALREADY_DEFINED
+#ifndef p_yyleng_ALREADY_DEFINED
 #undef yyleng
 #endif
-#ifndef yyin_ALREADY_DEFINED
+#ifndef p_yyin_ALREADY_DEFINED
 #undef yyin
 #endif
-#ifndef yyout_ALREADY_DEFINED
+#ifndef p_yyout_ALREADY_DEFINED
 #undef yyout
 #endif
-#ifndef yy_flex_debug_ALREADY_DEFINED
+#ifndef p_yy_flex_debug_ALREADY_DEFINED
 #undef yy_flex_debug
 #endif
-#ifndef yylineno_ALREADY_DEFINED
+#ifndef p_yylineno_ALREADY_DEFINED
 #undef yylineno
 #endif
-#ifndef yytables_fload_ALREADY_DEFINED
+#ifndef p_yytables_fload_ALREADY_DEFINED
 #undef yytables_fload
 #endif
-#ifndef yytables_destroy_ALREADY_DEFINED
+#ifndef p_yytables_destroy_ALREADY_DEFINED
 #undef yytables_destroy
 #endif
-#ifndef yyTABLES_NAME_ALREADY_DEFINED
+#ifndef p_yyTABLES_NAME_ALREADY_DEFINED
 #undef yyTABLES_NAME
 #endif
 
-#line 215 "./lexer.l"
+#line 19 "./pre_lexer.l"
 
 
-#line 476 "./tiny_compiler_lex.h"
-#undef yyIN_HEADER
-#endif /* yyHEADER_H */
+#line 710 "./tiny_compiler_prepo.h"
+#undef p_yyIN_HEADER
+#endif /* p_yyHEADER_H */
