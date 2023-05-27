@@ -10,12 +10,16 @@ llvm::IRBuilder<> CodeGenerator::IR_builder{CodeGenerator::context};
 llvm::Module CodeGenerator::module{"main", context};
 llvm::DataLayout CodeGenerator::data_layout{&module};
 llvm::Function *CodeGenerator::cur_func_{nullptr};
+llvm::Function *CodeGenerator::global_func = nullptr;
+llvm::BasicBlock *CodeGenerator::global_block = nullptr;
 std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
 std::set<std::string> CodeGenerator::defined_functions{};
 bool CodeGenerator::cur_init_{false};
 
 void CodeGenerator::InitGenerators() {
     LOAD_GEN(kRoot);
+
+    LOAD_GEN(kId);
 
     LOAD_GEN(kType);
     LOAD_GEN(kTypeDef);
@@ -28,14 +32,17 @@ void CodeGenerator::InitGenerators() {
 
     LOAD_GEN(kVarInit);
     LOAD_GEN(kVarDecl);
+    LOAD_GEN(kFuncDecl);
 
     LOAD_GEN(kHexNumber);
     LOAD_GEN(kDemNumber);
     LOAD_GEN(kOctNumber);
+    LOAD_GEN(kFloatNumber);
     LOAD_GEN(kCharLiteral);
     LOAD_GEN(kStrLiteral);
 
     LOAD_GEN(kExpr);
+    LOAD_GEN(kFuncCall);
 }
 
 void CodeGenerator::InitBasicTypes() {
@@ -156,14 +163,13 @@ void CodeGenerator::Generate() {
     if (!ast_root_)
         return;
     assert(ast_root_->type_ == kRoot);
-    try{
+    try {
         CallGenerator(ast_root_);
-    } catch (ParseException& e) {
+    } catch (ParseException &e) {
         e.show();
     }
 
 }
-
 
 
 DEF_GEN(kRoot) {
@@ -178,39 +184,70 @@ DEF_GEN(kRoot) {
     return {};
 }
 
+DEF_GEN(kId) {
+    auto p_symbol = GetSymbol(node->val_);
+    if (!p_symbol)
+        throw_code_gen_exception(node, "unidentified id");
+    auto type = p_symbol->GetVariable()->getType()->getNonOpaquePointerElementType();
+    auto value = p_symbol->GetVariable();
+    if (type->isArrayTy()) {
+        return IR_builder.CreatePointerCast(value, type->getArrayElementType()->getPointerTo());
+    } else return IR_builder.CreateLoad(type, value);
+}
+
 DEF_GEN(kFuncDef) {
     ASSERT_TYPE(node, kFuncDef);
 
     auto func_decl_node = getNChildSafe(node, 0);
     auto func_body_node = getNChildSafe(node, 1);
-    ASSERT_TYPE(func_decl_node, kVarDecl);
+    ASSERT_TYPE(func_decl_node, kFuncDecl);
     ASSERT_TYPE(func_body_node, kScope);
 
-    auto func_var = CallGenerator(func_decl_node).GetFunction();
-    defined_functions.insert(func_var->getName().str());
+    auto f = CallGenerator(func_decl_node).GetFunction();
+    defined_functions.insert(f->getName().str());
     {
         ScopeGuard scope_guard;
-        auto func_block = llvm::BasicBlock::Create(context, func_var->getName() + "_entry", func_var);
+        auto func_block = llvm::BasicBlock::Create(context, f->getName() + "_entry", f);
         IR_builder.SetInsertPoint(func_block);
-        FuncGuard func_guard(func_var);
+        FuncGuard func_guard(f);
         {
             auto params = func_decl_node->child_->child_->next_;
             ASSERT_TYPE(params, kFuncParams);
             auto cur = params->child_;
-            while (cur && cur->type_ == kVarDecl) {
-                if (cur->type_ != kVarDecl)
-                    throw_code_gen_exception(cur, "no anonymous declaration allowed");
-                CallGenerator(cur);
-                cur = cur->next_;
+            // TODO : here is a bug, fix this
+//            while (cur && cur->type_ == kVarDecl) {
+//                if (cur->type_ != kVarDecl)
+//                    throw_code_gen_exception(cur, "no anonymous declaration allowed");
+//                CallGenerator(cur);
+//                cur = cur->next_;
+//            }
+            int arg_idx = 0;
+            for (auto arg_it = f->arg_begin(); arg_it < f->arg_end(); arg_it++, arg_idx++, cur = cur->next_) {
+                if (!cur)
+                    throw_code_gen_exception(cur, "too few arguments");
+                ASSERT_TYPE(cur, kVarDecl);
+                auto alloc = CallGenerator(cur).GetVariable();
+                IR_builder.CreateStore(arg_it, alloc);
+            }
+            if (cur) {
+                throw_code_gen_exception(cur, "too many arguments");
             }
 
             CallGenerator(func_body_node);
 
+            if (!IR_builder.GetInsertBlock()->getTerminator()) {
+                // No returns yet!
+                auto ret_type = f->getReturnType();
+                if (ret_type->isVoidTy()) {
+                    IR_builder.CreateRetVoid();
+                } else {
+                    IR_builder.CreateRet(llvm::UndefValue::get(ret_type));
+                }
+            }
+
         }
     }
     return {};
-
-
 }
 
 DEF_GEN(kVarDecl) {
@@ -224,27 +261,19 @@ DEF_GEN(kVarDecl) {
     if (type->isVoidTy())
         throw_code_gen_exception(var_type_node, "cannot declare a void variable");
 
-    if (type->isFunctionTy()) {
-        if (cur_init_)
-            throw_code_gen_exception(var_type_node, "cannot initialize a function");
-        if (cur_func_)
-            throw_code_gen_exception(var_type_node, "cannot declare a function inside a function");
-        if (defined_functions.contains(name))
-            throw_code_gen_exception(var_type_node, "function redefined");
-        else if (GetLocalSymbol(name) && GetLocalSymbol(name)->GetFunction()->getFunctionType() == type) {
-            return GetLocalSymbol(name)->GetFunction();
-        }
+    if (type->isFunctionTy() && cur_init_) {
+        throw_code_gen_exception(var_type_node, "cannot initialize a function");
     }
 
     if (GetLocalSymbol(name))
         throw_code_gen_exception(var_id_node, "duplicate symbol");
 
-    if (var_type_node->type_ == kFuncType && type->isFunctionTy()) {
-        auto f = llvm::Function::Create((llvm::FunctionType *) (type), llvm::GlobalValue::ExternalLinkage,
-                                        std::string{name}, module);
-        SetSymbol(name, f);
-        return {f};
-    }
+//    if (var_type_node->type_ == kFuncType && type->isFunctionTy()) {
+//        auto f = llvm::Function::Create((llvm::FunctionType *) (type), llvm::GlobalValue::ExternalLinkage,
+//                                        std::string{name}, module);
+//        SetSymbol(name, f);
+//        return {f};
+//    }
 
 
     if (!cur_init_ && TypeFactory::IsConst(type))
@@ -265,16 +294,34 @@ DEF_GEN(kVarDecl) {
                 value,
                 std::string{name}
         );
-//                Symbol s(glob_var);
         Symbol s{glob_var};
         SetSymbol(name, s);
     } else {
+        // this var is a local var
         auto block_builder = llvm::IRBuilder<>(&cur_func_->getEntryBlock(), cur_func_->getEntryBlock().begin());
         auto alloc = block_builder.CreateAlloca(type, nullptr, name);
         SetSymbol(name, alloc);
         return {alloc};
     }
 //    return type;
+}
+
+DEF_GEN(kFuncDecl) {
+    auto func_node = getNChildSafe(node, 0);
+    auto name_node = getNChildSafe(node, 1);
+    ASSERT_TYPE(func_node, kFuncType);
+    ASSERT_TYPE(name_node, kId);
+    auto func_type = (llvm::FunctionType *) (CallGenerator(func_node).GetType());
+    auto prev_symbol = GetSymbol(name_node->val_);
+    if (!prev_symbol) {
+        auto f = llvm::Function::Create(func_type, llvm::GlobalValue::ExternalLinkage, std::string{name_node->val_},
+                                        module);
+        SetSymbol(name_node->val_, f);
+        return f;
+    } else if (prev_symbol->IsFunction()) {
+        return *prev_symbol;
+    } else throw_code_gen_exception(name_node, "duplicated symbol");
+
 }
 
 DEF_GEN(kVarInit) {
@@ -340,6 +387,18 @@ void CodeGenerator::CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &co
     if (void_idx >= 0 && collector.size() != 1)
         throw_code_gen_exception(getNChildSafe(node, void_idx),
                                  "no void type allowed in function declaration/definition");
+}
+
+void CodeGenerator::CollectArgs(pAstNode node, std::vector<llvm::Value *> &collector) {
+    //TODO: add type checks and argument checks
+    ASSERT_TYPE(node, kArgList);
+    auto arg_list = node->child_;
+    while (arg_list) {
+        auto symbol = CallGenerator(arg_list);
+        assert(symbol.IsVariable() || symbol.IsConst());
+        collector.push_back(symbol.GetVariable());
+        arg_list = arg_list->next_;
+    }
 }
 
 
@@ -429,7 +488,8 @@ DEF_GEN(kOctNumber) {
 
 DEF_GEN(kStrLiteral) {
     ASSERT_TYPE(node, kStrLiteral);
-    return {IR_builder.CreateGlobalStringPtr(node->val_), true};
+    std::string content{node->val_ + 1, strlen(node->val_) - 2};
+    return {IR_builder.CreateGlobalStringPtr(content), true};
 }
 
 DEF_GEN(kFloatNumber) {
@@ -478,6 +538,20 @@ DEF_GEN(kScope) {
             stats = stats->next_;
         }
     }
+}
+
+DEF_GEN(kFuncCall) {
+    ASSERT_TYPE(node, kFuncCall);
+    auto func_name_node = getNChildSafe(node, 0);
+    ASSERT_TYPE(func_name_node, kId);
+    auto func_s = GetSymbol(func_name_node->val_);
+    assert(func_s && func_s->IsFunction());
+    auto f = func_s->GetFunction();
+    assert(f->getName() == std::string{func_name_node->val_});
+    auto args_node = getNChildSafe(node, 1);
+    std::vector<llvm::Value *> args;
+    CollectArgs(args_node, args);
+    return IR_builder.CreateCall(f, args);
 }
 
 

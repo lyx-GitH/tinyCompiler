@@ -3,10 +3,6 @@ Terminals which are not used
    HEADER
 
 
-State 269 conflicts: 1 shift/reduce
-State 324 conflicts: 1 shift/reduce
-
-
 Grammar
 
     0 $accept: program_unit $end
@@ -204,35 +200,35 @@ Grammar
   145        | postfix SS
   146        | function_call
 
-  147 single: NUMBER
-  148       | STR
-  149       | ID
-  150       | LB expression RB
+  147 function_call: postfix LB RB
+  148              | postfix LB args_list RB
 
-  151 aop: ASSIGN
-  152    | A_AND
-  153    | A_DIV
-  154    | A_PLUS
-  155    | A_SUB
-  156    | A_MULT
-  157    | A_LS
-  158    | A_RS
-  159    | A_OR
-  160    | A_XOR
-  161    | A_MOD
+  149 args_list: expression11
+  150          | args_list COMMA expression11
 
-  162 uop: ADD
-  163    | SUB
-  164    | BIT_AND
-  165    | LOGIC_NOT
-  166    | BIT_NOT
-  167    | MULT
+  151 single: NUMBER
+  152       | STR
+  153       | ID
+  154       | LB expression RB
 
-  168 function_call: postfix LB RB
-  169              | postfix LB args_list RB
+  155 aop: ASSIGN
+  156    | A_AND
+  157    | A_DIV
+  158    | A_PLUS
+  159    | A_SUB
+  160    | A_MULT
+  161    | A_LS
+  162    | A_RS
+  163    | A_OR
+  164    | A_XOR
+  165    | A_MOD
 
-  170 args_list: expression
-  171          | args_list COMMA expression
+  166 uop: ADD
+  167    | SUB
+  168    | BIT_AND
+  169    | LOGIC_NOT
+  170    | BIT_NOT
+  171    | MULT
 
   172 type_name_cast: spec_qualifier_list abstract_declarator
   173               | spec_qualifier_list
@@ -280,9 +276,9 @@ Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-NUMBER (258) 147
-ID (259) 27 69 93 142 143 149 177 179 192 194 197 198
-STR (260) 148
+NUMBER (258) 151
+ID (259) 27 69 93 142 143 153 177 179 192 194 197 198
+STR (260) 152
 TYPE (261) 174
 CONST (262) 20
 STATIC (263) 18
@@ -299,23 +295,23 @@ UNION (273) 181
 ENUM (274) 199
 DOT (275) 142
 ARROW (276) 143
-ADD (277) 126 162
-SUB (278) 127 163
-MULT (279) 52 53 54 55 129 167
+ADD (277) 126 166
+SUB (278) 127 167
+MULT (279) 52 53 54 55 129 171
 DIV (280) 130
 MOD (281) 131
-COMMA (282) 22 46 48 60 62 99 171 190 196
+COMMA (282) 22 46 48 60 62 99 150 190 196
 LB (283) 28 31 32 36 41 42 43 44 80 81 82 83 84 85 86 87 88 89 90 91
-    92 133 139 150 168 169
+    92 133 139 147 148 154
 RB (284) 28 31 32 36 41 42 43 44 80 81 82 83 84 85 86 87 88 89 90 91
-    92 133 139 150 168 169
+    92 133 139 147 148 154
 LOGIC_AND (285) 107
 LOGIC_OR (286) 105
-LOGIC_NOT (287) 165
+LOGIC_NOT (287) 169
 BIT_OR (288) 109
-BIT_AND (289) 113 164
+BIT_AND (289) 113 168
 BIT_XOR (290) 111
-BIT_NOT (291) 166
+BIT_NOT (291) 170
 LSHIFT (292) 123
 RSHIFT (293) 124
 LSBSCRPT (294) 29 30 37 38 39 40 141
@@ -328,17 +324,17 @@ GE (300) 120
 LE (301) 121
 EQ (302) 115
 NEQ (303) 116
-ASSIGN (304) 24 151 198
-A_PLUS (305) 154
-A_SUB (306) 155
-A_MULT (307) 156
-A_DIV (308) 153
-A_MOD (309) 161
-A_LS (310) 157
-A_RS (311) 158
-A_XOR (312) 160
-A_AND (313) 152
-A_OR (314) 159
+ASSIGN (304) 24 155 198
+A_PLUS (305) 158
+A_SUB (306) 159
+A_MULT (307) 160
+A_DIV (308) 157
+A_MOD (309) 165
+A_LS (310) 161
+A_RS (311) 162
+A_XOR (312) 164
+A_AND (313) 156
+A_OR (314) 163
 PP (315) 135 144
 SS (316) 136 145
 T1 (317) 103
@@ -424,9 +420,9 @@ jump_stat (105)
     on left: 93 94 95 96 97, on right: 68
 expression (106)
     on left: 98 99, on right: 72 80 81 82 83 84 85 86 87 88 89 90 91
-    96 99 103 141 150 170 171
+    96 99 103 141 154
 expression11 (107)
-    on left: 100 101, on right: 58 98 99 101
+    on left: 100 101, on right: 58 98 99 101 149 150
 expression10 (108)
     on left: 102 103, on right: 29 37 38 70 100 103 198
 expression9 (109)
@@ -456,18 +452,18 @@ unaries (120)
     on left: 134 135 136 137 138 139, on right: 101 132 135 136 138
 postfix (121)
     on left: 140 141 142 143 144 145 146, on right: 134 141 142 143
-    144 145 168 169
-single (122)
-    on left: 147 148 149 150, on right: 140
-aop (123)
-    on left: 151 152 153 154 155 156 157 158 159 160 161,
+    144 145 147 148
+function_call (122)
+    on left: 147 148, on right: 146
+args_list (123)
+    on left: 149 150, on right: 148 150
+single (124)
+    on left: 151 152 153 154, on right: 140
+aop (125)
+    on left: 155 156 157 158 159 160 161 162 163 164 165,
     on right: 101
-uop (124)
-    on left: 162 163 164 165 166 167, on right: 137
-function_call (125)
-    on left: 168 169, on right: 146
-args_list (126)
-    on left: 170 171, on right: 169 171
+uop (126)
+    on left: 166 167 168 169 170 171, on right: 137
 type_name_cast (127)
     on left: 172 173, on right: 133
 type_name (128)
@@ -1062,9 +1058,9 @@ state 43
     factor                go to state 109
     unaries               go to state 110
     postfix               go to state 111
-    single                go to state 112
-    uop                   go to state 113
-    function_call         go to state 114
+    function_call         go to state 112
+    single                go to state 113
+    uop                   go to state 114
     type_name             go to state 23
     struct_or_union_spec  go to state 24
     struct_or_union       go to state 25
@@ -1140,9 +1136,9 @@ state 46
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 47
@@ -1298,9 +1294,9 @@ state 58
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 59
@@ -1312,26 +1308,26 @@ state 59
 
 state 60
 
-  147 single: NUMBER .
+  151 single: NUMBER .
 
-    $default  reduce using rule 147 (single)
+    $default  reduce using rule 151 (single)
 
 
 state 61
 
    69 labeled_stat: ID . T2 stat
-  149 single: ID .
+  153 single: ID .
 
     T2  shift, and go to state 138
 
-    $default  reduce using rule 149 (single)
+    $default  reduce using rule 153 (single)
 
 
 state 62
 
-  148 single: STR .
+  152 single: STR .
 
-    $default  reduce using rule 148 (single)
+    $default  reduce using rule 152 (single)
 
 
 state 63
@@ -1391,9 +1387,9 @@ state 66
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 67
@@ -1405,29 +1401,29 @@ state 67
 
 state 68
 
-  162 uop: ADD .
+  166 uop: ADD .
 
-    $default  reduce using rule 162 (uop)
+    $default  reduce using rule 166 (uop)
 
 
 state 69
 
-  163 uop: SUB .
+  167 uop: SUB .
 
-    $default  reduce using rule 163 (uop)
+    $default  reduce using rule 167 (uop)
 
 
 state 70
 
-  167 uop: MULT .
+  171 uop: MULT .
 
-    $default  reduce using rule 167 (uop)
+    $default  reduce using rule 171 (uop)
 
 
 state 71
 
   133 factor: LB . type_name_cast RB factor
-  150 single: LB . expression RB
+  154 single: LB . expression RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -1466,9 +1462,9 @@ state 71
     factor                go to state 109
     unaries               go to state 110
     postfix               go to state 111
-    single                go to state 112
-    uop                   go to state 113
-    function_call         go to state 114
+    function_call         go to state 112
+    single                go to state 113
+    uop                   go to state 114
     type_name_cast        go to state 145
     type_name             go to state 23
     struct_or_union_spec  go to state 24
@@ -1480,23 +1476,23 @@ state 71
 
 state 72
 
-  165 uop: LOGIC_NOT .
+  169 uop: LOGIC_NOT .
 
-    $default  reduce using rule 165 (uop)
+    $default  reduce using rule 169 (uop)
 
 
 state 73
 
-  164 uop: BIT_AND .
+  168 uop: BIT_AND .
 
-    $default  reduce using rule 164 (uop)
+    $default  reduce using rule 168 (uop)
 
 
 state 74
 
-  166 uop: BIT_NOT .
+  170 uop: BIT_NOT .
 
-    $default  reduce using rule 166 (uop)
+    $default  reduce using rule 170 (uop)
 
 
 state 75
@@ -1526,9 +1522,9 @@ state 76
 
     unaries        go to state 148
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 77
@@ -1551,9 +1547,9 @@ state 77
 
     unaries        go to state 149
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 78
@@ -1577,9 +1573,9 @@ state 78
 
     unaries        go to state 151
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 79
@@ -1651,9 +1647,9 @@ state 81
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 82
@@ -1709,9 +1705,9 @@ state 84
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 85
@@ -1790,9 +1786,9 @@ state 86
     factor                go to state 109
     unaries               go to state 110
     postfix               go to state 111
-    single                go to state 112
-    uop                   go to state 113
-    function_call         go to state 114
+    function_call         go to state 112
+    single                go to state 113
+    uop                   go to state 114
     type_name             go to state 23
     struct_or_union_spec  go to state 24
     struct_or_union       go to state 25
@@ -1891,9 +1887,9 @@ state 92
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 93
@@ -2095,8 +2091,8 @@ state 111
   143        | postfix . ARROW ID
   144        | postfix . PP
   145        | postfix . SS
-  168 function_call: postfix . LB RB
-  169              | postfix . LB args_list RB
+  147 function_call: postfix . LB RB
+  148              | postfix . LB args_list RB
 
     DOT       shift, and go to state 197
     ARROW     shift, and go to state 198
@@ -2110,12 +2106,19 @@ state 111
 
 state 112
 
+  146 postfix: function_call .
+
+    $default  reduce using rule 146 (postfix)
+
+
+state 113
+
   140 postfix: single .
 
     $default  reduce using rule 140 (postfix)
 
 
-state 113
+state 114
 
   137 unaries: uop . factor
 
@@ -2136,16 +2139,9 @@ state 113
     factor         go to state 203
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
-
-
-state 114
-
-  146 postfix: function_call .
-
-    $default  reduce using rule 146 (postfix)
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 115
@@ -2202,9 +2198,9 @@ state 119
 
 state 120
 
-  149 single: ID .
+  153 single: ID .
 
-    $default  reduce using rule 149 (single)
+    $default  reduce using rule 153 (single)
 
 
 state 121
@@ -2421,9 +2417,9 @@ state 135
     factor            go to state 109
     unaries           go to state 110
     postfix           go to state 111
-    single            go to state 112
-    uop               go to state 113
-    function_call     go to state 114
+    function_call     go to state 112
+    single            go to state 113
+    uop               go to state 114
 
 
 state 136
@@ -2494,9 +2490,9 @@ state 138
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 139
@@ -2539,7 +2535,7 @@ state 143
 state 144
 
    99 expression: expression . COMMA expression11
-  150 single: LB expression . RB
+  154 single: LB expression . RB
 
     COMMA  shift, and go to state 165
     RB     shift, and go to state 230
@@ -2570,7 +2566,7 @@ state 146
 
 state 147
 
-  150 single: LB . expression RB
+  154 single: LB . expression RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2602,9 +2598,9 @@ state 147
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 148
@@ -2624,7 +2620,7 @@ state 149
 state 150
 
   139 unaries: SIZE_OF LB . type_name RB
-  150 single: LB . expression RB
+  154 single: LB . expression RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2660,9 +2656,9 @@ state 150
     factor                go to state 109
     unaries               go to state 110
     postfix               go to state 111
-    single                go to state 112
-    uop                   go to state 113
-    function_call         go to state 114
+    function_call         go to state 112
+    single                go to state 113
+    uop                   go to state 114
     type_name             go to state 235
     struct_or_union_spec  go to state 24
     struct_or_union       go to state 25
@@ -2712,9 +2708,9 @@ state 152
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 153
@@ -2751,9 +2747,9 @@ state 153
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 154
@@ -2805,9 +2801,9 @@ state 155
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 156
@@ -2844,9 +2840,9 @@ state 156
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 157
@@ -2910,9 +2906,9 @@ state 158
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 159
@@ -2985,9 +2981,9 @@ state 161
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 162
@@ -3044,9 +3040,9 @@ state 165
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 166
@@ -3079,9 +3075,9 @@ state 166
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 167
@@ -3118,9 +3114,9 @@ state 167
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 168
@@ -3152,9 +3148,9 @@ state 168
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 169
@@ -3185,9 +3181,9 @@ state 169
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 170
@@ -3217,9 +3213,9 @@ state 170
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 171
@@ -3248,9 +3244,9 @@ state 171
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 172
@@ -3278,9 +3274,9 @@ state 172
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 173
@@ -3308,9 +3304,9 @@ state 173
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 174
@@ -3337,9 +3333,9 @@ state 174
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 175
@@ -3366,9 +3362,9 @@ state 175
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 176
@@ -3395,9 +3391,9 @@ state 176
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 177
@@ -3424,9 +3420,9 @@ state 177
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 178
@@ -3452,9 +3448,9 @@ state 178
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 179
@@ -3480,9 +3476,9 @@ state 179
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 180
@@ -3507,9 +3503,9 @@ state 180
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 181
@@ -3534,9 +3530,9 @@ state 181
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 182
@@ -3560,9 +3556,9 @@ state 182
     factor         go to state 262
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 183
@@ -3586,9 +3582,9 @@ state 183
     factor         go to state 263
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 184
@@ -3612,86 +3608,86 @@ state 184
     factor         go to state 264
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 185
 
-  151 aop: ASSIGN .
-
-    $default  reduce using rule 151 (aop)
-
-
-state 186
-
-  154 aop: A_PLUS .
-
-    $default  reduce using rule 154 (aop)
-
-
-state 187
-
-  155 aop: A_SUB .
+  155 aop: ASSIGN .
 
     $default  reduce using rule 155 (aop)
 
 
-state 188
+state 186
 
-  156 aop: A_MULT .
-
-    $default  reduce using rule 156 (aop)
-
-
-state 189
-
-  153 aop: A_DIV .
-
-    $default  reduce using rule 153 (aop)
-
-
-state 190
-
-  161 aop: A_MOD .
-
-    $default  reduce using rule 161 (aop)
-
-
-state 191
-
-  157 aop: A_LS .
-
-    $default  reduce using rule 157 (aop)
-
-
-state 192
-
-  158 aop: A_RS .
+  158 aop: A_PLUS .
 
     $default  reduce using rule 158 (aop)
 
 
-state 193
+state 187
 
-  160 aop: A_XOR .
+  159 aop: A_SUB .
+
+    $default  reduce using rule 159 (aop)
+
+
+state 188
+
+  160 aop: A_MULT .
 
     $default  reduce using rule 160 (aop)
 
 
+state 189
+
+  157 aop: A_DIV .
+
+    $default  reduce using rule 157 (aop)
+
+
+state 190
+
+  165 aop: A_MOD .
+
+    $default  reduce using rule 165 (aop)
+
+
+state 191
+
+  161 aop: A_LS .
+
+    $default  reduce using rule 161 (aop)
+
+
+state 192
+
+  162 aop: A_RS .
+
+    $default  reduce using rule 162 (aop)
+
+
+state 193
+
+  164 aop: A_XOR .
+
+    $default  reduce using rule 164 (aop)
+
+
 state 194
 
-  152 aop: A_AND .
+  156 aop: A_AND .
 
-    $default  reduce using rule 152 (aop)
+    $default  reduce using rule 156 (aop)
 
 
 state 195
 
-  159 aop: A_OR .
+  163 aop: A_OR .
 
-    $default  reduce using rule 159 (aop)
+    $default  reduce using rule 163 (aop)
 
 
 state 196
@@ -3727,9 +3723,9 @@ state 196
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 197
@@ -3748,8 +3744,8 @@ state 198
 
 state 199
 
-  168 function_call: postfix LB . RB
-  169              | postfix LB . args_list RB
+  147 function_call: postfix LB . RB
+  148              | postfix LB . args_list RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -3766,8 +3762,7 @@ state 199
     SS         shift, and go to state 77
     SIZE_OF    shift, and go to state 78
 
-    expression     go to state 269
-    expression11   go to state 97
+    expression11   go to state 269
     expression10   go to state 98
     expression9    go to state 99
     expression8    go to state 100
@@ -3782,10 +3777,10 @@ state 199
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
     args_list      go to state 270
+    single         go to state 113
+    uop            go to state 114
 
 
 state 200
@@ -3822,9 +3817,9 @@ state 200
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 201
@@ -3920,9 +3915,9 @@ state 205
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 206
@@ -4123,9 +4118,9 @@ state 222
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 223
@@ -4184,9 +4179,9 @@ state 229
 
 state 230
 
-  150 single: LB expression RB .
+  154 single: LB expression RB .
 
-    $default  reduce using rule 150 (single)
+    $default  reduce using rule 154 (single)
 
 
 state 231
@@ -4210,9 +4205,9 @@ state 231
     factor         go to state 290
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 232
@@ -4340,9 +4335,9 @@ state 239
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 240
@@ -4420,9 +4415,9 @@ state 242
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 243
@@ -4683,26 +4678,22 @@ state 267
 
 state 268
 
-  168 function_call: postfix LB RB .
+  147 function_call: postfix LB RB .
 
-    $default  reduce using rule 168 (function_call)
+    $default  reduce using rule 147 (function_call)
 
 
 state 269
 
-   99 expression: expression . COMMA expression11
-  170 args_list: expression .
+  149 args_list: expression11 .
 
-    COMMA  shift, and go to state 165
-
-    COMMA     [reduce using rule 170 (args_list)]
-    $default  reduce using rule 170 (args_list)
+    $default  reduce using rule 149 (args_list)
 
 
 state 270
 
-  169 function_call: postfix LB args_list . RB
-  171 args_list: args_list . COMMA expression
+  148 function_call: postfix LB args_list . RB
+  150 args_list: args_list . COMMA expression11
 
     COMMA  shift, and go to state 301
     RB     shift, and go to state 302
@@ -4813,9 +4804,9 @@ state 278
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 279
@@ -4932,9 +4923,9 @@ state 288
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 289
@@ -5013,9 +5004,9 @@ state 292
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 293
@@ -5072,9 +5063,9 @@ state 293
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 294
@@ -5111,9 +5102,9 @@ state 294
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 295
@@ -5152,9 +5143,9 @@ state 295
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 296
@@ -5205,9 +5196,9 @@ state 297
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 298
@@ -5264,9 +5255,9 @@ state 298
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 299
@@ -5308,14 +5299,14 @@ state 300
     factor         go to state 109
     unaries        go to state 123
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 301
 
-  171 args_list: args_list COMMA . expression
+  150 args_list: args_list COMMA . expression11
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -5331,8 +5322,7 @@ state 301
     SS         shift, and go to state 77
     SIZE_OF    shift, and go to state 78
 
-    expression     go to state 324
-    expression11   go to state 97
+    expression11   go to state 324
     expression10   go to state 98
     expression9    go to state 99
     expression8    go to state 100
@@ -5347,16 +5337,16 @@ state 301
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 302
 
-  169 function_call: postfix LB args_list RB .
+  148 function_call: postfix LB args_list RB .
 
-    $default  reduce using rule 169 (function_call)
+    $default  reduce using rule 148 (function_call)
 
 
 state 303
@@ -5516,9 +5506,9 @@ state 317
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 318
@@ -5566,9 +5556,9 @@ state 319
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 320
@@ -5607,9 +5597,9 @@ state 320
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 321
@@ -5638,13 +5628,9 @@ state 323
 
 state 324
 
-   99 expression: expression . COMMA expression11
-  171 args_list: args_list COMMA expression .
+  150 args_list: args_list COMMA expression11 .
 
-    COMMA  shift, and go to state 165
-
-    COMMA     [reduce using rule 171 (args_list)]
-    $default  reduce using rule 171 (args_list)
+    $default  reduce using rule 150 (args_list)
 
 
 state 325
@@ -5715,9 +5701,9 @@ state 327
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 328
@@ -5788,9 +5774,9 @@ state 330
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 331
@@ -5847,9 +5833,9 @@ state 331
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 332
@@ -5915,9 +5901,9 @@ state 333
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 334
@@ -5965,9 +5951,9 @@ state 335
     factor         go to state 109
     unaries        go to state 110
     postfix        go to state 111
-    single         go to state 112
-    uop            go to state 113
-    function_call  go to state 114
+    function_call  go to state 112
+    single         go to state 113
+    uop            go to state 114
 
 
 state 336
@@ -6052,9 +6038,9 @@ state 340
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 341
@@ -6118,9 +6104,9 @@ state 342
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 343
@@ -6177,9 +6163,9 @@ state 343
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 344
@@ -6266,9 +6252,9 @@ state 348
     factor          go to state 109
     unaries         go to state 110
     postfix         go to state 111
-    single          go to state 112
-    uop             go to state 113
-    function_call   go to state 114
+    function_call   go to state 112
+    single          go to state 113
+    uop             go to state 114
 
 
 state 349

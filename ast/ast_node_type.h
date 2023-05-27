@@ -41,7 +41,7 @@ enum AstNodeType {
     kVarDecl,
     kVarInit,
     kTypeDef,
-    kFuncDelc,
+    kFuncDecl,
     kFuncParams,
     kStructMember,
     kScope,

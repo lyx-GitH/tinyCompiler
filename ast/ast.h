@@ -88,8 +88,8 @@ inline const char *GetSyntaxNodeTypeStr(enum AstNodeType type) {
             return "kVarDecl";
         case kTypeQualifier:
             return "kTypeQualifier";
-        case kFuncDelc:
-            return "kFuncDelc";
+        case kFuncDecl:
+            return "kFuncDecl";
         case kFuncParams:
             return "kFuncParams";
         case kTypeFeature:

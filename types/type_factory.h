@@ -33,7 +33,9 @@ private:
     template<typename T>
     requires
     std::is_base_of_v<llvm::Type, T>
-    static T *GetMyType(T *ptr, bool is_const = false) {
+    static T *GetMyType(T *ptr, bool is_const = false, bool direct = true) {
+        if(direct)
+            return ptr;
         auto hash = GetHash(ptr, is_const);
         if (blocks.contains(hash))
             return reinterpret_cast<T *>(blocks.at(hash).get());
@@ -47,6 +49,7 @@ private:
         hash = GetHash(block.get(), is_const);
         blocks[hash] = block;
         return reinterpret_cast<T *>(blocks[hash].get());
+
     }
 
 public:

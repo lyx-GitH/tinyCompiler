@@ -148,8 +148,8 @@ direct_declarator			: ID                                                    {$$ 
 							| LB declarator RB									    {$$ = $2; }
 							| direct_declarator LSBSCRPT expression10 RSBSCRPT      {$$ = createArrType(NULL, $3); addLeftMost($1, $$); $$ = $1;}    			
 							| direct_declarator LSBSCRPT RSBSCRPT                   {$$ = createArrType(NULL, NULL); addLeftMost($1, $$); $$ = $1;}    			                  
-							| direct_declarator LB param_type_list RB               {$$ = createFuncType(NULL, $3); addLeftMost($1, $$); $$ = $1;}    			              		
-							| direct_declarator LB	RB                              {$$ = createFuncType(NULL, NULL); addLeftMost($1, $$); $$ = $1;} 							    
+							| direct_declarator LB param_type_list RB               {$$ = createFuncType(NULL, $3); addLeftMost($1, $$); $$ = $1; $$->type_ = kFuncDecl; }    			              		
+							| direct_declarator LB	RB                              {$$ = createFuncType(NULL, NULL); addLeftMost($1, $$); $$ = $1; $$->type_ = kFuncDecl; } 							    
 							;
 
 abstract_declarator			: pointer                                               {$$ = $1;}
@@ -252,6 +252,7 @@ jump_stat					: GOTO ID SEMI                  {addChild($1, $2); $$ = $1; }
 							;
 
 
+
 expression : expression11
     | expression COMMA expression11             {$$ = createBinaryOpTree(",", $1, $3); }
 
@@ -332,6 +333,13 @@ postfix : single                                {$$ = $1;}
     | function_call                             {$$ = $1;}
     ;
 
+function_call: postfix LB RB { $$ = createFunctionCallTree($1, NULL);}
+    | postfix LB args_list RB {$$ = createFunctionCallTree($1, $3);}
+    ;
+
+args_list : expression11 {$$ = createArgList($1); }
+    | args_list COMMA expression11 {addChild($$, $3); }
+    ;
     
 single: NUMBER          {$$ = $1;}
     | STR               {$$ = $1;}
@@ -361,13 +369,6 @@ uop : ADD {$$ = createAstNode(kUop, "+", 1);}
     ;
 
 
-function_call: postfix LB RB { $$ = createFunctionCallTree($1, NULL);}
-    | postfix LB args_list RB {$$ = createFunctionCallTree($1, $3);}
-    ;
-
-args_list : expression {$$ = createArgList($1); }
-    | args_list COMMA expression {addChild($$, $3); }
-    ;
 
 
 type_name_cast				: spec_qualifier_list abstract_declarator	{assignType($2, $1); $$ = $2;}

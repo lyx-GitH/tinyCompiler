@@ -154,6 +154,11 @@ int main() {
     parser.Visualize(false);
     parser.Generate();
     parser.PrintIR();
+//    parser.Optimize("O0");
+    std::cout << "end gen" << std::endl;
+    parser.GenObjectCode("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.o");
+
+
 
     return 0;
 }

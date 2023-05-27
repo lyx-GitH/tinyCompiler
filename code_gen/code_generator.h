@@ -97,9 +97,9 @@ public:
         InScope();
         InitGenerators();
         InitBasicTypes();
-//       module
-//        test();
-//        test2();
+//        global_func = llvm::Function::Create(llvm::FunctionType::get(GetVoid(), false),
+//                                             llvm::GlobalValue::InternalLinkage, "_", &module);
+//        global_block = llvm::BasicBlock::Create(context, "__", global_func);
     };
 
     ~CodeGenerator() {
@@ -182,6 +182,9 @@ public:
 
     static inline void PrintIR() {
         module.print(llvm::outs(), nullptr);
+        if (llvm::verifyModule(module, &llvm::outs()) == 0)
+            llvm::outs() << "No errors.\n";
+        else llvm::outs() << "error!\n";
     }
 
 
@@ -191,8 +194,8 @@ private:
 
     std::vector<llvm::BasicBlock *> ContinueBlockStack;    //Store blocks for "continue" statement
     std::vector<llvm::BasicBlock *> BreakBlockStack;        //Store blocks for "break" statement
-    llvm::BasicBlock *TmpBB = nullptr;                            //Temp block for global instruction code generation
-    llvm::Function *TmpFunc = nullptr;                            //Temp function for global instruction code generation
+    static llvm::BasicBlock *global_block;                            //Temp block for global instruction code generation
+    static llvm::Function *global_func;                            //Temp function for global instruction code generation
 
     static llvm::Module module;
     static llvm::DataLayout data_layout;
@@ -241,7 +244,6 @@ private:
     TYPE_GETTER(Void, "void");
 
 
-
     static void SetSymbol(const std::string &name, Symbol symbol);
 
     static Symbol const *GetSymbol(const std::string &name);
@@ -250,12 +252,16 @@ private:
 
     static void CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &collector);
 
-    friend llvm::Value* CastToType(llvm::Type* type, llvm::Value* value);
+    static void CollectArgs(pAstNode node, std::vector<llvm::Value*> & collector);
 
-    friend llvm::Value* CastToBool(llvm::Value* value);
+    friend llvm::Value *CastToType(llvm::Type *type, llvm::Value *value);
+
+    friend llvm::Value *CastToBool(llvm::Value *value);
 
 
     DECL_GEN(kRoot);
+
+    DECL_GEN(kId);
 
     DECL_GEN(kFuncDef);
 
@@ -290,6 +296,10 @@ private:
     DECL_GEN(kExpr);
 
     DECL_GEN(kScope);
+
+    DECL_GEN(kFuncCall);
+
+    DECL_GEN(kFuncDecl);
 
 
 };

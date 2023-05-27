@@ -31,6 +31,7 @@ ID {LITERAL}+{ID_C}*
 %%
 
 "#include"([ ]+)?((<(\\.|[^>])+>)|(\"(\\.|[^"])+\"))	{
+    /*This part has been pre-processed by TCPreProcessor*/
     MOVE;
 }
 
@@ -208,7 +209,7 @@ ID {LITERAL}+{ID_C}*
 
 "//"(\\.|[^\n])*[\n]																						{MOVE;};
 [/][*]([^*]|[*]*[^*/])*[*]+[/]                                                                              {MOVE;};
-\"(\\.|[^\"])*\"																							{MOVE; NODE(kStrLiteral); return STR; }
+"\""(\\.|[^"\\])*"\""																						{MOVE; NODE(kStrLiteral); return STR; }
 "'"."'"                                                                                                     {MOVE; NODE(kCharLiteral); return NUMBER;}
 . {MOVE;};
 
