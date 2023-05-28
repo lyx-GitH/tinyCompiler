@@ -16,6 +16,8 @@ std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
 std::set<std::string> CodeGenerator::defined_functions{};
 bool CodeGenerator::cur_init_{false};
 
+std::string convert_to_raw(const char *s, std::size_t len);
+
 void CodeGenerator::InitGenerators() {
     LOAD_GEN(kRoot);
 
@@ -214,13 +216,7 @@ DEF_GEN(kFuncDef) {
             auto params = func_decl_node->child_->child_->next_;
             ASSERT_TYPE(params, kFuncParams);
             auto cur = params->child_;
-            // TODO : here is a bug, fix this
-//            while (cur && cur->type_ == kVarDecl) {
-//                if (cur->type_ != kVarDecl)
-//                    throw_code_gen_exception(cur, "no anonymous declaration allowed");
-//                CallGenerator(cur);
-//                cur = cur->next_;
-//            }
+
             int arg_idx = 0;
             for (auto arg_it = f->arg_begin(); arg_it < f->arg_end(); arg_it++, arg_idx++, cur = cur->next_) {
                 if (!cur)
@@ -337,10 +333,15 @@ DEF_GEN(kVarInit) {
             throw_code_gen_exception(expr_node, "cannot use non-const value to initialize global variables");
         auto type = CallGenerator(getNChildSafe(var_decl_node, 0)).GetType();
         auto name = std::string{getNChildSafe(var_decl_node, 1)->val_};
+        auto initialzer = CastToType(type, init_value_sym.GetVariable());
+
+        if (!initialzer)
+            throw_code_gen_exception(expr_node, "cannot convert expression to target type");
+
         if (cur_func_) {
             auto block_builder = llvm::IRBuilder<>(&cur_func_->getEntryBlock(), cur_func_->getEntryBlock().begin());
             auto alloca = block_builder.CreateAlloca(type, nullptr, name);
-            IR_builder.CreateStore(init_value_sym.GetVariable(), alloca);
+            IR_builder.CreateStore(initialzer, alloca);
             SetSymbol(name, alloca);
         } else {
             assert(init_value_sym.IsConst());
@@ -349,7 +350,7 @@ DEF_GEN(kVarInit) {
                     type,
                     TypeFactory::IsConst(type),
                     llvm::Function::ExternalLinkage,
-                    (llvm::Constant *) init_value_sym.GetConstant(),
+                    (llvm::Constant *) initialzer,
                     name
             );
             Symbol s{global_var};
@@ -473,7 +474,7 @@ DEF_GEN(kTypeDef) {
 DEF_GEN(kDemNumber) {
     assert(node && IS_NUMBER(node->type_));
     auto i = strtoll(node->val_, nullptr, 0);
-    return {llvm::ConstantInt::get(GetType("long"), i), true};
+    return {llvm::ConstantInt::get(GetType("int"), i), true};
 }
 
 DEF_GEN(kHexNumber) {
@@ -488,7 +489,8 @@ DEF_GEN(kOctNumber) {
 
 DEF_GEN(kStrLiteral) {
     ASSERT_TYPE(node, kStrLiteral);
-    std::string content{node->val_ + 1, strlen(node->val_) - 2};
+//    std::string content{node->val_ + 1, strlen(node->val_) - 2};
+    std::string content{convert_to_raw(node->val_ + 1, strlen(node->val_) - 2)};
     return {IR_builder.CreateGlobalStringPtr(content), true};
 }
 
@@ -554,11 +556,56 @@ DEF_GEN(kFuncCall) {
     return IR_builder.CreateCall(f, args);
 }
 
+std::string convert_to_raw(const char *s, std::size_t len) {
+    std::string result{};
+    for (int i = 0; i < len; i++) {
+        if (s[i] == '\\' && i + 1 < len) {
+            switch (s[i + 1]) {
+                case 'n':
+                    result += '\n';
+                    break;
+                case 't':
+                    result += '\t';
+                    break;
+                case '\\':
+                    result += '\\';
+                    break;
+                case 'r':
+                    result += '\r';
+                    break;
+                case 'v':
+                    result += '\v';
+                    break;
+                case 'f':
+                    result += '\f';
+                    break;
+                case 'a':
+                    result += '\a';
+                    break;
+                case 'b':
+                    result += '\b';
+                    break;
+                case '?':
+                    result += '\?';
+                    break;
+                case '\'':
+                    result += '\'';
+                    break;
+                case '\"':
+                    result += '\"';
+                    break;
+                default:
+                    result += s[i];
+                    result += s[i + 1];
+            }
+            i++;
+        } else {
+            result += s[i];
+        }
+    }
+    return result;
+}
 
-
-//void CodeGenerator::HandleFunctionDecl(const AstNode *func_node, bool is_def) {
-//
-//}
 
 
 

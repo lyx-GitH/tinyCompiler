@@ -14,7 +14,6 @@ extern "C" {
 extern int yyparse(void);
 extern int yydebug;
 }
-using namespace llvm;
 
 //template<typename T, typename... Args> requires std::is_base_of_v<llvm::Type, T>
 //class MyClass : public T {
@@ -44,6 +43,7 @@ using namespace llvm;
 
 // This function tests that if your llvm is correctly configured
 void llvm_test() {
+    using namespace llvm;
     LLVMContext context;
     auto *module = new Module("my_compiler", context);
     IRBuilder<> builder(context);
@@ -148,15 +148,22 @@ void llvm_test() {
 
 
 int main() {
+    auto src_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.c";
+    auto obj_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.o";
+    auto exe_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/a.out";
     yydebug = 0; // set this to 1 to enable debugging
-    auto parser = CodeGenerator("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.c");
+    auto parser = CodeGenerator(src_path);
     parser.Parse();
     parser.Visualize(false);
     parser.Generate();
     parser.PrintIR();
 //    parser.Optimize("O0");
     std::cout << "end gen" << std::endl;
-    parser.GenObjectCode("/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.o");
+    parser.GenObjectCode(obj_path);
+    parser.CallClangGenExe(obj_path, exe_path);
+    std::cout << "begin executing:" << std::endl;
+    system(exe_path);
+
 
 
 

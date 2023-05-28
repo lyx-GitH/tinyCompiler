@@ -118,6 +118,11 @@ public:
 
     void GenObjectCode(const std::string &file_name);
 
+    inline void CallClangGenExe(const std::string &object_file_path, const std::string &exe_path) {
+        auto cmd = "clang " + object_file_path + " -o " + exe_path;
+        system(cmd.c_str());
+    }
+
     void DumpIR(std::string &&file_name);
 
     class ScopeGuard {
@@ -149,44 +154,14 @@ public:
         }
     };
 
-    void test() {
-        auto int_type = GetType("int");
-        assert(int_type->isIntOrIntVectorTy());
-
-        auto const_int_type = TypeFactory::GetConstTypeOf(int_type);
-        auto const_int_ptr_type = TypeFactory::Get<llvm::PointerType>(const_int_type, 0U);
-        std::cout << "const int:" << const_int_type << " " << "const int*: " << const_int_ptr_type << std::endl;
-        auto int_ptr_type = TypeFactory::Get<llvm::PointerType>(int_type, 0U);
-        std::cout << "int* : " << int_ptr_type << std::endl;
-
-    }
-
-    void test2() {
-        auto int_type = GetType("int");
-        assert(!TypeFactory::IsConst(int_type));
-        assert(int_type != IR_builder.getInt32Ty());
-        assert(int_type->isIntOrIntVectorTy());
-        auto const_int_type = TypeFactory::GetConstTypeOf(int_type);
-        auto c_const_int_ty = TypeFactory::GetConstTypeOf(const_int_type);
-        assert(const_int_type == c_const_int_ty);
-        assert(TypeFactory::IsConst(const_int_type));
-        auto const_int_ptr_type = TypeFactory::Get<llvm::PointerType>(const_int_type, 0U);
-        std::cout << "const int:" << const_int_type << " " << "const int*: " << const_int_ptr_type << std::endl;
-        auto int_ptr_type = TypeFactory::Get<llvm::PointerType>(int_type, 0U);
-        std::cout << "int* : " << int_ptr_type << std::endl;
-        auto f_cst_type = TypeFactory::Get<llvm::FunctionType>(int_type, std::vector<llvm::Type *>{}, false);
-        auto f_int_type = TypeFactory::Get<llvm::FunctionType>(const_int_type, std::vector<llvm::Type *>{}, false);
-        assert(f_cst_type != f_int_type);
-
-    }
-
-    static inline void PrintIR() {
+    inline void PrintIR() {
         module.print(llvm::outs(), nullptr);
         if (llvm::verifyModule(module, &llvm::outs()) == 0)
             llvm::outs() << "No errors.\n";
-        else llvm::outs() << "error!\n";
+        else
+            llvm::outs() << "error!\n"
+                         << "NOTE: when enabling type factory, mismatched signatures are totally normal\n";
     }
-
 
 private:
     llvm::DataLayout *data_layout_ = nullptr;
@@ -241,6 +216,8 @@ private:
 
     TYPE_GETTER(Float, "float");
 
+    TYPE_GETTER(Double, "double");
+
     TYPE_GETTER(Void, "void");
 
 
@@ -252,11 +229,11 @@ private:
 
     static void CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &collector);
 
-    static void CollectArgs(pAstNode node, std::vector<llvm::Value*> & collector);
+    static void CollectArgs(pAstNode node, std::vector<llvm::Value *> &collector);
 
-    friend llvm::Value *CastToType(llvm::Type *type, llvm::Value *value);
+    static llvm::Value *CastToType(llvm::Type *type, llvm::Value *value);
 
-    friend llvm::Value *CastToBool(llvm::Value *value);
+    static llvm::Value *CastToBool(llvm::Value *value);
 
 
     DECL_GEN(kRoot);

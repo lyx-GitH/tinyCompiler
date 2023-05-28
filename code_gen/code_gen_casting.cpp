@@ -8,7 +8,7 @@ inline bool IsSigned(llvm::Value *v) {
     return !v->getType()->isIntegerTy(1);
 }
 
-llvm::Value *CastToBool(llvm::Value *value) {
+llvm::Value *CodeGenerator::CastToBool(llvm::Value *value) {
     if (value->getType() == CodeGenerator::GetType("_bool"))
         return value;
     if (value->getType()->isIntegerTy())
@@ -25,7 +25,7 @@ llvm::Value *CastToBool(llvm::Value *value) {
 
 }
 
-llvm::Value *CastToType(llvm::Type *type, llvm::Value *value) {
+llvm::Value *CodeGenerator::CastToType(llvm::Type *type, llvm::Value *value) {
     if (value->getType() == type)
         return value;
     if (value->getType() == CodeGenerator::GetType("_bool"))
