@@ -23,7 +23,7 @@
 %token <ast_node> NUMBER ID STR
 %token <ast_node> TYPE 
 %token <ast_node> CONST STATIC TYPE_DEF VARGS
-%token <ast_node> GOTO BREAK CONTINUE RETURN;
+%token <ast_node> GOTO BREAK CONTINUE RETURN
 
 %token SEMI HEADER
 %token STRUCT UNION ENUM DOT ARROW

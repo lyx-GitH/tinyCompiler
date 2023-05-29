@@ -196,14 +196,13 @@ DEF_GEN(kRoot) {
 }
 
 DEF_GEN(kId) {
+    printf("call kId Gen\n");
     auto p_symbol = GetSymbol(node->val_);
-    if (!p_symbol)
+    if (!p_symbol || !p_symbol->IsVariable())
         throw_code_gen_exception(node, "unidentified id");
-    auto type = p_symbol->GetVariable()->getType()->getNonOpaquePointerElementType();
-    auto value = p_symbol->GetVariable();
-    if (type->isArrayTy()) {
-        return IR_builder.CreatePointerCast(value, type->getArrayElementType()->getPointerTo());
-    } else return IR_builder.CreateLoad(type, value);
+
+//    return CastToRightValue(p_symbol->GetVariable());
+    return p_symbol->GetVariable();
 }
 
 DEF_GEN(kFuncDef) {
@@ -332,7 +331,7 @@ DEF_GEN(kVarInit) {
         assert(expr_node);
         ASSERT_TYPE(var_decl_node, kVarDecl);
         CallGenerator(var_decl_node);   // this would do semantic checks.
-        auto init_value_sym = CallGenerator(expr_node);
+        auto init_value_sym = GenExpression(expr_node);
         if (!cur_func_ && !init_value_sym.IsConst())
             throw_code_gen_exception(expr_node, "cannot use non-const value to initialize global variables");
         auto type = CallGenerator(getNChildSafe(var_decl_node, 0)).GetType();
@@ -402,7 +401,7 @@ void CodeGenerator::CollectArgs(pAstNode node, std::vector<llvm::Value *> &colle
     ASSERT_TYPE(node, kArgList);
     auto arg_list = node->child_;
     while (arg_list) {
-        auto symbol = CallGenerator(arg_list);
+        auto symbol = GenExpression(arg_list); // TODO: here has been fix
         assert(symbol.IsVariable() || symbol.IsConst());
         collector.push_back(symbol.GetVariable());
         arg_list = arg_list->next_;
@@ -517,6 +516,7 @@ DEF_GEN(kCharLiteral) {
 }
 
 DEF_GEN(kExpr) {
+    // TODO: modify this
     return CallGenerator(node->child_);
 }
 
@@ -603,7 +603,6 @@ DEF_GEN(kStructType) {
     if (supposed_type) {
         assert(supposed_type->IsType() && supposed_type->GetType()->isStructTy());
         return supposed_type->GetType();
-
     }
 
     auto decl_list_node = id_node->next_;
@@ -624,6 +623,7 @@ DEF_GEN(kStructType) {
     }
 
     auto struct_type = TypeFactory::Get(llvm::StructType::create(context, struct_name));
+    struct_type->setBody(member_types);
 
     SetType(struct_name, struct_type);
 
@@ -633,6 +633,7 @@ DEF_GEN(kStructType) {
         member_map.emplace(member_names[i], mem);
     }
     struct_type_table.insert(std::make_pair(struct_name, std::move(member_map)));
+
     return struct_type;
 }
 
@@ -643,6 +644,7 @@ DEF_GEN(kUnionType) {
 DEF_GEN(kEnumType) {
 
 }
+
 
 std::string convert_to_raw(const char *s, std::size_t len) {
     std::string result{};

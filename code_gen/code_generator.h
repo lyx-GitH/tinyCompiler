@@ -169,6 +169,14 @@ public:
 //        c_int->elements()[0]
     }
 
+    static llvm::Value* CreateLoad(llvm::Value* pLHS) {
+        //For array types, return the pointer to its first element
+        if (pLHS->getType()->getNonOpaquePointerElementType()->isArrayTy())
+            return IR_builder.CreatePointerCast(pLHS, pLHS->getType()->getNonOpaquePointerElementType()->getArrayElementType()->getPointerTo());
+        else
+            return IR_builder.CreateLoad(pLHS->getType()->getNonOpaquePointerElementType(), pLHS);
+    }
+
 private:
     llvm::DataLayout *data_layout_ = nullptr;
 
@@ -243,6 +251,16 @@ private:
     static llvm::Value *CastToType(llvm::Type *type, llvm::Value *value);
 
     static llvm::Value *CastToBool(llvm::Value *value);
+
+    static llvm::Type *GetPriorType(llvm::Type *t1, llvm::Type *t2);
+
+    static void AlignType(llvm::Value *&v1, llvm::Value *&v2);
+
+    static llvm::Value *AlignType(llvm::Value *v, llvm::Type *t);
+
+    static llvm::Value *CastToRightValue(llvm::Value *left_value);
+
+    static Symbol GenExpression(const AstNode *node);
 
 
     DECL_GEN(kRoot);

@@ -68,4 +68,42 @@ llvm::Value *CodeGenerator::CastToType(llvm::Type *type, llvm::Value *value) {
     return nullptr;
 }
 
+llvm::Type *CodeGenerator::GetPriorType(llvm::Type *t1, llvm::Type *t2) {
+    if (t1->isIntegerTy() && t2->isIntegerTy()) {
+        return t1->getIntegerBitWidth() > t2->getIntegerBitWidth() ? t1 : t2;
+    }
+    if (t1->isFloatingPointTy() && t2->isFloatingPointTy())
+        return t1->isFloatTy() ? t2 : t1;
+    if (t1->isFloatingPointTy() && t2->isIntegerTy())
+        return t1;
+    if (t1->isIntegerTy() && t2->isFloatingPointTy())
+        return t2;
+    return nullptr;
+}
+
+void CodeGenerator::AlignType(llvm::Value *&v1, llvm::Value *&v2) {
+    auto good_type = GetPriorType(v1->getType(), v2->getType());
+    if (!good_type)
+        throw std::runtime_error("incompatible types");
+    v1 = CastToType(good_type, v1);
+    v2 = CastToType(good_type, v2);
+}
+
+llvm::Value *CodeGenerator::AlignType(llvm::Value *v, llvm::Type *t) {
+    auto good_type = GetPriorType(v->getType(), t);
+    if (!good_type)
+        throw std::runtime_error("incompatible types");
+    return t == good_type ? CastToType(t, v) : v;
+}
+
+llvm::Value *CodeGenerator::CastToRightValue(llvm::Value *left_value) {
+    assert(left_value);
+
+    auto type = left_value->getType()->getNonOpaquePointerElementType();
+    if (type->isArrayTy()) {
+        return IR_builder.CreatePointerCast(left_value, type->getArrayElementType()->getPointerTo());
+    } else return IR_builder.CreateLoad(type, left_value);
+}
+
+
 
