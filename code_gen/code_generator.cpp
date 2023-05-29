@@ -10,11 +10,14 @@ llvm::IRBuilder<> CodeGenerator::IR_builder{CodeGenerator::context};
 llvm::Module CodeGenerator::module{"main", context};
 llvm::DataLayout CodeGenerator::data_layout{&module};
 llvm::Function *CodeGenerator::cur_func_{nullptr};
-llvm::Function *CodeGenerator::global_func = nullptr;
-llvm::BasicBlock *CodeGenerator::global_block = nullptr;
+//llvm::Function *CodeGenerator::global_func = nullptr;
+//llvm::BasicBlock *CodeGenerator::global_block = nullptr;
 std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
+CodeGenerator::StructTypeTable CodeGenerator::struct_type_table{};
+CodeGenerator::UnionTypeTable CodeGenerator::union_type_table{};
 std::set<std::string> CodeGenerator::defined_functions{};
 bool CodeGenerator::cur_init_{false};
+bool CodeGenerator::en_warn{true};
 
 std::string convert_to_raw(const char *s, std::size_t len);
 
@@ -28,9 +31,12 @@ void CodeGenerator::InitGenerators() {
     LOAD_GEN(kTypeFeature);
     LOAD_GEN(kFuncDef);
     LOAD_GEN(kScope);
+
     LOAD_GEN(kFuncType);
     LOAD_GEN(kPtrType);
     LOAD_GEN(kArrType);
+    LOAD_GEN(kStructType);
+    LOAD_GEN(kUnionType);
 
     LOAD_GEN(kVarInit);
     LOAD_GEN(kVarDecl);
@@ -162,6 +168,7 @@ Symbol const *CodeGenerator::GetLocalSymbol(const std::string &name) {
 }
 
 void CodeGenerator::Generate() {
+    std::printf("\033[32m[codegen begins] \033[0m\n");
     if (!ast_root_)
         return;
     assert(ast_root_->type_ == kRoot);
@@ -169,7 +176,9 @@ void CodeGenerator::Generate() {
         CallGenerator(ast_root_);
     } catch (ParseException &e) {
         e.show();
+        exit(1);
     }
+    std::printf("\033[32m[codegen succeed] \033[0m\n");
 
 }
 
@@ -218,6 +227,7 @@ DEF_GEN(kFuncDef) {
             auto cur = params->child_;
 
             int arg_idx = 0;
+            en_warn = false;
             for (auto arg_it = f->arg_begin(); arg_it < f->arg_end(); arg_it++, arg_idx++, cur = cur->next_) {
                 if (!cur)
                     throw_code_gen_exception(cur, "too few arguments");
@@ -228,6 +238,7 @@ DEF_GEN(kFuncDef) {
             if (cur) {
                 throw_code_gen_exception(cur, "too many arguments");
             }
+            en_warn = true;
 
             CallGenerator(func_body_node);
 
@@ -264,16 +275,9 @@ DEF_GEN(kVarDecl) {
     if (GetLocalSymbol(name))
         throw_code_gen_exception(var_id_node, "duplicate symbol");
 
-//    if (var_type_node->type_ == kFuncType && type->isFunctionTy()) {
-//        auto f = llvm::Function::Create((llvm::FunctionType *) (type), llvm::GlobalValue::ExternalLinkage,
-//                                        std::string{name}, module);
-//        SetSymbol(name, f);
-//        return {f};
-//    }
-
-
-    if (!cur_init_ && TypeFactory::IsConst(type))
-        throw_code_gen_exception(var_id_node, "uninitialized const variable");
+    if (en_warn && !cur_init_ && TypeFactory::IsConst(type))
+        show_code_gen_warning(node, "uninitialized const variable");
+//        throw_code_gen_exception(var_id_node, "uninitialized const variable");
 
     if (cur_init_)
         return {type}; // semantics checks are done, if this is a child node, the parent will do the rest.
@@ -385,9 +389,12 @@ void CodeGenerator::CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &co
         ++param_idx;
         param_start = param_start->next_;
     }
-    if (void_idx >= 0 && collector.size() != 1)
-        throw_code_gen_exception(getNChildSafe(node, void_idx),
-                                 "no void type allowed in function declaration/definition");
+    if (void_idx >= 0) {
+        if (collector.size() > 1)
+            throw_code_gen_exception(getNChildSafe(node, void_idx),
+                                     "no void type allowed in function declaration/definition");
+        else collector.clear();
+    }
 }
 
 void CodeGenerator::CollectArgs(pAstNode node, std::vector<llvm::Value *> &collector) {
@@ -457,7 +464,9 @@ DEF_GEN(kTypeFeature) {
         qualifiers = qualifiers->next_;
     }
     if (qualifiers) {
-        return pValue{TypeFactory::GetConstTypeOf(type.GetType())};
+//        return pValue{TypeFactory::GetConstTypeOf(type.GetType())};
+        auto t = TypeFactory::GetConstTypeOf(type.GetType());
+        return t;
     } else return type;
 }
 
@@ -474,7 +483,10 @@ DEF_GEN(kTypeDef) {
 DEF_GEN(kDemNumber) {
     assert(node && IS_NUMBER(node->type_));
     auto i = strtoll(node->val_, nullptr, 0);
-    return {llvm::ConstantInt::get(GetType("int"), i), true};
+    auto s = Symbol{llvm::ConstantInt::get(GetType("int"), i), true};
+//    assert(s.GetVariable()->getType() == GetType("int") );
+    return s;
+
 }
 
 DEF_GEN(kHexNumber) {
@@ -553,7 +565,83 @@ DEF_GEN(kFuncCall) {
     auto args_node = getNChildSafe(node, 1);
     std::vector<llvm::Value *> args;
     CollectArgs(args_node, args);
+
+    if (!f->isVarArg()) {
+        std::size_t i = 0;
+        for (auto arg_it = f->arg_begin(); arg_it != f->arg_end(); ++arg_it, ++i) {
+            if (i >= args.size())
+                throw_code_gen_exception(node, "too few arguments in function call");
+
+            auto casted = CastToType(arg_it->getType(), args[i]);
+            if (!casted)
+                throw_code_gen_exception(node, "unqualified type");
+
+            args[i] = casted;
+        }
+        if (i != args.size())
+            throw_code_gen_exception(node, "too many arguments in function call");
+    }
     return IR_builder.CreateCall(f, args);
+}
+
+DEF_GEN(kStructType) {
+    std::vector<llvm::Type *> member_types;
+    std::vector<std::string> member_names;
+    auto id_node = getNChildSafe(node, 0);
+    assert(id_node);
+
+    std::string struct_name;
+
+    if (id_node->type_ == kNULL) {
+        struct_name.assign("struct-" + std::to_string(struct_type_table.size()));
+    } else if (id_node->type_ == kId) {
+        struct_name.assign("struct-" + std::string{id_node->val_});
+    } else
+        assert(false);
+
+    auto supposed_type = GetSymbol(struct_name);
+    if (supposed_type) {
+        assert(supposed_type->IsType() && supposed_type->GetType()->isStructTy());
+        return supposed_type->GetType();
+
+    }
+
+    auto decl_list_node = id_node->next_;
+    if (!decl_list_node || decl_list_node->type_ == kNULL) {
+        auto it = GetSymbol(id_node->val_);
+        if (!it || !it->GetType()->isStructTy())
+            throw_code_gen_exception(id_node, "invalid struct type id");
+        else return *it;
+    }
+
+    for (auto cur = decl_list_node; cur; cur = cur->next_) {
+        ASSERT_TYPE(cur, kVarDecl);
+        auto type = CallGenerator(cur->child_).GetType();
+        if (type->isVoidTy())
+            throw_code_gen_exception(cur, "cannot declare a void type variable");
+        member_types.push_back(type);
+        member_names.emplace_back(cur->child_->next_->val_);
+    }
+
+    auto struct_type = TypeFactory::Get(llvm::StructType::create(context, struct_name));
+
+    SetType(struct_name, struct_type);
+
+    StructMemberMap member_map;
+    for (std::size_t i = 0; i < member_names.size(); i++) {
+        StructMemberType mem{i, member_types[i]};
+        member_map.emplace(member_names[i], mem);
+    }
+    struct_type_table.insert(std::make_pair(struct_name, std::move(member_map)));
+    return struct_type;
+}
+
+DEF_GEN(kUnionType) {
+
+}
+
+DEF_GEN(kEnumType) {
+
 }
 
 std::string convert_to_raw(const char *s, std::size_t len) {

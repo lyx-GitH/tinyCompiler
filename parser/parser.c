@@ -55,7 +55,6 @@ void TinyParserBegin() {
     parser_col_no = 0;
     parser_line_no = 0;
     parser_root_node = createAstNode(kRoot, NULL, 0);
-    pwd = getcwd(NULL, 0);
     assert(parser_root_node != NULL);
 }
 
@@ -97,6 +96,8 @@ void TinyParserInclude(const char *include_file, char mode, int len) {
 }
 
 const char *TinyParserGetPwd() { return pwd; }
+
+void TinyParserSetPwd(const char *path) { pwd = path; }
 
 // void TinyParserSetPwd(const char *path) { const char *dir = chdir(path); }
 

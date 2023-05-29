@@ -26,8 +26,19 @@ llvm::Value *CodeGenerator::CastToBool(llvm::Value *value) {
 }
 
 llvm::Value *CodeGenerator::CastToType(llvm::Type *type, llvm::Value *value) {
-    if (value->getType() == type)
+//    auto non_const_type = TypeFactory::GetNonConstOf(type);
+//    auto non_const_v_type = TypeFactory::GetNonConstOf(value->getType());
+
+//    if (non_const_type == non_const_v_type) // This would eliminate const issues.
+//        return value;
+//    if(type == value->getType())
+//        return value;
+    if (TypeFactory::IsActuallySameType(type, value->getType())) {
         return value;
+    } else {
+        std::cout << "warning: implicit type conversion is conducted" << std::endl;
+    }
+
     if (value->getType() == CodeGenerator::GetType("_bool"))
         return CastToBool(value);
 

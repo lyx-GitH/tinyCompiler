@@ -21,6 +21,12 @@ void show_lexer_error(const char *file_name, int column, int line, int throw_err
         throw std::runtime_error("");
 }
 
+void show_code_gen_warning(const struct AstNode *node, const char *e)  {
+    auto path = TinyParserGetPwd();
+    printf("\033[33mwarning\033[0m: %s ", e);
+    show_lexer_error(path, node->col_no_, node->line_no_, 0);
+}
+
 extern void ThrowParseException(const char *e);
 extern void ThrowParseException(const char* e, const struct AstNode* node);
 

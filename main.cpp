@@ -148,23 +148,23 @@ void llvm_test() {
 
 
 int main() {
+#define ENABLE_TYPE_FACTORY
     auto src_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.c";
+    auto vis_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/ast.dot";
     auto obj_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.o";
     auto exe_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/a.out";
     yydebug = 0; // set this to 1 to enable debugging
     auto parser = CodeGenerator(src_path);
     parser.Parse();
-    parser.Visualize(false);
+    parser.Visualize(true, vis_path);
     parser.Generate();
     parser.PrintIR();
-//    parser.Optimize("O0");
+//    parser.Optimize("O3");
     std::cout << "end gen" << std::endl;
     parser.GenObjectCode(obj_path);
     parser.CallClangGenExe(obj_path, exe_path);
     std::cout << "begin executing:" << std::endl;
     system(exe_path);
-
-
 
 
     return 0;

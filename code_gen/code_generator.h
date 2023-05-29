@@ -83,6 +83,10 @@ public:
     using pValue = Symbol;
     using GenFunc = std::function<pValue(const AstNode *)>;
     using SymbolTable = std::map<std::string, pValue>;
+    using StructMemberType = std::pair<std::size_t, llvm::Type *>;
+    using StructMemberMap = std::map<std::string, StructMemberType>;
+    using StructTypeTable = std::map<std::string, StructMemberMap>;
+    using UnionTypeTable = std::map<std::string, StructMemberMap>;
 
 
     static void InitGenerators();
@@ -161,6 +165,8 @@ public:
         else
             llvm::outs() << "error!\n"
                          << "NOTE: when enabling type factory, mismatched signatures are totally normal\n";
+//        llvm::StructType* c_int = llvm::StructType::get(IR_builder.getInt32Ty());
+//        c_int->elements()[0]
     }
 
 private:
@@ -169,8 +175,8 @@ private:
 
     std::vector<llvm::BasicBlock *> ContinueBlockStack;    //Store blocks for "continue" statement
     std::vector<llvm::BasicBlock *> BreakBlockStack;        //Store blocks for "break" statement
-    static llvm::BasicBlock *global_block;                            //Temp block for global instruction code generation
-    static llvm::Function *global_func;                            //Temp function for global instruction code generation
+//    static llvm::BasicBlock *global_block;                            //Temp block for global instruction code generation
+//    static llvm::Function *global_func;                            //Temp function for global instruction code generation
 
     static llvm::Module module;
     static llvm::DataLayout data_layout;
@@ -178,8 +184,11 @@ private:
     static llvm::IRBuilder<> IR_builder;
     static llvm::Function *cur_func_;
     static bool cur_init_;
+    static bool en_warn;
     static std::vector<SymbolTable> symbol_table_stack_;
     static std::set<std::string> defined_functions;
+    static StructTypeTable struct_type_table;
+    static UnionTypeTable union_type_table;
 
     static void InScope() {
         symbol_table_stack_.emplace_back();
@@ -278,7 +287,11 @@ private:
 
     DECL_GEN(kFuncDecl);
 
+    DECL_GEN(kEnumType);
 
+    DECL_GEN(kStructType);
+
+    DECL_GEN(kUnionType);
 };
 
 

@@ -10,14 +10,16 @@
 #include "../preprocessor/tc_preprocessor.h"
 
 void TCParser::Parse() {
+    std::printf("\033[32m[parse begins] \033[0m\n");
     TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
     TCPreProcessor::GenIncludeChain(file_path_);
     for(const auto& file : TCPreProcessor::GetIncludeChain()){
         TinyParserBegin();
+        TinyParserSetPwd(file_path_.c_str());
         try {
             TinyParserParse(file.c_str());
         } catch (ParseException &e) {
-            std::printf("\033[31mfailed \033[0m");
+            std::printf("\033[31m[parse failed] \033[0m");
             e.show();
             TinyParserEnd();
             is_ok_ = false;
@@ -34,7 +36,7 @@ void TCParser::Parse() {
             merge(ast_root_, root);
         }
     }
-    std::printf("\033[32m done \033[0m\n");
+    std::printf("\033[32m[parse succeed] \033[0m\n");
     assert(ast_root_ != nullptr);
 }
 
@@ -45,7 +47,7 @@ void TCParser::Visualize(bool to_file, const std::string &out_file_path) {
     if (!to_file)
         printer.PrintTree(std::cout);
     else {
-        auto fs = std::ofstream{file_path_};
+        auto fs = std::ofstream{out_file_path};
         printer.PrintTree(static_cast<std::ostream &>(fs));
     }
 }

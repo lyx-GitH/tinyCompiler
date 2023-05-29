@@ -14,6 +14,11 @@
 static std::map<uint64_t, std::shared_ptr<char>> blocks;
 static const int BLOCK_SIZE = 64;
 
+class TypeCache {
+public:
+    static std::map<uint64_t, uint64_t> const_to_trivial;
+};
+
 class TypeFactory {
 
 
@@ -34,7 +39,7 @@ private:
     requires
     std::is_base_of_v<llvm::Type, T>
     static T *GetMyType(T *ptr, bool is_const = false, bool direct = false) {
-        if(direct)
+        if (direct)
             return ptr;
         auto hash = GetHash(ptr, is_const);
         if (blocks.contains(hash))
@@ -48,6 +53,9 @@ private:
         blocks[hash] = block;
         hash = GetHash(block.get(), is_const);
         blocks[hash] = block;
+        if (is_const) {
+            TypeCache::const_to_trivial[(uint64_t) block.get()] = (uint64_t) ptr;
+        }
         return reinterpret_cast<T *>(blocks[hash].get());
 
     }
@@ -89,6 +97,22 @@ public:
     std::is_base_of_v<llvm::Type, T>
     static bool IsConst(T *ptr) {
         return _IsConst(reinterpret_cast<char *>(ptr));
+    }
+
+    template<typename T>
+    requires
+    std::is_base_of_v<llvm::Type, T>
+    static bool IsActuallySameType(T *t1, T *t2) {
+        if (t1 == t2)
+            return true;
+        auto t1_i = reinterpret_cast<uint64_t>(t1);
+        auto t2_i = reinterpret_cast<uint64_t>(t2);
+        if (TypeCache::const_to_trivial.contains(t1_i) && TypeCache::const_to_trivial[t1_i] == t2_i)
+            return true;
+        if (TypeCache::const_to_trivial.contains(t2_i) && TypeCache::const_to_trivial[t2_i] == t1_i)
+            return true;
+        return false;
+
     }
 
 };

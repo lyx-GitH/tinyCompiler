@@ -37,7 +37,6 @@ static int level = 0;
 inline void add_level() {
     ++level;
     if (level == 1) {
-        std::cout << "_____begin preprocessing_____" << std::endl;
         p_yyout = fopen("/dev/null", "w");
     }
 
@@ -47,7 +46,6 @@ inline void sub_level() {
     --level;
     if (level == 0) {
         fclose(p_yyout);
-        std::cout << "_____end preprocessing_____" << std::endl;
     }
 }
 
@@ -59,7 +57,7 @@ void TCPreProcessor::GenIncludeChain(const std::string &path) {
         throw std::runtime_error("invalid path: " + path);
 
     include_chain.push_front(abs_path.string());
-    std::cout << "include file: " << abs_path.string() << std::endl;
+    std::printf("\033[32m[include file] %s \033[0m\n", abs_path.c_str());
 
     auto dir = abs_path.parent_path();
     chdir(dir.c_str());
