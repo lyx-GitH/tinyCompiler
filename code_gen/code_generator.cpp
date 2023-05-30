@@ -5,21 +5,44 @@
 #include "code_generator.h"
 
 std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::generators{};
+
 llvm::LLVMContext CodeGenerator::context{};
+
 llvm::IRBuilder<> CodeGenerator::IR_builder{CodeGenerator::context};
+
 llvm::Module CodeGenerator::module{"main", context};
+
 llvm::DataLayout CodeGenerator::data_layout{&module};
+
 llvm::Function *CodeGenerator::cur_func_{nullptr};
-//llvm::Function *CodeGenerator::global_func = nullptr;
-//llvm::BasicBlock *CodeGenerator::global_block = nullptr;
+
 std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
+
 CodeGenerator::StructTypeTable CodeGenerator::struct_type_table{};
+
 CodeGenerator::UnionTypeTable CodeGenerator::union_type_table{};
+
 std::set<std::string> CodeGenerator::defined_functions{};
+
 bool CodeGenerator::cur_init_{false};
+
 bool CodeGenerator::en_warn{true};
 
+std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::binary_gen_left{};
+
+std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::binary_gen_right{};
+
+std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::unary_gen_left{};
+
+std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::unary_gen_right{};
+
+std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::assign_gen_left{};
+
+std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::assign_gen_right{};
+
 std::string convert_to_raw(const char *s, std::size_t len);
+
+
 
 void CodeGenerator::InitGenerators() {
     LOAD_GEN(kRoot);
@@ -51,6 +74,10 @@ void CodeGenerator::InitGenerators() {
 
     LOAD_GEN(kExpr);
     LOAD_GEN(kFuncCall);
+    LOAD_GEN(kSubScript);
+    LOAD_GEN(kAssign);
+    LOAD_GEN(kCast);
+
 }
 
 void CodeGenerator::InitBasicTypes() {
@@ -473,6 +500,10 @@ DEF_GEN(kTypeDef) {
     ASSERT_TYPE(node, kTypeDef);
     auto real_type_node = getNChildSafe(node, 0);
     auto real_type = CallGenerator(real_type_node).GetType();
+    if(real_type->isFunctionTy()) {
+        // function defs are force converted to pointer;
+        real_type = TypeFactory::Get<llvm::PointerType>(real_type, 0U);
+    }
     auto alias_name = getNChildSafe(node, 1)->val_;
     AddTypeAlias(alias_name, real_type);
     return {};
@@ -635,6 +666,34 @@ DEF_GEN(kStructType) {
     struct_type_table.insert(std::make_pair(struct_name, std::move(member_map)));
 
     return struct_type;
+}
+
+DEF_GEN(kCast) {
+    auto type_node = getNChildSafe(node, 0);
+    assert(IS_TYPE(type_node->type_));
+    auto type = CallGenerator(type_node).GetType();
+    auto expr_node = getNChildSafe(node, 1);
+    assert(expr_node);
+    auto expr_value = GenExpression(expr_node).GetVariable();
+    return CastToType(type, expr_value);
+}
+
+DEF_GEN(kSubScript) {
+    auto arr_node = getNChildSafe(node, 0);
+    auto idx_node = getNChildSafe(node, 1);
+    assert(arr_node);
+    assert(idx_node);
+    auto array = GenExpression(arr_node).GetVariable();
+    auto idx = GenExpression(idx_node).GetVariable();
+    if(!array->getType()->isPointerTy() || !idx->getType()->isIntegerTy()) {
+        throw_code_gen_exception(node, "incompatible type for subscript");
+    }
+
+    return IR_builder.CreateGEP(array->getType()->getNonOpaquePointerElementType(), array, idx);
+}
+
+DEF_GEN(kAssign) {
+    return GenExpression(node);
 }
 
 DEF_GEN(kUnionType) {

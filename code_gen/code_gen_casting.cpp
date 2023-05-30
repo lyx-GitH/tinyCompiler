@@ -9,12 +9,15 @@ inline bool IsSigned(llvm::Value *v) {
 }
 
 llvm::Value *CodeGenerator::CastToBool(llvm::Value *value) {
-    if (value->getType() == CodeGenerator::GetType("_bool"))
+    if (value->getType()->isIntegerTy() && value->getType()->getIntegerBitWidth() == 1)
         return value;
-    if (value->getType()->isIntegerTy())
+
+    if (value->getType()->isIntegerTy()) {
+        value = CastToType(IR_builder.getIntNTy(value->getType()->getIntegerBitWidth()), value); // When enabling type factory
         return CodeGenerator::IR_builder.CreateICmpNE(value,
                                                       llvm::ConstantInt::get((llvm::IntegerType *) value->getType(), 0,
                                                                              true));
+    }
     if (value->getType()->isFloatingPointTy())
         return CodeGenerator::IR_builder.CreateFCmpONE(value, llvm::ConstantFP::get(value->getType(), 0.0));
     if (value->getType()->isPointerTy())

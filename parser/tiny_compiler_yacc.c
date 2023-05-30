@@ -2595,52 +2595,52 @@ yyreduce:
 
   case 157:
 #line 351 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "&", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "&=", 1);;}
     break;
 
   case 158:
 #line 352 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "/", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "/=", 1);;}
     break;
 
   case 159:
 #line 353 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "+", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "+=", 1);;}
     break;
 
   case 160:
 #line 354 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "-", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "-=", 1);;}
     break;
 
   case 161:
 #line 355 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "*", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "*=", 1);;}
     break;
 
   case 162:
 #line 356 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "<", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "<<=", 1);;}
     break;
 
   case 163:
 #line 357 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, ">", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, ">>=", 1);;}
     break;
 
   case 164:
 #line 358 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "|", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "|=", 1);;}
     break;
 
   case 165:
 #line 359 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "^", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "^=", 1);;}
     break;
 
   case 166:
 #line 360 "parser.y"
-    {(yyval.ast_node) = createAstNode(kAssign, "%", 1);;}
+    {(yyval.ast_node) = createAstNode(kAssign, "%=", 1);;}
     break;
 
   case 167:

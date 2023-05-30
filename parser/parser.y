@@ -348,16 +348,16 @@ single: NUMBER          {$$ = $1;}
     ;
 
 aop : ASSIGN {$$ = createAstNode(kAssign, "=", 1); }
-    | A_AND {$$ = createAstNode(kAssign, "&", 1);}
-    | A_DIV {$$ = createAstNode(kAssign, "/", 1);}
-    | A_PLUS {$$ = createAstNode(kAssign, "+", 1);}
-    | A_SUB {$$ = createAstNode(kAssign, "-", 1);}
-    | A_MULT {$$ = createAstNode(kAssign, "*", 1);}
-    | A_LS {$$ = createAstNode(kAssign, "<", 1);}
-    | A_RS {$$ = createAstNode(kAssign, ">", 1);}
-    | A_OR {$$ = createAstNode(kAssign, "|", 1);}
-    | A_XOR {$$ = createAstNode(kAssign, "^", 1);}
-    | A_MOD {$$ = createAstNode(kAssign, "%", 1);}
+    | A_AND {$$ = createAstNode(kAssign, "&=", 1);}
+    | A_DIV {$$ = createAstNode(kAssign, "/=", 1);}
+    | A_PLUS {$$ = createAstNode(kAssign, "+=", 1);}
+    | A_SUB {$$ = createAstNode(kAssign, "-=", 1);}
+    | A_MULT {$$ = createAstNode(kAssign, "*=", 1);}
+    | A_LS {$$ = createAstNode(kAssign, "<<=", 1);}
+    | A_RS {$$ = createAstNode(kAssign, ">>=", 1);}
+    | A_OR {$$ = createAstNode(kAssign, "|=", 1);}
+    | A_XOR {$$ = createAstNode(kAssign, "^=", 1);}
+    | A_MOD {$$ = createAstNode(kAssign, "%=", 1);}
     ;
 
 uop : ADD {$$ = createAstNode(kUop, "+", 1);}

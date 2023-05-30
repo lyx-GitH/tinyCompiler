@@ -67,7 +67,7 @@ extern "C" {
 }
 
 
-#define MAX_GEN_NUM 1024
+#define MAX_GEN_NUM 256
 #define GEN_NAME(t) gen_##t
 #define DECL_GEN(t) static pValue GEN_NAME(t) (const AstNode* node)
 #define DEF_GEN(t) CodeGenerator::pValue CodeGenerator:: GEN_NAME(t) (const AstNode* node)
@@ -76,6 +76,33 @@ extern "C" {
 #define CALL_GEN(n) CodeGenerator::generators.at((n)->type_)((n))
 #define ASSERT_TYPE(n, t) assert((n) && (n)->type_ == (t))
 #define TYPE_GETTER(type, name) static inline llvm::Type * Get##type(){return GetType(name);}
+
+#define EXPR_L_NAME(name) LGen##name
+#define EXPR_R_NAME(name) RGen##name
+#define DECL_EXPR_L(name) static Symbol EXPR_L_NAME(name) (const AstNode* node)
+#define DECL_EXPR_R(name) static Symbol EXPR_R_NAME(name) (const AstNode* node)
+#define INVALID throw_code_gen_exception(node, "expression must be a right value"); return {}
+#define DEFAULT_R(name) CastToRightValue(EXPR_L_NAME(name)(node).GetVariable())
+#define PACK_METHOD(m) [](llvm::Value* a, llvm::Value* b) { \
+    return (m)(a, b);                                       \
+}
+
+#define LOAD_BINARY_OP(op_str, name) do { \
+    printf("generating at %d %s\n", GetOpHash(op_str), #name);                                      \
+    CodeGenerator::binary_gen_left.at(GetOpHash(op_str)) = CodeGenerator:: EXPR_L_NAME(name);                                          \
+    CodeGenerator::binary_gen_right.at(GetOpHash(op_str)) = CodeGenerator:: EXPR_R_NAME(name);                                         \
+ } while(0)
+
+#define LOAD_UNARY_OP(op_str, name) do { \
+    CodeGenerator::unary_gen_left.at(GetOpHash(op_str)) = CodeGenerator:: EXPR_L_NAME(name);                                        \
+    CodeGenerator::unary_gen_right.at(GetOpHash(op_str)) = CodeGenerator:: EXPR_R_NAME(name);                                       \
+ }while(0)
+
+#define LOAD_ASSIGN_OP(op_str, name) do { \
+    CodeGenerator::assign_gen_left.at(GetOpHash(op_str)) = CodeGenerator:: EXPR_L_NAME(name);                                        \
+    CodeGenerator::assign_gen_right.at(GetOpHash(op_str)) = CodeGenerator:: EXPR_R_NAME(name);                                       \
+ }while(0)
+
 
 
 class CodeGenerator : public TCParser {
@@ -93,7 +120,25 @@ public:
 
     static void InitBasicTypes();
 
+    static void InitBinaryOperators();
+
+    static void InitUnaryOperators();
+
+    static void InitAssignOperators();
+
     static std::array<GenFunc, MAX_GEN_NUM> generators;
+
+    static std::array<GenFunc, MAX_GEN_NUM> binary_gen_left;
+
+    static std::array<GenFunc, MAX_GEN_NUM> binary_gen_right;
+
+    static std::array<GenFunc, MAX_GEN_NUM> unary_gen_left;
+
+    static std::array<GenFunc, MAX_GEN_NUM> unary_gen_right;
+
+    static std::array<GenFunc, MAX_GEN_NUM> assign_gen_left;
+
+    static std::array<GenFunc, MAX_GEN_NUM> assign_gen_right;
 
 //    CodeGenerator() = default;
 
@@ -101,15 +146,14 @@ public:
         InScope();
         InitGenerators();
         InitBasicTypes();
-//        global_func = llvm::Function::Create(llvm::FunctionType::get(GetVoid(), false),
-//                                             llvm::GlobalValue::InternalLinkage, "_", &module);
-//        global_block = llvm::BasicBlock::Create(context, "__", global_func);
+        InitUnaryOperators();
+        InitAssignOperators();
+        InitBinaryOperators();
     };
+
 
     ~CodeGenerator() {
         OffScope();
-//        delete data_layout_;
-//        delete module_;
     }
 
     void SetAstRoot(pAstNode root) {
@@ -169,17 +213,16 @@ public:
 //        c_int->elements()[0]
     }
 
-    static llvm::Value* CreateLoad(llvm::Value* pLHS) {
+    static llvm::Value *CreateLoad(llvm::Value *pLHS) {
         //For array types, return the pointer to its first element
         if (pLHS->getType()->getNonOpaquePointerElementType()->isArrayTy())
-            return IR_builder.CreatePointerCast(pLHS, pLHS->getType()->getNonOpaquePointerElementType()->getArrayElementType()->getPointerTo());
+            return IR_builder.CreatePointerCast(pLHS,
+                                                pLHS->getType()->getNonOpaquePointerElementType()->getArrayElementType()->getPointerTo());
         else
             return IR_builder.CreateLoad(pLHS->getType()->getNonOpaquePointerElementType(), pLHS);
     }
 
 private:
-    llvm::DataLayout *data_layout_ = nullptr;
-
 
     std::vector<llvm::BasicBlock *> ContinueBlockStack;    //Store blocks for "continue" statement
     std::vector<llvm::BasicBlock *> BreakBlockStack;        //Store blocks for "break" statement
@@ -235,6 +278,8 @@ private:
 
     TYPE_GETTER(Double, "double");
 
+    TYPE_GETTER(Long, "long");
+
     TYPE_GETTER(Void, "void");
 
 
@@ -260,12 +305,35 @@ private:
 
     static llvm::Value *CastToRightValue(llvm::Value *left_value);
 
-    static Symbol GenExpression(const AstNode *node);
+    static Symbol GenExpression(const AstNode *node, bool r_value = true);
+
+    static Symbol AssignValue(llvm::Value *lhs, llvm::Value *rhs, const AstNode* node);
+
+    static void CheckValidAssign(llvm::Value* lhs, llvm::Value* rhs, const AstNode* node);
+
+    template<typename F, typename ...Args>
+    static auto PackMethod(F &&f, Args &&...args) {
+        return [&](llvm::Value *a, llvm::Value *b) {
+            return (CodeGenerator::IR_builder.*f)(a, b, args...);
+        };
+    }
+
+    template<typename F>
+    static llvm::Value *GenBinaryOpIntInt(const AstNode *node, F &&f) {
+        auto lhs = GenExpression(getNChildSafe(node, 0)).GetVariable();
+        auto rhs = GenExpression(getNChildSafe(node, 1)).GetVariable();
+        if (!lhs || !rhs)
+            return nullptr;
+        if (!lhs->getType()->isIntegerTy() || !rhs->getType()->isIntegerTy())
+            return nullptr;
+        AlignType(lhs, rhs);
+        return f(lhs, rhs);
+    }
 
 
     DECL_GEN(kRoot);
 
-    DECL_GEN(kId);
+    DECL_GEN(kId); // left value
 
     DECL_GEN(kFuncDef);
 
@@ -297,7 +365,7 @@ private:
 
     DECL_GEN(kFloatNumber);
 
-    DECL_GEN(kExpr);
+    DECL_GEN(kExpr); // right value
 
     DECL_GEN(kScope);
 
@@ -310,7 +378,288 @@ private:
     DECL_GEN(kStructType);
 
     DECL_GEN(kUnionType);
+
+    DECL_GEN(kCast); // right value
+
+    DECL_GEN(kSubScript);// left value
+
+    DECL_GEN(kAssign);
+
+    // Operators and Expression Generators
+    DECL_EXPR_R(Plus){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(Plus) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(Sub){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(Sub) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(Mult){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(Mult) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(Div){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(Div) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(Mod) {
+        auto f = PACK_METHOD(CodeGenerator::IR_builder.CreateSRem);
+        return GenBinaryOpIntInt(node, f);
+    }
+
+    DECL_EXPR_L(Mod) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(Shl) {
+        auto f = PACK_METHOD(CodeGenerator::IR_builder.CreateShl);
+        return GenBinaryOpIntInt(node, f);
+    }
+
+    DECL_EXPR_L(Shl) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(Shr) {
+        printf("calling generator for shl\n");
+        return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateAShr));
+    }
+
+    DECL_EXPR_L(Shr) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(BitAnd) {
+        return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateAnd));
+    }
+
+    DECL_EXPR_L(BitAnd) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(BitOr) {
+        return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateOr));
+    }
+
+    DECL_EXPR_L(BitOr) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(BitXor) {
+        return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateXor));
+    }
+
+    DECL_EXPR_L(BitXor) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(Assign) {
+        return DEFAULT_R(Assign);
+    }
+
+    DECL_EXPR_L(Assign) {
+        auto left = GenExpression(getNChildSafe(node, 0), false);
+        auto right = GenExpression(getNChildSafe(node, 1), true);
+        CheckValidAssign(left.GetVariable(), right.GetVariable(), node);
+        return AssignValue(left.GetVariable(), right.GetVariable(), node);
+    }
+
+    DECL_EXPR_R(AssignPlus){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignPlus){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_R(AssignSub){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignSub){
+        assert(false && "unimplemented yet");
+    }
+
+
+    DECL_EXPR_R(AssignMult){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignMult){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_R(AssignDiv){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignDiv){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_R(AssignShl){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignShl){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_R(AssignShr){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignShr){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_R(AssignBitOr){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignBitOr){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_R(AssignBitAnd){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignBitAnd){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_R(AssignBitXor){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_L(AssignBitXor){
+        assert(false && "unimplemented yet");
+    }
+
+    DECL_EXPR_R(DeRef) {
+        return DEFAULT_R(DeRef);
+    }
+
+    DECL_EXPR_L(DeRef) {
+        Symbol ptr = GenExpression(node->child_);
+        if (!ptr.GetVariable()->getType()->isPointerTy()) {
+            throw_code_gen_exception(node, "deref operator must be assigned to a pointer");
+        }
+        return ptr;
+    }
+
+    DECL_EXPR_R(AddrOf) {
+        return GenExpression(node->child_, false).GetVariable();
+    }
+
+    DECL_EXPR_L(AddrOf) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(UPlus) {
+        auto val = GenExpression(node->child_);
+        if (!val.GetVariable()->getType()->isIntegerTy() || !val.GetVariable()->getType()->isFloatingPointTy()) {
+            throw_code_gen_exception(node, "must be applied to a number");
+        }
+        return val;
+    }
+
+    DECL_EXPR_L(UPlus) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(UMinus) {
+        auto val = GenExpression(node->child_).GetVariable();
+        if (val->getType()->isIntegerTy())
+            return IR_builder.CreateNeg(val);
+        if (val->getType()->isFloatingPointTy())
+            return IR_builder.CreateFNeg(val);
+        throw_code_gen_exception(node, "must be applied to a number");
+        return {};
+    }
+
+    DECL_EXPR_L(UMinus) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(ULogNot) {
+        auto boolean_val = CastToBool(GenExpression(node->child_).GetVariable());
+        auto boolean_0 = llvm::ConstantInt::get(boolean_val->getType(), 0);
+        return IR_builder.CreateICmpEQ(boolean_val, boolean_0);
+    }
+
+    DECL_EXPR_L(ULogNot) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(UBitNot) {
+        auto val = GenExpression(node->child_).GetVariable();
+        val->print(llvm::outs(), true);
+        if (!val->getType()->isIntegerTy())
+            throw_code_gen_exception(node, "\'~\' must be applied to a integer");
+        auto rev_val = IR_builder.CreateNot(val);
+        val->print(llvm::outs(), true);
+        return rev_val;
+    }
+
+    DECL_EXPR_L(UBitNot) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(FuncCall) {
+        return gen_kFuncCall(node).GetVariable();
+    }
+
+    DECL_EXPR_L(FuncCall) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(SubScript) {
+        return DEFAULT_R(SubScript);
+    }
+
+    DECL_EXPR_L(SubScript) {
+        return gen_kSubScript(node);
+    }
+
+    DECL_EXPR_R(SizeOf) {
+        llvm::Type *type = nullptr;
+        if (IS_TYPE(node->child_->type_)) {
+            type = CALL_GEN(node->child_).GetType();
+        } else if (node->child_->type_ == kId) {
+            type = GenExpression(node->child_).GetVariable()->getType();
+        } else {
+            type = GenExpression(node->child_).GetVariable()->getType();
+        }
+        auto size = data_layout.getTypeAllocSize(type);
+        return llvm::ConstantInt::get(CodeGenerator::GetLong(), size);
+    }
+
+    DECL_EXPR_L(SizeOf) {
+        INVALID;
+    }
+
+
 };
+
+
 
 
 #endif //TINYCOMPILER_CODE_GENERATOR_H

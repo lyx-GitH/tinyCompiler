@@ -12,7 +12,7 @@ void assert_valid_typedefs(pAstNode declares){
     while (cur) {
         if (cur->type_ == kVarInit)
             goto err;
-        if (cur->type_ == kVarDecl){
+        if (cur->type_ == kVarDecl || cur->type_ == kFuncDecl){
             cur->type_ = kTypeDef;
             assert(cur->child_->next_);
             add_type(cur->child_->next_->val_);
