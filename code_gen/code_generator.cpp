@@ -18,9 +18,13 @@ llvm::DataLayout CodeGenerator::data_layout{&module};
 
 llvm::Function *CodeGenerator::cur_func_{nullptr};
 
+const AstNode *CodeGenerator::cur_node{nullptr};
+
 std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
 
 std::vector<CodeGenerator::TypeTable> CodeGenerator::symbol_type_stack_{};
+
+std::map<std::string, const AstNode *> CodeGenerator::type_aliases_map{};
 
 CodeGenerator::StructTypeTable CodeGenerator::struct_type_table{};
 
@@ -54,6 +58,7 @@ void CodeGenerator::InitGenerators() {
 
     LOAD_GEN(kType);
     LOAD_GEN(kTypeDef);
+    LOAD_GEN(kTypeAlias);
     LOAD_GEN(kTypeFeature);
     LOAD_GEN(kFuncDef);
     LOAD_GEN(kScope);
@@ -80,6 +85,7 @@ void CodeGenerator::InitGenerators() {
     LOAD_GEN(kSubScript);
     LOAD_GEN(kAssign);
     LOAD_GEN(kCast);
+    LOAD_GEN(KUAsign);
 
 }
 
@@ -191,10 +197,12 @@ Symbol const *CodeGenerator::GetSymbol(const std::string &name) {
 }
 
 const AstNode *CodeGenerator::GetSymbolTypeTree(const std::string &name) {
+    std::cout << "getting type tree " << name << std::endl;
     for (auto rit = symbol_type_stack_.rbegin(); rit != symbol_type_stack_.rend(); ++rit) {
         if (rit->contains(name))
             return rit->at(name);
     }
+    std::cout << "type tree not found" << std::endl;
     return nullptr;
 }
 
@@ -332,13 +340,13 @@ DEF_GEN(kVarDecl) {
         );
         Symbol s{glob_var};
         SetSymbol(name, s);
-        SetSymbolType(cur_struct_name + name, var_type_node);
+        SetSymbolTypeTree(cur_struct_name + name, var_type_node);
     } else {
         // this var is a local var
         auto block_builder = llvm::IRBuilder<>(&cur_func_->getEntryBlock(), cur_func_->getEntryBlock().begin());
         auto alloc = block_builder.CreateAlloca(type, nullptr, name);
         SetSymbol(name, alloc);
-        SetSymbolType(name, var_type_node);
+        SetSymbolTypeTree(name, var_type_node);
         return {alloc};
     }
 //    return type;
@@ -392,7 +400,7 @@ DEF_GEN(kVarInit) {
             auto alloca = block_builder.CreateAlloca(type, nullptr, name);
             IR_builder.CreateStore(initialzer, alloca);
             SetSymbol(name, alloca);
-            SetSymbolType(name, var_decl_node->child_);
+            SetSymbolTypeTree(name, var_decl_node->child_);
         } else {
             assert(init_value_sym.IsConst());
             auto global_var = new llvm::GlobalVariable(
@@ -405,7 +413,7 @@ DEF_GEN(kVarInit) {
             );
             Symbol s{global_var};
             SetSymbol(name, s);
-            SetSymbolType(name, var_decl_node->child_);
+            SetSymbolTypeTree(name, var_decl_node->child_);
         }
 
 
@@ -477,7 +485,12 @@ DEF_GEN(kFuncType) {
 
 DEF_GEN(kType) {
     ASSERT_TYPE(node, kType);
+    return Symbol{GetType(node->val_)};
+}
 
+DEF_GEN(kTypeAlias) {
+    ASSERT_TYPE(node, kTypeAlias);
+    assert(type_aliases_map.contains(node->val_));
     return Symbol{GetType(node->val_)};
 }
 
@@ -511,7 +524,6 @@ DEF_GEN(kTypeFeature) {
         qualifiers = qualifiers->next_;
     }
     if (qualifiers) {
-//        return pValue{TypeFactory::GetConstTypeOf(type.GetType())};
         auto t = TypeFactory::GetConstTypeOf(type.GetType());
         return t;
     } else return type;
@@ -520,12 +532,11 @@ DEF_GEN(kTypeFeature) {
 DEF_GEN(kTypeDef) {
     ASSERT_TYPE(node, kTypeDef);
     auto real_type_node = getNChildSafe(node, 0);
+    cur_node = GetExactTypeTree(real_type_node);
     auto real_type = CallGenerator(real_type_node).GetType();
-    llvm::outs() << "typedef :";
-    real_type->print(llvm::outs(), true);
-    llvm::outs() << "\n";
     auto alias_name = getNChildSafe(node, 1)->val_;
     AddTypeAlias(alias_name, real_type);
+    AddTypeDefTreeInfo(alias_name, cur_node);
     return {};
 }
 
@@ -578,9 +589,9 @@ void CodeGenerator::SetSymbol(const std::string &name, Symbol symbol) {
     symbol_table_stack_.back().insert({name, symbol});
 }
 
-void CodeGenerator::SetSymbolType(const std::string &name, const AstNode *node) {
+void CodeGenerator::SetSymbolTypeTree(const std::string &name, const AstNode *node) {
     assert(!symbol_type_stack_.empty() && !symbol_type_stack_.back().contains(name));
-    symbol_type_stack_.back().insert({name, node});
+    symbol_type_stack_.back().insert({name, GetExactTypeTree(node)});
 }
 
 void CodeGenerator::SetFunction(const std::string &name, llvm::Function *f) {
@@ -687,6 +698,9 @@ DEF_GEN(kStructType) {
         else return *it;
     }
 
+    auto struct_type = TypeFactory::Get(llvm::StructType::create(context, struct_name));
+    SetType(struct_name, struct_type);
+
     for (auto cur = decl_list_node; cur; cur = cur->next_) {
         ASSERT_TYPE(cur, kVarDecl);
         auto type = CallGenerator(cur->child_).GetType();
@@ -695,14 +709,12 @@ DEF_GEN(kStructType) {
         member_types.push_back(type);
         member_names.emplace_back(cur->child_->next_->val_);
         auto mem_id_name = struct_name + std::string{cur->child_->next_->val_};
-        SetSymbolType(mem_id_name, cur->child_);
+        SetSymbolTypeTree(mem_id_name, cur->child_);
     }
 
-    auto struct_type = TypeFactory::Get(llvm::StructType::create(context, struct_name));
+
     struct_type->setBody(member_types);
 
-
-    SetType(struct_name, struct_type);
 
     StructMemberMap member_map;
     for (std::size_t i = 0; i < member_names.size(); i++) {
@@ -745,11 +757,28 @@ DEF_GEN(kAssign) {
     return GenExpression(node);
 }
 
+DEF_GEN(KUAsign) {
+    return GenExpression(node);
+}
+
 DEF_GEN(kUnionType) {
 
 }
 
 DEF_GEN(kEnumType) {
+
+}
+
+void CodeGenerator::AddTypeDefTreeInfo(const char *name, const AstNode *pNode) {
+    assert(!type_aliases_map.contains(name));
+    type_aliases_map[name] = pNode;
+}
+
+const AstNode *CodeGenerator::GetExactTypeTree(const AstNode *type_node) {
+    if (type_node->type_ == kTypeAlias) {
+        assert(type_aliases_map.contains(type_node->val_));
+        return type_aliases_map[type_node->val_];
+    } else return type_node;
 
 }
 

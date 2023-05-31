@@ -138,6 +138,8 @@ inline const char *GetSyntaxNodeTypeStr(enum AstNodeType type) {
             return "kTypeDecl";
         case kTypeDef:
             return "kTypeDef";
+        case kTypeAlias:
+            return "kTypeAlias";
         default:
             return "Unsupported";
     }

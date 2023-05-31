@@ -57,11 +57,18 @@ enum AstNodeType {
     kCharLiteral,
     kStrLiteral,
     kTypeDecl,
-    kVargs
+    kVargs,
+
+    kRet,
+    kGoto,
+    kBreak,
+    kCont,
+
+    kTypeAlias
 };
 
 #define IS_NUMBER(TYPE) ((TYPE) >> 2 == 1)
-#define IS_TYPE(t) ((t) >> 2 == 4 || (t) >> 2 == 5)
+#define IS_TYPE(t) ((t) >> 2 == 4 || (t) >> 2 == 5 || (t) == kTypeAlias)
 
 
 

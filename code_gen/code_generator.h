@@ -238,6 +238,7 @@ private:
     static bool en_warn;
     static std::vector<SymbolTable> symbol_table_stack_;
     static std::vector<TypeTable> symbol_type_stack_;
+    static std::map<std::string, const AstNode*> type_aliases_map;
     static std::set<std::string> defined_functions;
     static StructTypeTable struct_type_table;
     static UnionTypeTable union_type_table;
@@ -288,9 +289,13 @@ private:
 
     static void SetSymbol(const std::string &name, Symbol symbol);
 
-    static void SetSymbolType(const std::string &name, const AstNode *node);
+    static void SetSymbolTypeTree(const std::string &name, const AstNode *node);
 
-    static void SetFunction(const std::string& name, llvm::Function* f);
+    static void SetFunction(const std::string &name, llvm::Function *f);
+
+    static void AddTypeDefTreeInfo(const char *name, const AstNode *pNode);
+
+    static const AstNode* GetExactTypeTree(const AstNode* type);
 
     static Symbol const *GetSymbol(const std::string &name);
 
@@ -314,28 +319,27 @@ private:
 
     static llvm::Value *CastToRightValue(llvm::Value *left_value);
 
-    static llvm::Value* CastToRightValue(llvm::Function* func);
+    static llvm::Value *CastToRightValue(llvm::Function *func);
 
     static Symbol GenExpression(const AstNode *node, bool r_value = true);
 
     static Symbol AssignValue(llvm::Value *lhs, llvm::Value *rhs, const AstNode *node);
 
-    static bool IsConstExpr(const AstNode *);
+    static Symbol SelfPSValue(const AstNode *v, bool is_prefix, bool is_add); // ++ = true, -- = false
+
+    static Symbol DefaultAssignGen(const AstNode* node, const GenFunc& bin_op);
+
 
     static const AstNode *cur_node;
 
     static inline void CurNodeStepDown() {
+        assert(cur_node && cur_node->child_);
+
         if (cur_node->type_ == kTypeFeature) {
             cur_node = cur_node->child_->child_;
         } else cur_node = cur_node->child_;
     }
 
-    template<typename F, typename ...Args>
-    static auto PackMethod(F &&f, Args &&...args) {
-        return [&](llvm::Value *a, llvm::Value *b) {
-            return (CodeGenerator::IR_builder.*f)(a, b, args...);
-        };
-    }
 
     template<typename F>
     static llvm::Value *GenBinaryOpIntInt(const AstNode *node, F &&f) {
@@ -349,6 +353,21 @@ private:
         return f(lhs, rhs);
     }
 
+    template<typename FInt, typename FFloat>
+    static llvm::Value *RunOpNumNum(FInt &&f_i, FFloat &&f_f, llvm::Value *lhs, llvm::Value *rhs) {
+        AlignType(lhs, rhs);
+        if (lhs->getType()->isFloatingPointTy()) {
+            return f_f(lhs, rhs);
+        } else {
+            assert(lhs->getType()->isIntegerTy());
+            return f_i(lhs, rhs);
+        }
+    }
+
+    // add and sub involves pointers and constant checks, so it needs to be considered.
+    static llvm::Value *RunAdd(llvm::Value *lhs, llvm::Value *rhs);
+
+    static llvm::Value *RunSub(llvm::Value *lhs, llvm::Value *rhs);
 
     DECL_GEN(kRoot);
 
@@ -367,6 +386,8 @@ private:
     DECL_GEN(kArrType);
 
     DECL_GEN(kType);
+
+    DECL_GEN(kTypeAlias);
 
     DECL_GEN(kTypeFeature);
 
@@ -404,9 +425,30 @@ private:
 
     DECL_GEN(kAssign);
 
+    DECL_GEN(KUAsign);
+
+    DECL_GEN(kGoto);
+
+    DECL_GEN(kRet);
+
+    DECL_GEN(kCont);
+
+    DECL_GEN(kBreak);
+
+
+
     // Operators and Expression Generators
     DECL_EXPR_R(Plus) {
-        assert(false && "unimplemented yet");
+        auto lhs = GenExpression(node->child_);
+        auto lhs_node = cur_node;
+        auto rhs = GenExpression(node->child_->next_);
+        if (lhs.GetVariable()->getType()->isPointerTy() || lhs.GetVariable()->getType()->isArrayTy())
+            cur_node = lhs_node;
+        try {
+            return RunAdd(lhs.GetVariable(), rhs.GetVariable());
+        } catch (std::exception &e) {
+            throw_code_gen_exception(node, e.what());
+        }
     }
 
     DECL_EXPR_L(Plus) {
@@ -414,7 +456,16 @@ private:
     }
 
     DECL_EXPR_R(Sub) {
-        assert(false && "unimplemented yet");
+        auto lhs = GenExpression(node->child_);
+        auto lhs_node = cur_node;
+        auto rhs = GenExpression(node->child_->next_);
+        if (lhs.GetVariable()->getType()->isPointerTy() || lhs.GetVariable()->getType()->isArrayTy())
+            cur_node = lhs_node;
+        try {
+            return RunSub(lhs.GetVariable(), rhs.GetVariable());
+        } catch (std::exception &e) {
+            throw_code_gen_exception(node, e.what());
+        }
     }
 
     DECL_EXPR_L(Sub) {
@@ -422,7 +473,16 @@ private:
     }
 
     DECL_EXPR_R(Mult) {
-        assert(false && "unimplemented yet");
+        auto mul_int_f = PACK_METHOD(IR_builder.CreateMul);
+        auto mul_float_f = PACK_METHOD(IR_builder.CreateFMul);
+        auto lhs = GenExpression(node->child_);
+        auto rhs = GenExpression(node->child_->next_);
+        try {
+            return RunOpNumNum(mul_int_f, mul_float_f, lhs.GetVariable(), rhs.GetVariable());
+        } catch (std::exception &e) {
+            throw_code_gen_exception(node, e.what());
+            return {};
+        }
     }
 
     DECL_EXPR_L(Mult) {
@@ -430,7 +490,16 @@ private:
     }
 
     DECL_EXPR_R(Div) {
-        assert(false && "unimplemented yet");
+        auto mul_int_f = PACK_METHOD(IR_builder.CreateSDiv);
+        auto mul_float_f = PACK_METHOD(IR_builder.CreateFDiv);
+        auto lhs = GenExpression(node->child_);
+        auto rhs = GenExpression(node->child_->next_);
+        try {
+            return RunOpNumNum(mul_int_f, mul_float_f, lhs.GetVariable(), rhs.GetVariable());
+        } catch (std::exception &e) {
+            throw_code_gen_exception(node, e.what());
+            return {};
+        }
     }
 
     DECL_EXPR_L(Div) {
@@ -456,7 +525,6 @@ private:
     }
 
     DECL_EXPR_R(Shr) {
-        printf("calling generator for shl\n");
         return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateAShr));
     }
 
@@ -494,8 +562,8 @@ private:
 
     DECL_EXPR_L(Assign) {
         auto left = GenExpression(getNChildSafe(node, 0), false);
-        if (cur_node->type_ == kTypeFeature)
-            throw_code_gen_exception(node, "cannot assign type to const variables");
+        if (cur_node && cur_node->type_ == kTypeFeature)
+            throw_code_gen_exception(node, "cannot assign value to const variables");
         auto right = GenExpression(getNChildSafe(node, 1), true);
         return AssignValue(left.GetVariable(), right.GetVariable(), node);
     }
@@ -677,7 +745,7 @@ private:
         INVALID;
     }
 
-    DECL_EXPR_R(MemOf){
+    DECL_EXPR_R(MemOf) {
         return DEFAULT_R(MemOf);
     }
 
@@ -688,7 +756,10 @@ private:
     DECL_EXPR_L(TrinaryExpr);
 
 
+
     static std::string cur_struct_name;
+
+
 };
 
 

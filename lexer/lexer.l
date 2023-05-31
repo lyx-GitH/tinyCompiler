@@ -38,14 +38,12 @@ ID {LITERAL}+{ID_C}*
 ";" {MOVE; return SEMI;}
 
 "char"|"short"|"int"|"long"|"float"|"double"|"void"|"signed"|"unsigned" {
-    printf("get type: %s\n", yytext);
     MOVE;
     NODE(kType);
     return TYPE;
 }
 
 "const" {
-    printf("get const\n");
     MOVE;
     NODE(kTypeQualifier);
     return CONST;
@@ -93,12 +91,12 @@ ID {LITERAL}+{ID_C}*
 "case"      {MOVE; return CASE;}
 "defualt"   {MOVE; return DEFAULT; }
 
-"goto"      {MOVE; NODE(kJump); return GOTO;}
-"break"     {MOVE; NODE(kJump); return BREAK;}
-"continue"  {MOVE; NODE(kJump); return CONTINUE;}
+"goto"      {MOVE; NODE(kGoto); return GOTO;}
+"break"     {MOVE; NODE(kBreak); return BREAK;}
+"continue"  {MOVE; NODE(kCont); return CONTINUE;}
 
 "..." {MOVE; NODE(kVargs); return VARGS; }
-"return" {MOVE; NODE(kJump); return RETURN;}
+"return" {MOVE; NODE(kRet); return RETURN;}
 
 
 
@@ -131,7 +129,7 @@ ID {LITERAL}+{ID_C}*
     MOVE;
     // ID can be a type-alias
     if(has_type(yytext)){
-        NODE(kType);
+        NODE(kTypeAlias);
         return TYPE;
     } else {
         NODE(kId);
