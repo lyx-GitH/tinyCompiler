@@ -13,7 +13,7 @@ void TCParser::Parse() {
     std::printf("\033[32m[parse begins] \033[0m\n");
     TinyParserSetRoot(createAstNode(kRoot, nullptr, 0));
     TCPreProcessor::GenIncludeChain(file_path_);
-    for(const auto& file : TCPreProcessor::GetIncludeChain()){
+    for (const auto &file: TCPreProcessor::GetIncludeChain()) {
         TinyParserBegin();
         TinyParserSetPwd(file_path_.c_str());
         try {
@@ -23,14 +23,14 @@ void TCParser::Parse() {
             e.show();
             TinyParserEnd();
             is_ok_ = false;
-            return;
+            exit(1);
         } catch (std::runtime_error &e) {
             // do nothing
         }
         is_ok_ = true;
 //        ast_root_ = TinyParserGetRoot();
         auto root = TinyParserMoveRoot();
-        if(!ast_root_) {
+        if (!ast_root_) {
             ast_root_ = root;
         } else {
             merge(ast_root_, root);

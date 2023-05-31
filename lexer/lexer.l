@@ -38,12 +38,14 @@ ID {LITERAL}+{ID_C}*
 ";" {MOVE; return SEMI;}
 
 "char"|"short"|"int"|"long"|"float"|"double"|"void"|"signed"|"unsigned" {
+    printf("get type: %s\n", yytext);
     MOVE;
     NODE(kType);
     return TYPE;
 }
 
 "const" {
+    printf("get const\n");
     MOVE;
     NODE(kTypeQualifier);
     return CONST;

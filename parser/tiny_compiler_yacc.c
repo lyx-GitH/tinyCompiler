@@ -2735,7 +2735,7 @@ yyreduce:
 
   case 188:
 #line 407 "parser.y"
-    {addNext((yyvsp[(2) - (2)].ast_node), (yyvsp[(1) - (2)].ast_node)); (yyval.ast_node) = (yyvsp[(1) - (2)].ast_node);;}
+    {addNext((yyvsp[(2) - (2)].ast_node), (yyvsp[(1) - (2)].ast_node)); (yyval.ast_node) = (yyvsp[(2) - (2)].ast_node);;}
     break;
 
   case 189:

@@ -16,6 +16,7 @@ pAstNode check_types(pAstNode type) {
     if (IS_TYPE(type->type_)) return type;
     assert(type->child_ != NULL);
     if (!IS_TYPE(type->child_->type_)) {
+        printf("add default\n");
         pAstNode node = createAstNode(kType, "int", 3);
         addChildHead(type, node);
     }
@@ -40,7 +41,7 @@ void assignType(pAstNode dec_list, pAstNode type) {
 
 size_t safe_strlen(char *s) { return s == NULL ? 0 : strlen(s); }
 
-pAstNode copyNode(pAstNode target) {
+pAstNode copyNode(const struct AstNode* target) {
     if (target == NULL) return NULL;
     pAstNode new_node =
             createAstNode(target->type_, target->val_, safe_strlen(target->val_));
@@ -124,7 +125,7 @@ pAstNode createAstNode(enum AstNodeType type, char *value, int len) {
 
 void freeAstNode(pAstNode node) {
     if (!node) return;
-    if (node->val_) free(node->val_);
+    if (node->val_ && strlen(node->val_) != 0) free(node->val_);
     freeAstNode(node->next_);
     freeAstNode(node->child_);
     free(node);
@@ -173,9 +174,10 @@ pAstNode createArgList(pAstNode args) {
 
 pAstNode createFunctionCallTree(pAstNode function_name, pAstNode arg_list) {
     pAstNode node = createAstNode(kFuncCall, NULL, 0);
-    assert(function_name->type_ == kId);
+    pAstNode expr_node = createAstNode(kExpr, NULL, 0);
+    expr_node->child_ = function_name;
     assert(arg_list == NULL || arg_list->type_ == kArgList);
-    addChild(node, function_name);
+    addChild(node, expr_node);
     addChild(node, arg_list);
     return node;
 }

@@ -10,6 +10,9 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Function.h>
 #include "../types/type_factory.h"
+extern "C" {
+#include "../ast/ast.h"
+};
 
 
 class Symbol {
@@ -27,14 +30,15 @@ public:
     Symbol(llvm::Type *Ty) : type_(TYPE) { content_.t = Ty; }
 
 
-    Symbol(llvm::Value *Value, bool isConst = false, bool release = false) : type_(isConst ? CONSTANT : VARIABLE), relase_mem_(
-            true) { content_.v = Value; }
+    Symbol(llvm::Value *Value, bool isConst = false, bool release = false) : type_(isConst ? CONSTANT : VARIABLE),
+                                                                             relase_mem_(
+                                                                                     true) { content_.v = Value; }
 
     [[nodiscard]] llvm::Function *GetFunction() const { return this->type_ == FUNCTION ? content_.f : nullptr; }
 
     [[nodiscard]] llvm::Type *GetType() const { return this->type_ == TYPE ? content_.t : nullptr; }
 
-    [[nodiscard]] llvm::Value *GetVariable() const { return content_.v;  }
+    [[nodiscard]] llvm::Value *GetVariable() const { return content_.v; }
 
     [[nodiscard]] llvm::Value *GetConstant() const { return this->type_ == CONSTANT ? content_.v : nullptr; }
 

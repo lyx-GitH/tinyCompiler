@@ -159,7 +159,7 @@ int main() {
     parser.Visualize(true, vis_path);
     parser.Generate();
     parser.PrintIR();
-//    parser.Optimize("O3");
+    parser.Optimize("O3");
     std::cout << "end gen" << std::endl;
     parser.GenObjectCode(obj_path);
     parser.CallClangGenExe(obj_path, exe_path);

@@ -104,12 +104,12 @@ extern "C" {
  }while(0)
 
 
-
 class CodeGenerator : public TCParser {
 public:
     using pValue = Symbol;
     using GenFunc = std::function<pValue(const AstNode *)>;
     using SymbolTable = std::map<std::string, pValue>;
+    using TypeTable = std::map<std::string, const AstNode *>;
     using StructMemberType = std::pair<std::size_t, llvm::Type *>;
     using StructMemberMap = std::map<std::string, StructMemberType>;
     using StructTypeTable = std::map<std::string, StructMemberMap>;
@@ -237,17 +237,20 @@ private:
     static bool cur_init_;
     static bool en_warn;
     static std::vector<SymbolTable> symbol_table_stack_;
+    static std::vector<TypeTable> symbol_type_stack_;
     static std::set<std::string> defined_functions;
     static StructTypeTable struct_type_table;
     static UnionTypeTable union_type_table;
 
     static void InScope() {
         symbol_table_stack_.emplace_back();
+        symbol_type_stack_.emplace_back();
     }
 
     static void OffScope() {
         assert(!symbol_table_stack_.empty());
         symbol_table_stack_.pop_back();
+        symbol_type_stack_.pop_back();
     }
 
     static void InFunc(llvm::Function *f) {
@@ -285,7 +288,13 @@ private:
 
     static void SetSymbol(const std::string &name, Symbol symbol);
 
+    static void SetSymbolType(const std::string &name, const AstNode *node);
+
+    static void SetFunction(const std::string& name, llvm::Function* f);
+
     static Symbol const *GetSymbol(const std::string &name);
+
+    static const AstNode *GetSymbolTypeTree(const std::string &name);
 
     static Symbol const *GetLocalSymbol(const std::string &name);
 
@@ -305,11 +314,21 @@ private:
 
     static llvm::Value *CastToRightValue(llvm::Value *left_value);
 
+    static llvm::Value* CastToRightValue(llvm::Function* func);
+
     static Symbol GenExpression(const AstNode *node, bool r_value = true);
 
-    static Symbol AssignValue(llvm::Value *lhs, llvm::Value *rhs, const AstNode* node);
+    static Symbol AssignValue(llvm::Value *lhs, llvm::Value *rhs, const AstNode *node);
 
-    static void CheckValidAssign(llvm::Value* lhs, llvm::Value* rhs, const AstNode* node);
+    static bool IsConstExpr(const AstNode *);
+
+    static const AstNode *cur_node;
+
+    static inline void CurNodeStepDown() {
+        if (cur_node->type_ == kTypeFeature) {
+            cur_node = cur_node->child_->child_;
+        } else cur_node = cur_node->child_;
+    }
 
     template<typename F, typename ...Args>
     static auto PackMethod(F &&f, Args &&...args) {
@@ -386,7 +405,7 @@ private:
     DECL_GEN(kAssign);
 
     // Operators and Expression Generators
-    DECL_EXPR_R(Plus){
+    DECL_EXPR_R(Plus) {
         assert(false && "unimplemented yet");
     }
 
@@ -394,7 +413,7 @@ private:
         INVALID;
     }
 
-    DECL_EXPR_R(Sub){
+    DECL_EXPR_R(Sub) {
         assert(false && "unimplemented yet");
     }
 
@@ -402,7 +421,7 @@ private:
         INVALID;
     }
 
-    DECL_EXPR_R(Mult){
+    DECL_EXPR_R(Mult) {
         assert(false && "unimplemented yet");
     }
 
@@ -410,7 +429,7 @@ private:
         INVALID;
     }
 
-    DECL_EXPR_R(Div){
+    DECL_EXPR_R(Div) {
         assert(false && "unimplemented yet");
     }
 
@@ -475,81 +494,82 @@ private:
 
     DECL_EXPR_L(Assign) {
         auto left = GenExpression(getNChildSafe(node, 0), false);
+        if (cur_node->type_ == kTypeFeature)
+            throw_code_gen_exception(node, "cannot assign type to const variables");
         auto right = GenExpression(getNChildSafe(node, 1), true);
-        CheckValidAssign(left.GetVariable(), right.GetVariable(), node);
         return AssignValue(left.GetVariable(), right.GetVariable(), node);
     }
 
-    DECL_EXPR_R(AssignPlus){
+    DECL_EXPR_R(AssignPlus) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignPlus){
+    DECL_EXPR_L(AssignPlus) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_R(AssignSub){
+    DECL_EXPR_R(AssignSub) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignSub){
+    DECL_EXPR_L(AssignSub) {
         assert(false && "unimplemented yet");
     }
 
 
-    DECL_EXPR_R(AssignMult){
+    DECL_EXPR_R(AssignMult) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignMult){
+    DECL_EXPR_L(AssignMult) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_R(AssignDiv){
+    DECL_EXPR_R(AssignDiv) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignDiv){
+    DECL_EXPR_L(AssignDiv) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_R(AssignShl){
+    DECL_EXPR_R(AssignShl) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignShl){
+    DECL_EXPR_L(AssignShl) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_R(AssignShr){
+    DECL_EXPR_R(AssignShr) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignShr){
+    DECL_EXPR_L(AssignShr) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_R(AssignBitOr){
+    DECL_EXPR_R(AssignBitOr) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignBitOr){
+    DECL_EXPR_L(AssignBitOr) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_R(AssignBitAnd){
+    DECL_EXPR_R(AssignBitAnd) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignBitAnd){
+    DECL_EXPR_L(AssignBitAnd) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_R(AssignBitXor){
+    DECL_EXPR_R(AssignBitXor) {
         assert(false && "unimplemented yet");
     }
 
-    DECL_EXPR_L(AssignBitXor){
+    DECL_EXPR_L(AssignBitXor) {
         assert(false && "unimplemented yet");
     }
 
@@ -562,6 +582,7 @@ private:
         if (!ptr.GetVariable()->getType()->isPointerTy()) {
             throw_code_gen_exception(node, "deref operator must be assigned to a pointer");
         }
+        CurNodeStepDown();
         return ptr;
     }
 
@@ -656,10 +677,19 @@ private:
         INVALID;
     }
 
+    DECL_EXPR_R(MemOf){
+        return DEFAULT_R(MemOf);
+    }
 
+    DECL_EXPR_L(MemOf);
+
+    DECL_EXPR_R(TrinaryExpr);
+
+    DECL_EXPR_L(TrinaryExpr);
+
+
+    static std::string cur_struct_name;
 };
-
-
 
 
 #endif //TINYCOMPILER_CODE_GENERATOR_H

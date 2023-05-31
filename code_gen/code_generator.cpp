@@ -4,6 +4,8 @@
 
 #include "code_generator.h"
 
+std::string CodeGenerator::cur_struct_name{};
+
 std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::generators{};
 
 llvm::LLVMContext CodeGenerator::context{};
@@ -17,6 +19,8 @@ llvm::DataLayout CodeGenerator::data_layout{&module};
 llvm::Function *CodeGenerator::cur_func_{nullptr};
 
 std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
+
+std::vector<CodeGenerator::TypeTable> CodeGenerator::symbol_type_stack_{};
 
 CodeGenerator::StructTypeTable CodeGenerator::struct_type_table{};
 
@@ -41,7 +45,6 @@ std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::assign_gen_left{}
 std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::assign_gen_right{};
 
 std::string convert_to_raw(const char *s, std::size_t len);
-
 
 
 void CodeGenerator::InitGenerators() {
@@ -187,6 +190,14 @@ Symbol const *CodeGenerator::GetSymbol(const std::string &name) {
     return nullptr;
 }
 
+const AstNode *CodeGenerator::GetSymbolTypeTree(const std::string &name) {
+    for (auto rit = symbol_type_stack_.rbegin(); rit != symbol_type_stack_.rend(); ++rit) {
+        if (rit->contains(name))
+            return rit->at(name);
+    }
+    return nullptr;
+}
+
 Symbol const *CodeGenerator::GetLocalSymbol(const std::string &name) {
     if (symbol_table_stack_.empty())
         return nullptr;
@@ -202,6 +213,7 @@ void CodeGenerator::Generate() {
     try {
         CallGenerator(ast_root_);
     } catch (ParseException &e) {
+        std::printf("\033[31merror\033[0m ");
         e.show();
         exit(1);
     }
@@ -223,13 +235,11 @@ DEF_GEN(kRoot) {
 }
 
 DEF_GEN(kId) {
-    printf("call kId Gen\n");
     auto p_symbol = GetSymbol(node->val_);
-    if (!p_symbol || !p_symbol->IsVariable())
+    if (!p_symbol)
         throw_code_gen_exception(node, "unidentified id");
-
-//    return CastToRightValue(p_symbol->GetVariable());
-    return p_symbol->GetVariable();
+    cur_node = GetSymbolTypeTree(node->val_);
+    return *p_symbol;
 }
 
 DEF_GEN(kFuncDef) {
@@ -322,11 +332,13 @@ DEF_GEN(kVarDecl) {
         );
         Symbol s{glob_var};
         SetSymbol(name, s);
+        SetSymbolType(cur_struct_name + name, var_type_node);
     } else {
         // this var is a local var
         auto block_builder = llvm::IRBuilder<>(&cur_func_->getEntryBlock(), cur_func_->getEntryBlock().begin());
         auto alloc = block_builder.CreateAlloca(type, nullptr, name);
         SetSymbol(name, alloc);
+        SetSymbolType(name, var_type_node);
         return {alloc};
     }
 //    return type;
@@ -342,7 +354,7 @@ DEF_GEN(kFuncDecl) {
     if (!prev_symbol) {
         auto f = llvm::Function::Create(func_type, llvm::GlobalValue::ExternalLinkage, std::string{name_node->val_},
                                         module);
-        SetSymbol(name_node->val_, f);
+        SetFunction(name_node->val_, f);
         return f;
     } else if (prev_symbol->IsFunction()) {
         return *prev_symbol;
@@ -362,8 +374,15 @@ DEF_GEN(kVarInit) {
         if (!cur_func_ && !init_value_sym.IsConst())
             throw_code_gen_exception(expr_node, "cannot use non-const value to initialize global variables");
         auto type = CallGenerator(getNChildSafe(var_decl_node, 0)).GetType();
+        llvm::outs() << "get type: ";
+        type->print(llvm::outs(), true);
+        llvm::outs() << "\n";
         auto name = std::string{getNChildSafe(var_decl_node, 1)->val_};
-        auto initialzer = CastToType(type, init_value_sym.GetVariable());
+        auto initialzer = init_value_sym.IsFunction() ? (llvm::Value *) init_value_sym.GetFunction() : CastToType(type,
+                                                                                                                  init_value_sym.GetVariable());
+//        llvm::outs() << "init type: ";
+//        initialzer->print(llvm::outs(), true);
+//        llvm::outs() << "\n";
 
         if (!initialzer)
             throw_code_gen_exception(expr_node, "cannot convert expression to target type");
@@ -373,6 +392,7 @@ DEF_GEN(kVarInit) {
             auto alloca = block_builder.CreateAlloca(type, nullptr, name);
             IR_builder.CreateStore(initialzer, alloca);
             SetSymbol(name, alloca);
+            SetSymbolType(name, var_decl_node->child_);
         } else {
             assert(init_value_sym.IsConst());
             auto global_var = new llvm::GlobalVariable(
@@ -385,6 +405,7 @@ DEF_GEN(kVarInit) {
             );
             Symbol s{global_var};
             SetSymbol(name, s);
+            SetSymbolType(name, var_decl_node->child_);
         }
 
 
@@ -483,7 +504,7 @@ DEF_GEN(kArrType) {
 
 DEF_GEN(kTypeFeature) {
     auto type_node = getNChildSafe(node, 0);
-    ASSERT_TYPE(type_node, kType);
+    assert(type_node && IS_TYPE(type_node->type_));
     auto type = CallGenerator(type_node);
     auto qualifiers = type_node->next_;
     while (qualifiers && strcmp(qualifiers->val_, "const") != 0) {
@@ -500,10 +521,9 @@ DEF_GEN(kTypeDef) {
     ASSERT_TYPE(node, kTypeDef);
     auto real_type_node = getNChildSafe(node, 0);
     auto real_type = CallGenerator(real_type_node).GetType();
-    if(real_type->isFunctionTy()) {
-        // function defs are force converted to pointer;
-        real_type = TypeFactory::Get<llvm::PointerType>(real_type, 0U);
-    }
+    llvm::outs() << "typedef :";
+    real_type->print(llvm::outs(), true);
+    llvm::outs() << "\n";
     auto alias_name = getNChildSafe(node, 1)->val_;
     AddTypeAlias(alias_name, real_type);
     return {};
@@ -542,8 +562,8 @@ DEF_GEN(kFloatNumber) {
 }
 
 DEF_GEN(kCharLiteral) {
-    auto c = static_cast<uint8_t>(node->val_[0]);
-    return {llvm::ConstantInt::get(GetType("char"), c), true};
+    std::string content{convert_to_raw(node->val_ + 1, strlen(node->val_) - 2)};
+    return {llvm::ConstantInt::get(GetType("char"), content[0]), true};
 }
 
 DEF_GEN(kExpr) {
@@ -556,6 +576,18 @@ DEF_GEN(kExpr) {
 void CodeGenerator::SetSymbol(const std::string &name, Symbol symbol) {
     assert(!symbol_table_stack_.empty() && !symbol_table_stack_.back().contains(name));
     symbol_table_stack_.back().insert({name, symbol});
+}
+
+void CodeGenerator::SetSymbolType(const std::string &name, const AstNode *node) {
+    assert(!symbol_type_stack_.empty() && !symbol_type_stack_.back().contains(name));
+    symbol_type_stack_.back().insert({name, node});
+}
+
+void CodeGenerator::SetFunction(const std::string &name, llvm::Function *f) {
+    assert(!symbol_table_stack_.empty() && !symbol_table_stack_.back().contains(name));
+    Symbol s{f};
+    assert(s.IsFunction());
+    symbol_table_stack_.back().insert({name, s});
 }
 
 void CodeGenerator::SetType(const std::string &name, llvm::Type *type) {
@@ -586,16 +618,27 @@ DEF_GEN(kScope) {
 }
 
 DEF_GEN(kFuncCall) {
-    ASSERT_TYPE(node, kFuncCall);
-    auto func_name_node = getNChildSafe(node, 0);
-    ASSERT_TYPE(func_name_node, kId);
-    auto func_s = GetSymbol(func_name_node->val_);
-    assert(func_s && func_s->IsFunction());
-    auto f = func_s->GetFunction();
-    assert(f->getName() == std::string{func_name_node->val_});
+    llvm::Function *f = nullptr;
+    auto func_name_node = getNChildSafe(node, 0)->child_;
     auto args_node = getNChildSafe(node, 1);
     std::vector<llvm::Value *> args;
     CollectArgs(args_node, args);
+
+
+    auto f_v = GenExpression(func_name_node, false);
+    if (f_v.IsFunction()) {
+        f = f_v.GetFunction();
+    } else {
+        auto f0 = GenExpression(func_name_node, false).GetVariable();
+        if (f0->getType()->isSized()) {
+            // non-sized, this is a right-value
+            auto inst = IR_builder.CreateLoad(f0->getType()->getPointerElementType(), f0);
+            return IR_builder.CreateCall((llvm::FunctionType *) (inst->getType()->getPointerElementType()), inst, args);
+        } else {
+            return IR_builder.CreateCall((llvm::FunctionType *) (f0->getType()->getPointerElementType()), f0, args);
+        }
+    }
+
 
     if (!f->isVarArg()) {
         std::size_t i = 0;
@@ -651,10 +694,13 @@ DEF_GEN(kStructType) {
             throw_code_gen_exception(cur, "cannot declare a void type variable");
         member_types.push_back(type);
         member_names.emplace_back(cur->child_->next_->val_);
+        auto mem_id_name = struct_name + std::string{cur->child_->next_->val_};
+        SetSymbolType(mem_id_name, cur->child_);
     }
 
     auto struct_type = TypeFactory::Get(llvm::StructType::create(context, struct_name));
     struct_type->setBody(member_types);
+
 
     SetType(struct_name, struct_type);
 
@@ -684,10 +730,13 @@ DEF_GEN(kSubScript) {
     assert(arr_node);
     assert(idx_node);
     auto array = GenExpression(arr_node).GetVariable();
+    auto left_cur_node = cur_node;
     auto idx = GenExpression(idx_node).GetVariable();
-    if(!array->getType()->isPointerTy() || !idx->getType()->isIntegerTy()) {
+    if (!array->getType()->isPointerTy() || !idx->getType()->isIntegerTy()) {
         throw_code_gen_exception(node, "incompatible type for subscript");
     }
+    cur_node = left_cur_node;
+    CurNodeStepDown();
 
     return IR_builder.CreateGEP(array->getType()->getNonOpaquePointerElementType(), array, idx);
 }

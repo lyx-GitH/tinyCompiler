@@ -13,7 +13,8 @@ llvm::Value *CodeGenerator::CastToBool(llvm::Value *value) {
         return value;
 
     if (value->getType()->isIntegerTy()) {
-        value = CastToType(IR_builder.getIntNTy(value->getType()->getIntegerBitWidth()), value); // When enabling type factory
+        value = CastToType(IR_builder.getIntNTy(value->getType()->getIntegerBitWidth()),
+                           value); // When enabling type factory
         return CodeGenerator::IR_builder.CreateICmpNE(value,
                                                       llvm::ConstantInt::get((llvm::IntegerType *) value->getType(), 0,
                                                                              true));
@@ -29,18 +30,15 @@ llvm::Value *CodeGenerator::CastToBool(llvm::Value *value) {
 }
 
 llvm::Value *CodeGenerator::CastToType(llvm::Type *type, llvm::Value *value) {
-//    auto non_const_type = TypeFactory::GetNonConstOf(type);
-//    auto non_const_v_type = TypeFactory::GetNonConstOf(value->getType());
 
-//    if (non_const_type == non_const_v_type) // This would eliminate const issues.
-//        return value;
-//    if(type == value->getType())
-//        return value;
     if (TypeFactory::IsActuallySameType(type, value->getType())) {
         return value;
     } else {
         std::cout << "warning: implicit type conversion is conducted" << std::endl;
     }
+
+    if (type->isPointerTy() && type->getPointerElementType() == value->getType() && value->getType()->isFunctionTy())
+        return value;
 
     if (value->getType() == CodeGenerator::GetType("_bool"))
         return CastToBool(value);
@@ -101,11 +99,16 @@ llvm::Value *CodeGenerator::AlignType(llvm::Value *v, llvm::Type *t) {
 
 llvm::Value *CodeGenerator::CastToRightValue(llvm::Value *left_value) {
     assert(left_value);
-
     auto type = left_value->getType()->getNonOpaquePointerElementType();
     if (type->isArrayTy()) {
         return IR_builder.CreatePointerCast(left_value, type->getArrayElementType()->getPointerTo());
     } else return IR_builder.CreateLoad(type, left_value);
+}
+
+llvm::Value *CodeGenerator::CastToRightValue(llvm::Function *func) {
+//    llvm::Value *p = IR_builder.CreateAlloca(func->getType(), nullptr);
+    return IR_builder.CreateLoad(func->getType(), func);
+
 }
 
 

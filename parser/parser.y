@@ -404,7 +404,7 @@ struct_decl					: spec_qualifier_list struct_declarator_list SEMI   {assignType(
 							; */
 spec_qualifier_list			: type_spec spec_qualifier_list						{addNext($1, $2); $$ = $1;}
 							| type_spec											{$$ = $1;}
-							| type_qualifier spec_qualifier_list				{addNext($2, $1); $$ = $1;}
+							| type_qualifier spec_qualifier_list				{addNext($2, $1); $$ = $2;}
 							| type_qualifier									{$$ = $1; }
 							;
 
