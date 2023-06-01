@@ -157,8 +157,11 @@ Symbol CodeGenerator::GenExpression(const AstNode *node, bool r_value) {
                 return CodeGenerator::RGenMemOf(node);
             else return CodeGenerator::LGenMemOf(node);
         }
-        default:
+        default:{
+            printf("%s\n", GetSyntaxNodeTypeStr(node->type_));
             assert(false && "Not Implemented yet");
+        }
+
 
     }
 }

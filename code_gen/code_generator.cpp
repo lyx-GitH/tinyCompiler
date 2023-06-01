@@ -36,6 +36,8 @@ CodeGenerator::StructTypeTable CodeGenerator::struct_type_table{};
 
 CodeGenerator::UnionTypeTable CodeGenerator::union_type_table{};
 
+CodeGenerator::BlockTable CodeGenerator::block_table{};
+
 std::set<std::string> CodeGenerator::defined_functions{};
 
 bool CodeGenerator::cur_init_{false};
@@ -98,6 +100,12 @@ void CodeGenerator::InitGenerators() {
     LOAD_GEN(kCont);
     LOAD_GEN(kIfStmt);
     LOAD_GEN(kWhileStmt);
+    LOAD_GEN(kDoWhileStmt);
+    LOAD_GEN(kForStmt);
+
+    LOAD_GEN(kGoto);
+    LOAD_GEN(kLabeledStmt);
+    LOAD_GEN(kSwitchStmt);
 
 
 }
@@ -223,6 +231,10 @@ Symbol const *CodeGenerator::GetLocalSymbol(const std::string &name) {
         return nullptr;
     auto &top = symbol_table_stack_.back();
     return top.contains(name) ? &top.at(name) : nullptr;
+}
+
+llvm::BasicBlock *CodeGenerator::GetBlock(const std::string &name) {
+    return block_table.contains(name) ? block_table.at(name) : nullptr;
 }
 
 void CodeGenerator::Generate() {
@@ -494,6 +506,30 @@ void CodeGenerator::CollectArgs(pAstNode node, std::vector<llvm::Value *> &colle
         arg_list = arg_list->next_;
     }
 }
+
+void CodeGenerator::CollecCases(pAstNode node, std::vector<pAstNode> &collector, AstNode *&default_node) {
+    if (!node)
+        return;
+
+    if (node->type_ == kScope) {
+        CollecCases(node->child_, collector, default_node);
+        return;
+    }
+    if (node->type_ == kCase) {
+        collector.push_back(node->child_);
+        CollecCases(node->child_->next_, collector, default_node);
+        CollecCases(node->next_, collector, default_node);
+    } else if (node->type_ == kLabeledStmt && strcmp("default", node->val_) == 0) {
+        if (default_node)
+            throw_code_gen_exception(node, "multiple default statements not allowed");
+        default_node = node;
+        collector.push_back(nullptr);
+        CollecCases(node->child_->next_, collector, default_node);
+        CollecCases(node->next_, collector, default_node);
+    }
+
+}
+
 
 void CodeGenerator::SwapBtwGlobal() {
     auto cur_block = IR_builder.GetInsertBlock();
@@ -845,7 +881,7 @@ DEF_GEN(kCont) {
     return IR_builder.CreateBr(loop_begin);
 }
 
-inline void QuitCondStmtTo(llvm::IRBuilder<> &IR_builder, llvm::BasicBlock *block) {
+void CodeGenerator::GotoBlock(llvm::BasicBlock *block) {
     if (!IR_builder.GetInsertBlock()->getTerminator())
         IR_builder.CreateBr(block);
 }
@@ -854,6 +890,22 @@ inline void CodeGenerator::SetCurBlockTo(llvm::BasicBlock *block) {
     cur_func_->getBasicBlockList().push_back(block);
     IR_builder.SetInsertPoint(block);
 }
+
+inline pAstNode GetCaseStmtByCase(AstNode *node) {
+    if (node->type_ == kLabeledStmt)
+        return GetCaseStmtByCase(node->child_);
+    if (node->type_ == kCase)
+        return GetCaseStmtByCase(node->child_->next_);
+    return node;
+}
+
+inline pAstNode GetCaseStmt(const AstNode *case_value_node) {
+
+    if (auto stmt_node = case_value_node->next_) {
+        return GetCaseStmtByCase(stmt_node);
+    } else return nullptr;
+}
+
 
 DEF_GEN(kIfStmt) {
     if (!cur_func_)
@@ -874,17 +926,93 @@ DEF_GEN(kIfStmt) {
 
     SetCurBlockTo(t_block);
     CallGenerator(true_node);
-    QuitCondStmtTo(IR_builder, q_block);
+    GotoBlock(q_block);
 
 
     SetCurBlockTo(f_block);
     CallGenerator(false_node);
-    QuitCondStmtTo(IR_builder, q_block);
+    GotoBlock(q_block);
 
     if (q_block->hasNPredecessorsOrMore(1)) {
         SetCurBlockTo(q_block);
     }
 
+    return {};
+}
+
+DEF_GEN(kSwitchStmt) {
+    auto match_node = getNChildSafe(node, 0);
+    auto cases_node = getNChildSafe(node, 1);
+
+    auto eq_node = createAstNode(AstNodeType::kBinOp, "==", 2);
+
+    std::vector<AstNode *> case_values;
+    std::vector<AstNode *> case_stmts;
+    AstNode *default_node = nullptr;
+    AstNode *default_stmt = nullptr;
+    CollecCases(cases_node, case_values, default_node);
+    int default_idx = -1;
+    for (int i = 0; i < case_values.size(); i++) {
+        if (case_values[i])
+            case_stmts.push_back(GetCaseStmt(case_values[i]));
+        else {
+            default_idx = i;
+            default_stmt = GetCaseStmtByCase(default_node);
+            case_stmts.push_back(default_stmt);
+        }
+    }
+    if(default_idx >=0) {
+
+    }
+
+
+
+
+    // block vectors for 1) case IR gen, and 2) cmp IR gen
+    std::vector<llvm::BasicBlock *> case_blocks;
+    std::vector<llvm::BasicBlock *> cmp_blocks;
+
+    for (int i = 0; i < case_values.size(); i++)
+        case_blocks.push_back(llvm::BasicBlock::Create(context, "case-" + std::to_string(i)));
+    //Create an extra block for SwitchEnd
+    case_blocks.push_back(llvm::BasicBlock::Create(context, "switch-end"));
+    cmp_blocks.push_back(IR_builder.GetInsertBlock());
+
+    for (int i = 1; i < case_values.size(); i++)
+        cmp_blocks.push_back(llvm::BasicBlock::Create(context, "cmp-" + std::to_string(i)));
+    cmp_blocks.push_back(case_blocks.back());
+    //Generate branches
+    for (int i = 0; i < case_values.size(); i++) {
+        if (i > 0) {
+            SetCurBlockTo(cmp_blocks[i]);
+        }
+        if (case_values[i]) {
+            addChild(eq_node, match_node);
+            addChild(eq_node, case_values[i]);
+            auto cond = GenExpression(eq_node).GetVariable();
+            IR_builder.CreateCondBr(cond, case_blocks[i], cmp_blocks[i + 1]);
+            eq_node->child_ = nullptr;
+        } else                                    //Default
+            IR_builder.CreateBr(case_blocks[i]);
+    }
+    //Generate code for each case statement
+    {
+        ScopeGuard g;
+        for (int i = 0; i < case_values.size(); i++) {
+            SetCurBlockTo(case_blocks[i]);
+            LoopGuard lg{case_blocks[i + 1], case_blocks.back()};
+            {
+                GenExpression(case_stmts[i]);
+            }
+        }
+    }
+    //Finish "SwitchEnd" block
+    if (case_blocks.back()->hasNPredecessorsOrMore(1)) {
+        SetCurBlockTo(case_blocks.back());
+    }
+
+
+    free(eq_node); // do not call freeAstNode(), or it would kill the entire tree
     return {};
 }
 
@@ -914,8 +1042,107 @@ DEF_GEN(kWhileStmt) {
         CallGenerator(body_node);
     }
 
-    QuitCondStmtTo(IR_builder, loop_begin);
+    GotoBlock(loop_begin);
     SetCurBlockTo(loop_end);
+    return {};
+}
+
+DEF_GEN(kDoWhileStmt) {
+    if (!cur_func_)
+        throw_code_gen_exception(node, "cannot declare for statement outside a function");
+    auto loop_body_node = getNChildSafe(node, 0);
+    auto loop_cond_node = getNChildSafe(node, 1);
+
+    llvm::BasicBlock *loop_body = llvm::BasicBlock::Create(context, "dw_body");
+    llvm::BasicBlock *loop_cond = llvm::BasicBlock::Create(context, "dw_cond");
+    llvm::BasicBlock *loop_end = llvm::BasicBlock::Create(context, "dw_end");
+
+    IR_builder.CreateBr(loop_body);
+    SetCurBlockTo(loop_body);
+    {
+        LoopGuard f(loop_cond, loop_end);
+        CallGenerator(loop_body_node);
+    }
+    GotoBlock(loop_cond);
+
+    SetCurBlockTo(loop_cond);
+    auto cond = CastToBool(GenExpression(loop_cond_node).GetVariable());
+
+    if (!cond) {
+        throw_code_gen_exception(node, "expression cannot become a do-while-condition");
+    }
+
+    IR_builder.CreateCondBr(cond, loop_body, loop_end);
+    SetCurBlockTo(loop_end);
+    return {};
+}
+
+DEF_GEN(kForStmt) {
+    auto for_init_node = getNChildSafe(node, 0);
+    auto for_cond_node = getNChildSafe(node, 1);
+    auto for_update_node = getNChildSafe(node, 2);
+    auto for_body_node = getNChildSafe(node, 3);
+
+    if (for_init_node->type_ != kNULL)
+        GenExpression(for_init_node);
+
+    auto loop_begin = llvm::BasicBlock::Create(context, "for_begin");
+    auto loop_body = llvm::BasicBlock::Create(context, "for_body");
+    auto loop_update = llvm::BasicBlock::Create(context, "for_update");
+    auto loop_end = llvm::BasicBlock::Create(context, "for_end");
+
+    GotoBlock(loop_begin);
+    SetCurBlockTo(loop_begin);
+
+    llvm::Value *cond = IR_builder.getInt1(true);
+    if (for_cond_node->type_ != kNULL)
+        cond = CastToBool(GenExpression(for_cond_node).GetVariable());
+    if (!cond)
+        throw_code_gen_exception(node, "expression cannot become a for-condition");
+
+    IR_builder.CreateCondBr(cond, loop_body, loop_end);
+
+    SetCurBlockTo(loop_body);
+    {
+        LoopGuard g{loop_update, loop_end};
+        CallGenerator(for_body_node);
+    }
+
+    GotoBlock(loop_update);
+    SetCurBlockTo(loop_update);
+    if (for_update_node->type_ != kNULL)
+        GenExpression(for_update_node);
+    IR_builder.CreateBr(loop_begin);
+
+    SetCurBlockTo(loop_end);
+    return {};
+}
+
+DEF_GEN(kGoto) {
+    if (!cur_func_)
+        throw_code_gen_exception(node, "cannot declare for statement outside a function");
+    auto label_name = std::string{node->child_->val_};
+    auto label_block = GetBlock(label_name);
+    if (!label_block) {
+        label_block = llvm::BasicBlock::Create(context, label_name);
+        block_table[label_name] = label_block;
+    }
+
+    GotoBlock(label_block);
+    return {};
+}
+
+DEF_GEN(kLabeledStmt) {
+    auto label_name = std::string{node->val_};
+    auto label_block = GetBlock(label_name);
+    if (!label_block) {
+        label_block = llvm::BasicBlock::Create(context, label_name);
+        block_table[label_name] = label_block;
+    }
+    GotoBlock(label_block);
+    SetCurBlockTo(label_block);
+    CallGenerator(node->child_);
+    return {};
 }
 
 void CodeGenerator::AddTypeDefTreeInfo(const char *name, const AstNode *pNode) {

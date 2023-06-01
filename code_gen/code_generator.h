@@ -88,7 +88,6 @@ extern "C" {
 }
 
 #define LOAD_BINARY_OP(op_str, name) do { \
-    printf("generating at %d %s\n", GetOpHash(op_str), #name);                                      \
     CodeGenerator::binary_gen_left.at(GetOpHash(op_str)) = CodeGenerator:: EXPR_L_NAME(name);                                          \
     CodeGenerator::binary_gen_right.at(GetOpHash(op_str)) = CodeGenerator:: EXPR_R_NAME(name);                                         \
  } while(0)
@@ -110,6 +109,7 @@ public:
     using GenFunc = std::function<pValue(const AstNode *)>;
     using LoopScope = std::pair<llvm::BasicBlock *, llvm::BasicBlock *>;
     using SymbolTable = std::map<std::string, pValue>;
+    using BlockTable = std::map<std::string, llvm::BasicBlock *>;
     using TypeTable = std::map<std::string, const AstNode *>;
     using StructMemberType = std::pair<std::size_t, llvm::Type *>;
     using StructMemberMap = std::map<std::string, StructMemberType>;
@@ -238,6 +238,7 @@ private:
     static std::set<std::string> defined_functions;
     static StructTypeTable struct_type_table;
     static UnionTypeTable union_type_table;
+    static BlockTable block_table;
 
     static void InScope() {
         symbol_table_stack_.emplace_back();
@@ -256,6 +257,7 @@ private:
     }
 
     static void OffFunc() {
+        block_table.clear(); // block table only available in current function.
         cur_func_ = nullptr;
     }
 
@@ -308,9 +310,14 @@ private:
 
     static Symbol const *GetLocalSymbol(const std::string &name);
 
+    static llvm::BasicBlock *GetBlock(const std::string &name);
+
     static void CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &collector);
 
     static void CollectArgs(pAstNode node, std::vector<llvm::Value *> &collector);
+
+    static void CollecCases(pAstNode node, std::vector<pAstNode> &collector, AstNode *&default_node);
+
 
     static void SwapBtwGlobal();
 
@@ -483,6 +490,11 @@ private:
     DECL_GEN(kDoWhileStmt);
 
     DECL_GEN(kForStmt);
+
+    DECL_GEN(kLabeledStmt);
+
+    DECL_GEN(kSwitchStmt);
+
 
 
 
@@ -830,6 +842,7 @@ private:
     static std::string cur_struct_name;
 
 
+    static void GotoBlock(llvm::BasicBlock *block);
 };
 
 

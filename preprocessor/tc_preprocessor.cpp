@@ -63,7 +63,7 @@ void TCPreProcessor::GenIncludeChain(const std::string &path) {
     chdir(dir.c_str());
 
     FILE *old_yyin = p_yyin;
-    FILE *f = fopen(path.c_str(), "r");
+    FILE *f = fopen(abs_path.c_str(), "r");
     if (!f) {
         fprintf(stderr, "cannot open file:  %s\n", path.c_str());
     }
