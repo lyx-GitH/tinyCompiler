@@ -108,6 +108,7 @@ class CodeGenerator : public TCParser {
 public:
     using pValue = Symbol;
     using GenFunc = std::function<pValue(const AstNode *)>;
+    using LoopScope = std::pair<llvm::BasicBlock *, llvm::BasicBlock *>;
     using SymbolTable = std::map<std::string, pValue>;
     using TypeTable = std::map<std::string, const AstNode *>;
     using StructMemberType = std::pair<std::size_t, llvm::Type *>;
@@ -202,43 +203,38 @@ public:
         }
     };
 
+    class LoopGuard {
+    public:
+        ~LoopGuard() {
+            OffLoop();
+        }
+
+        LoopGuard(llvm::BasicBlock *loop_begin, llvm::BasicBlock *loop_end) {
+            InLoop(loop_begin, loop_end);
+        }
+    };
+
     inline void PrintIR() {
         module.print(llvm::outs(), nullptr);
         if (llvm::verifyModule(module, &llvm::outs()) == 0)
             llvm::outs() << "No errors.\n";
-        else
-            llvm::outs() << "error!\n"
-                         << "NOTE: when enabling type factory, mismatched signatures are totally normal\n";
-//        llvm::StructType* c_int = llvm::StructType::get(IR_builder.getInt32Ty());
-//        c_int->elements()[0]
     }
 
-    static llvm::Value *CreateLoad(llvm::Value *pLHS) {
-        //For array types, return the pointer to its first element
-        if (pLHS->getType()->getNonOpaquePointerElementType()->isArrayTy())
-            return IR_builder.CreatePointerCast(pLHS,
-                                                pLHS->getType()->getNonOpaquePointerElementType()->getArrayElementType()->getPointerTo());
-        else
-            return IR_builder.CreateLoad(pLHS->getType()->getNonOpaquePointerElementType(), pLHS);
-    }
 
 private:
-
-    std::vector<llvm::BasicBlock *> ContinueBlockStack;    //Store blocks for "continue" statement
-    std::vector<llvm::BasicBlock *> BreakBlockStack;        //Store blocks for "break" statement
-//    static llvm::BasicBlock *global_block;                            //Temp block for global instruction code generation
-//    static llvm::Function *global_func;                            //Temp function for global instruction code generation
-
     static llvm::Module module;
     static llvm::DataLayout data_layout;
     static llvm::LLVMContext context;
     static llvm::IRBuilder<> IR_builder;
+    static llvm::BasicBlock *global_entry;
+    static llvm::Function *global;
     static llvm::Function *cur_func_;
     static bool cur_init_;
     static bool en_warn;
     static std::vector<SymbolTable> symbol_table_stack_;
     static std::vector<TypeTable> symbol_type_stack_;
-    static std::map<std::string, const AstNode*> type_aliases_map;
+    static std::vector<LoopScope> loop_stack;
+    static std::map<std::string, const AstNode *> type_aliases_map;
     static std::set<std::string> defined_functions;
     static StructTypeTable struct_type_table;
     static UnionTypeTable union_type_table;
@@ -261,6 +257,15 @@ private:
 
     static void OffFunc() {
         cur_func_ = nullptr;
+    }
+
+    static void InLoop(llvm::BasicBlock *loop_begin, llvm::BasicBlock *loop_end) {
+        loop_stack.emplace_back(loop_begin, loop_end);
+    }
+
+    static void OffLoop() {
+        assert(!loop_stack.empty());
+        loop_stack.pop_back();
     }
 
 
@@ -295,7 +300,7 @@ private:
 
     static void AddTypeDefTreeInfo(const char *name, const AstNode *pNode);
 
-    static const AstNode* GetExactTypeTree(const AstNode* type);
+    static const AstNode *GetExactTypeTree(const AstNode *type);
 
     static Symbol const *GetSymbol(const std::string &name);
 
@@ -306,6 +311,10 @@ private:
     static void CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &collector);
 
     static void CollectArgs(pAstNode node, std::vector<llvm::Value *> &collector);
+
+    static void SwapBtwGlobal();
+
+    static llvm::Value *AllocFunctionArg(llvm::Function *f, llvm::Type *t, const std::string &name);
 
     static llvm::Value *CastToType(llvm::Type *type, llvm::Value *value);
 
@@ -319,16 +328,17 @@ private:
 
     static llvm::Value *CastToRightValue(llvm::Value *left_value);
 
-    static llvm::Value *CastToRightValue(llvm::Function *func);
-
     static Symbol GenExpression(const AstNode *node, bool r_value = true);
 
     static Symbol AssignValue(llvm::Value *lhs, llvm::Value *rhs, const AstNode *node);
 
-    static Symbol SelfPSValue(const AstNode *v, bool is_prefix, bool is_add); // ++ = true, -- = false
+    // <var>++, <var>--, ++<var>, --<var>
+    static Symbol SelfPSValue(const AstNode *v, bool is_prefix, bool is_add);
 
-    static Symbol DefaultAssignGen(const AstNode* node, const GenFunc& bin_op);
+    // x <op>= x eq. to  x = x <op> y
+    static Symbol DefaultAssignGen(const AstNode *node, const GenFunc &bin_op);
 
+    static void SetCurBlockTo(llvm::BasicBlock *block);
 
     static const AstNode *cur_node;
 
@@ -342,11 +352,15 @@ private:
 
 
     template<typename F>
-    static llvm::Value *GenBinaryOpIntInt(const AstNode *node, F &&f) {
+    static llvm::Value *GenBinaryOpIntInt(const AstNode *node, F &&f, bool logical = false) {
         auto lhs = GenExpression(getNChildSafe(node, 0)).GetVariable();
         auto rhs = GenExpression(getNChildSafe(node, 1)).GetVariable();
+        if (logical) {
+            lhs = CastToBool(lhs);
+            rhs = CastToBool(rhs);
+        }
         if (!lhs || !rhs)
-            return nullptr;
+            throw_code_gen_exception(node, "operator between given types are not supported");
         if (!lhs->getType()->isIntegerTy() || !rhs->getType()->isIntegerTy())
             return nullptr;
         AlignType(lhs, rhs);
@@ -354,14 +368,41 @@ private:
     }
 
     template<typename FInt, typename FFloat>
-    static llvm::Value *RunOpNumNum(FInt &&f_i, FFloat &&f_f, llvm::Value *lhs, llvm::Value *rhs) {
+    static llvm::Value *RunOpNumNum(FInt &&i_f, FFloat &&f_f, llvm::Value *lhs, llvm::Value *rhs) {
         AlignType(lhs, rhs);
         if (lhs->getType()->isFloatingPointTy()) {
             return f_f(lhs, rhs);
         } else {
             assert(lhs->getType()->isIntegerTy());
-            return f_i(lhs, rhs);
+            return i_f(lhs, rhs);
         }
+    }
+
+    template<typename FInt, typename FFloat, typename FPtr>
+    static llvm::Value *GenBinaryOpAnyAny(const AstNode *node, FInt &&i_f, FFloat &&f_f, FPtr &&p_f) {
+        auto lhs = GenExpression(node->child_).GetVariable();
+        auto rhs = GenExpression(node->child_->next_).GetVariable();
+        if (TypeFactory::IsSameTypePtr(lhs, rhs)) {
+            return p_f(
+                    IR_builder.CreatePtrToInt(lhs, IR_builder.getInt64Ty()),
+                    IR_builder.CreatePtrToInt(rhs, IR_builder.getInt64Ty())
+            );
+        }
+
+        if (TypeFactory::IsPtrOperation(lhs, rhs)) {
+            return p_f(
+                    IR_builder.CreatePtrToInt(lhs, IR_builder.getInt64Ty()),
+                    AlignType(rhs, IR_builder.getInt64Ty())
+            );
+        }
+
+        try {
+            return RunOpNumNum(std::forward<FInt &&>(i_f), std::forward<FFloat &&>(f_f), lhs, rhs);
+        } catch (std::exception &e) {
+            throw_code_gen_exception(node, e.what());
+        }
+
+        return nullptr;
     }
 
     // add and sub involves pointers and constant checks, so it needs to be considered.
@@ -435,9 +476,28 @@ private:
 
     DECL_GEN(kBreak);
 
+    DECL_GEN(kIfStmt);
+
+    DECL_GEN(kWhileStmt);
+
+    DECL_GEN(kDoWhileStmt);
+
+    DECL_GEN(kForStmt);
+
 
 
     // Operators and Expression Generators
+
+    DECL_EXPR_R(Comma) {
+        GenExpression(node->child_);
+        return GenExpression(node->child_->next_);
+    }
+
+    DECL_EXPR_L(Comma) {
+        GenExpression(node->child_);
+        return GenExpression(node->child_->next_, false);
+    }
+
     DECL_EXPR_R(Plus) {
         auto lhs = GenExpression(node->child_);
         auto lhs_node = cur_node;
@@ -540,6 +600,15 @@ private:
         INVALID;
     }
 
+    DECL_EXPR_R(LogAnd) {
+        return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateLogicalAnd), true);
+    }
+
+    DECL_EXPR_L(LogAnd) {
+        INVALID;
+    }
+
+
     DECL_EXPR_R(BitOr) {
         return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateOr));
     }
@@ -548,11 +617,85 @@ private:
         INVALID;
     }
 
+    DECL_EXPR_R(LogOr) {
+        return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateLogicalOr), true);
+    }
+
+    DECL_EXPR_L(LogOr) {
+        INVALID;
+    }
+
     DECL_EXPR_R(BitXor) {
         return GenBinaryOpIntInt(node, PACK_METHOD(CodeGenerator::IR_builder.CreateXor));
     }
 
     DECL_EXPR_L(BitXor) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(GreaterThan) {
+        auto i_f = PACK_METHOD(IR_builder.CreateICmpSGT);
+        auto f_f = PACK_METHOD(IR_builder.CreateFCmpOGT);
+        auto p_f = PACK_METHOD(IR_builder.CreateICmpUGT);
+        return GenBinaryOpAnyAny(node, i_f, f_f, p_f);
+    }
+
+    DECL_EXPR_L(GreaterThan) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(LessThan) {
+        auto i_f = PACK_METHOD(IR_builder.CreateICmpSLT);
+        auto f_f = PACK_METHOD(IR_builder.CreateFCmpOLT);
+        auto p_f = PACK_METHOD(IR_builder.CreateICmpULT);
+        return GenBinaryOpAnyAny(node, i_f, f_f, p_f);
+    }
+
+    DECL_EXPR_L(LessThan) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(GreaterEq) {
+        auto i_f = PACK_METHOD(IR_builder.CreateICmpSGE);
+        auto f_f = PACK_METHOD(IR_builder.CreateFCmpOGE);
+        auto p_f = PACK_METHOD(IR_builder.CreateICmpUGE);
+        return GenBinaryOpAnyAny(node, i_f, f_f, p_f);
+    }
+
+    DECL_EXPR_L(GreaterEq) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(LessEq) {
+        auto i_f = PACK_METHOD(IR_builder.CreateICmpSLE);
+        auto f_f = PACK_METHOD(IR_builder.CreateFCmpOLE);
+        auto p_f = PACK_METHOD(IR_builder.CreateICmpULE);
+        return GenBinaryOpAnyAny(node, i_f, f_f, p_f);
+    }
+
+    DECL_EXPR_L(LessEq) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(Eq) {
+        auto i_f = PACK_METHOD(IR_builder.CreateICmpEQ);
+        auto f_f = PACK_METHOD(IR_builder.CreateFCmpOEQ);
+        auto p_f = PACK_METHOD(IR_builder.CreateICmpEQ);
+        return GenBinaryOpAnyAny(node, i_f, f_f, p_f);
+    }
+
+    DECL_EXPR_L(Eq) {
+        INVALID;
+    }
+
+    DECL_EXPR_R(NEq) {
+        auto i_f = PACK_METHOD(IR_builder.CreateICmpNE);
+        auto f_f = PACK_METHOD(IR_builder.CreateFCmpONE);
+        auto p_f = PACK_METHOD(IR_builder.CreateICmpNE);
+        return GenBinaryOpAnyAny(node, i_f, f_f, p_f);
+    }
+
+    DECL_EXPR_L(NEq) {
         INVALID;
     }
 
@@ -568,78 +711,6 @@ private:
         return AssignValue(left.GetVariable(), right.GetVariable(), node);
     }
 
-    DECL_EXPR_R(AssignPlus) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignPlus) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_R(AssignSub) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignSub) {
-        assert(false && "unimplemented yet");
-    }
-
-
-    DECL_EXPR_R(AssignMult) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignMult) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_R(AssignDiv) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignDiv) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_R(AssignShl) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignShl) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_R(AssignShr) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignShr) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_R(AssignBitOr) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignBitOr) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_R(AssignBitAnd) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignBitAnd) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_R(AssignBitXor) {
-        assert(false && "unimplemented yet");
-    }
-
-    DECL_EXPR_L(AssignBitXor) {
-        assert(false && "unimplemented yet");
-    }
 
     DECL_EXPR_R(DeRef) {
         return DEFAULT_R(DeRef);
@@ -754,7 +825,6 @@ private:
     DECL_EXPR_R(TrinaryExpr);
 
     DECL_EXPR_L(TrinaryExpr);
-
 
 
     static std::string cur_struct_name;

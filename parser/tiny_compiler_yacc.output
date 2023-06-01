@@ -1,6 +1,10 @@
 Terminals which are not used
 
    HEADER
+   "then"
+
+
+State 314 conflicts: 1 shift/reduce
 
 
 Grammar
@@ -190,7 +194,7 @@ Grammar
   136        | SS unaries
   137        | uop factor
   138        | SIZE_OF unaries
-  139        | SIZE_OF LB type_name RB
+  139        | SIZE_OF LB type_name_cast RB
 
   140 postfix: single
   141        | postfix LSBSCRPT expression RSBSCRPT
@@ -465,9 +469,9 @@ aop (125)
 uop (126)
     on left: 166 167 168 169 170 171, on right: 137
 type_name_cast (127)
-    on left: 172 173, on right: 133
+    on left: 172 173, on right: 133 139
 type_name (128)
-    on left: 174 175 176, on right: 19 139
+    on left: 174 175 176, on right: 19
 struct_or_union_spec (129)
     on left: 177 178 179, on right: 175
 struct_or_union (130)
@@ -1555,7 +1559,7 @@ state 77
 state 78
 
   138 unaries: SIZE_OF . unaries
-  139        | SIZE_OF . LB type_name RB
+  139        | SIZE_OF . LB type_name_cast RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
@@ -2619,13 +2623,14 @@ state 149
 
 state 150
 
-  139 unaries: SIZE_OF LB . type_name RB
+  139 unaries: SIZE_OF LB . type_name_cast RB
   154 single: LB . expression RB
 
     NUMBER     shift, and go to state 60
     ID         shift, and go to state 120
     STR        shift, and go to state 62
     TYPE       shift, and go to state 2
+    CONST      shift, and go to state 3
     STRUCT     shift, and go to state 6
     UNION      shift, and go to state 7
     ENUM       shift, and go to state 8
@@ -2640,6 +2645,8 @@ state 150
     SS         shift, and go to state 77
     SIZE_OF    shift, and go to state 78
 
+    type_spec             go to state 125
+    type_qualifier        go to state 126
     expression            go to state 144
     expression11          go to state 97
     expression10          go to state 98
@@ -2659,9 +2666,11 @@ state 150
     function_call         go to state 112
     single                go to state 113
     uop                   go to state 114
-    type_name             go to state 235
+    type_name_cast        go to state 235
+    type_name             go to state 23
     struct_or_union_spec  go to state 24
     struct_or_union       go to state 25
+    spec_qualifier_list   go to state 146
     enum_spec             go to state 26
     enum_const            go to state 27
 
@@ -4266,7 +4275,7 @@ state 234
 
 state 235
 
-  139 unaries: SIZE_OF LB type_name . RB
+  139 unaries: SIZE_OF LB type_name_cast . RB
 
     RB  shift, and go to state 291
 
@@ -4944,7 +4953,7 @@ state 290
 
 state 291
 
-  139 unaries: SIZE_OF LB type_name RB .
+  139 unaries: SIZE_OF LB type_name_cast RB .
 
     $default  reduce using rule 139 (unaries)
 
@@ -5433,6 +5442,7 @@ state 314
 
     ELSE  shift, and go to state 327
 
+    ELSE      [reduce using rule 80 (selection_stat)]
     $default  reduce using rule 80 (selection_stat)
 
 

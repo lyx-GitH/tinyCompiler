@@ -7,4 +7,4 @@ fi
 
 cd build
 cmake ..
-make -j8 && cd .. && ./build/tinyCompiler
+make -j8 && echo done

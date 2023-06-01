@@ -18,11 +18,17 @@ llvm::DataLayout CodeGenerator::data_layout{&module};
 
 llvm::Function *CodeGenerator::cur_func_{nullptr};
 
+llvm::BasicBlock *CodeGenerator::global_entry{nullptr};
+
+llvm::Function *CodeGenerator::global{nullptr};
+
 const AstNode *CodeGenerator::cur_node{nullptr};
 
 std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
 
 std::vector<CodeGenerator::TypeTable> CodeGenerator::symbol_type_stack_{};
+
+std::vector<CodeGenerator::LoopScope> CodeGenerator::loop_stack{};
 
 std::map<std::string, const AstNode *> CodeGenerator::type_aliases_map{};
 
@@ -87,6 +93,13 @@ void CodeGenerator::InitGenerators() {
     LOAD_GEN(kCast);
     LOAD_GEN(KUAsign);
 
+    LOAD_GEN(kRet);
+    LOAD_GEN(kBreak);
+    LOAD_GEN(kCont);
+    LOAD_GEN(kIfStmt);
+    LOAD_GEN(kWhileStmt);
+
+
 }
 
 void CodeGenerator::InitBasicTypes() {
@@ -101,7 +114,7 @@ void CodeGenerator::InitBasicTypes() {
 }
 
 CodeGenerator::pValue CallGenerator(const AstNode *node) {
-    if (!node)
+    if (!node || node->type_ == kNULL)
         return {};
     else return CALL_GEN(node);
 }
@@ -172,6 +185,7 @@ void CodeGenerator::GenObjectCode(const std::string &file_name) {
 
     PM.run(module);
     Dest.flush();
+    printf("Dump object to %s\n", file_name.c_str());
 }
 
 void CodeGenerator::DumpIR(std::string &&file_name) {
@@ -197,12 +211,10 @@ Symbol const *CodeGenerator::GetSymbol(const std::string &name) {
 }
 
 const AstNode *CodeGenerator::GetSymbolTypeTree(const std::string &name) {
-    std::cout << "getting type tree " << name << std::endl;
     for (auto rit = symbol_type_stack_.rbegin(); rit != symbol_type_stack_.rend(); ++rit) {
         if (rit->contains(name))
             return rit->at(name);
     }
-    std::cout << "type tree not found" << std::endl;
     return nullptr;
 }
 
@@ -215,6 +227,9 @@ Symbol const *CodeGenerator::GetLocalSymbol(const std::string &name) {
 
 void CodeGenerator::Generate() {
     std::printf("\033[32m[codegen begins] \033[0m\n");
+    global = llvm::Function::Create(llvm::FunctionType::get(IR_builder.getVoidTy(), false),
+                                    llvm::GlobalValue::InternalLinkage, "global", module);
+    global_entry = llvm::BasicBlock::Create(context, "global_entry", global);
     if (!ast_root_)
         return;
     assert(ast_root_->type_ == kRoot);
@@ -225,6 +240,9 @@ void CodeGenerator::Generate() {
         e.show();
         exit(1);
     }
+
+    global_entry->eraseFromParent();
+    global->eraseFromParent();
     std::printf("\033[32m[codegen succeed] \033[0m\n");
 
 }
@@ -259,6 +277,9 @@ DEF_GEN(kFuncDef) {
     ASSERT_TYPE(func_body_node, kScope);
 
     auto f = CallGenerator(func_decl_node).GetFunction();
+    printf("fn:\n");
+    f->print(llvm::outs());
+
     defined_functions.insert(f->getName().str());
     {
         ScopeGuard scope_guard;
@@ -276,8 +297,12 @@ DEF_GEN(kFuncDef) {
                 if (!cur)
                     throw_code_gen_exception(cur, "too few arguments");
                 ASSERT_TYPE(cur, kVarDecl);
-                auto alloc = CallGenerator(cur).GetVariable();
-                IR_builder.CreateStore(arg_it, alloc);
+                std::string var_name{cur->child_->next_->val_};
+                const AstNode *var_type_tree = cur->child_;
+                auto alloc_inst = AllocFunctionArg(f, arg_it->getType(), cur->child_->next_->val_);
+                IR_builder.CreateStore(arg_it, alloc_inst);
+                SetSymbol(var_name, alloc_inst);
+                SetSymbolTypeTree(var_name, var_type_tree);
             }
             if (cur) {
                 throw_code_gen_exception(cur, "too many arguments");
@@ -377,32 +402,28 @@ DEF_GEN(kVarInit) {
         auto expr_node = getNChildSafe(node, 1);
         assert(expr_node);
         ASSERT_TYPE(var_decl_node, kVarDecl);
-        CallGenerator(var_decl_node);   // this would do semantic checks.
+        CallGenerator(var_decl_node);// this would do semantic checks.
+
+        if (!cur_func_)
+            SwapBtwGlobal();
         auto init_value_sym = GenExpression(expr_node);
-        if (!cur_func_ && !init_value_sym.IsConst())
-            throw_code_gen_exception(expr_node, "cannot use non-const value to initialize global variables");
+        if (!cur_func_)
+            SwapBtwGlobal();
+
         auto type = CallGenerator(getNChildSafe(var_decl_node, 0)).GetType();
-        llvm::outs() << "get type: ";
-        type->print(llvm::outs(), true);
-        llvm::outs() << "\n";
         auto name = std::string{getNChildSafe(var_decl_node, 1)->val_};
-        auto initialzer = init_value_sym.IsFunction() ? (llvm::Value *) init_value_sym.GetFunction() : CastToType(type,
-                                                                                                                  init_value_sym.GetVariable());
-//        llvm::outs() << "init type: ";
-//        initialzer->print(llvm::outs(), true);
-//        llvm::outs() << "\n";
+        auto initialzer = CastToType(type, init_value_sym.GetVariable());
 
         if (!initialzer)
             throw_code_gen_exception(expr_node, "cannot convert expression to target type");
 
         if (cur_func_) {
-            auto block_builder = llvm::IRBuilder<>(&cur_func_->getEntryBlock(), cur_func_->getEntryBlock().begin());
-            auto alloca = block_builder.CreateAlloca(type, nullptr, name);
+            auto alloca = AllocFunctionArg(cur_func_, type, name);
             IR_builder.CreateStore(initialzer, alloca);
             SetSymbol(name, alloca);
             SetSymbolTypeTree(name, var_decl_node->child_);
         } else {
-            assert(init_value_sym.IsConst());
+
             auto global_var = new llvm::GlobalVariable(
                     module,
                     type,
@@ -441,6 +462,14 @@ void CodeGenerator::CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &co
         }
         if (collector.back()->isVoidTy())
             void_idx = param_idx;
+        if (collector.back()->isArrayTy() || collector.back()->isPointerTy()) {
+            auto arr_type = collector.back();
+            collector.back() = TypeFactory::GetNonArrayType(arr_type);
+        }
+        if (collector.back()->isFunctionTy()) {
+            auto f_type = collector.back();
+            collector.back() = f_type->getPointerTo();
+        }
         ++param_idx;
         param_start = param_start->next_;
     }
@@ -453,6 +482,8 @@ void CodeGenerator::CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &co
 }
 
 void CodeGenerator::CollectArgs(pAstNode node, std::vector<llvm::Value *> &collector) {
+    if (!node)
+        return;
     //TODO: add type checks and argument checks
     ASSERT_TYPE(node, kArgList);
     auto arg_list = node->child_;
@@ -462,6 +493,17 @@ void CodeGenerator::CollectArgs(pAstNode node, std::vector<llvm::Value *> &colle
         collector.push_back(symbol.GetVariable());
         arg_list = arg_list->next_;
     }
+}
+
+void CodeGenerator::SwapBtwGlobal() {
+    auto cur_block = IR_builder.GetInsertBlock();
+    IR_builder.SetInsertPoint(global_entry);
+    global_entry = cur_block;
+}
+
+llvm::Value *CodeGenerator::AllocFunctionArg(llvm::Function *f, llvm::Type *t, const std::string &name) {
+    llvm::IRBuilder<> func_builder{&f->getEntryBlock(), f->getEntryBlock().begin()};
+    return func_builder.CreateAlloca(t, nullptr, name);
 }
 
 
@@ -640,14 +682,15 @@ DEF_GEN(kFuncCall) {
     if (f_v.IsFunction()) {
         f = f_v.GetFunction();
     } else {
-        auto f0 = GenExpression(func_name_node, false).GetVariable();
-        if (f0->getType()->isSized()) {
-            // non-sized, this is a right-value
-            auto inst = IR_builder.CreateLoad(f0->getType()->getPointerElementType(), f0);
-            return IR_builder.CreateCall((llvm::FunctionType *) (inst->getType()->getPointerElementType()), inst, args);
-        } else {
-            return IR_builder.CreateCall((llvm::FunctionType *) (f0->getType()->getPointerElementType()), f0, args);
-        }
+        //TODO: finish IR gen for variable function call
+//        auto f0 = GenExpression(func_name_node, false).GetVariable();
+//        if (f0->getType()->isSized()) {
+//            // non-sized, this is a right-value
+//            auto inst = IR_builder.CreateLoad(f0->getType()->getPointerElementType(), f0);
+//            return IR_builder.CreateCall((llvm::FunctionType *) (inst->getType()->getPointerElementType()), inst, args);
+//        } else {
+//            return IR_builder.CreateCall((llvm::FunctionType *) (f0->getType()->getPointerElementType()), f0, args);
+//        }
     }
 
 
@@ -767,6 +810,112 @@ DEF_GEN(kUnionType) {
 
 DEF_GEN(kEnumType) {
 
+}
+
+DEF_GEN(kRet) {
+    if (!cur_func_)
+        throw_code_gen_exception(node, "return statement out of function");
+    if (!node->child_) {
+        if (!cur_func_->getReturnType()->isVoidTy())
+            throw_code_gen_exception(node, "return type unmatched");
+        else {
+            IR_builder.CreateRetVoid();
+            return {};
+        }
+    }
+
+    auto ret_value = GenExpression(node->child_).GetVariable();
+    ret_value = CastToType(cur_func_->getReturnType(), ret_value);
+    if (!ret_value)
+        throw_code_gen_exception(node, "return type unmatched");
+    return IR_builder.CreateRet(ret_value);
+}
+
+DEF_GEN(kBreak) {
+    if (!cur_func_ || CodeGenerator::loop_stack.empty())
+        throw_code_gen_exception(node, "break statement out of function");
+    auto loop_end = loop_stack.back().second;
+    return IR_builder.CreateBr(loop_end);
+}
+
+DEF_GEN(kCont) {
+    if (!cur_func_ || CodeGenerator::loop_stack.empty())
+        throw_code_gen_exception(node, "break statement out of function");
+    auto loop_begin = loop_stack.back().first;
+    return IR_builder.CreateBr(loop_begin);
+}
+
+inline void QuitCondStmtTo(llvm::IRBuilder<> &IR_builder, llvm::BasicBlock *block) {
+    if (!IR_builder.GetInsertBlock()->getTerminator())
+        IR_builder.CreateBr(block);
+}
+
+inline void CodeGenerator::SetCurBlockTo(llvm::BasicBlock *block) {
+    cur_func_->getBasicBlockList().push_back(block);
+    IR_builder.SetInsertPoint(block);
+}
+
+DEF_GEN(kIfStmt) {
+    if (!cur_func_)
+        throw_code_gen_exception(node, "cannot declare if statement outside a function");
+    auto cond_node = getNChildSafe(node, 0);
+    auto true_node = getNChildSafe(node, 1);
+    auto false_node = getNChildSafe(node, 2);
+    llvm::Value *cond = CastToBool(GenExpression(cond_node).GetVariable());
+    if (!cond)
+        throw_code_gen_exception(cond_node, "expression cannot become a if-condition");
+
+    auto t_block = llvm::BasicBlock::Create(context, "if-true:");
+    auto f_block = llvm::BasicBlock::Create(context, "if-false");
+    auto q_block = llvm::BasicBlock::Create(context, "if-quit");
+
+    IR_builder.CreateCondBr(cond, t_block, f_block);
+
+
+    SetCurBlockTo(t_block);
+    CallGenerator(true_node);
+    QuitCondStmtTo(IR_builder, q_block);
+
+
+    SetCurBlockTo(f_block);
+    CallGenerator(false_node);
+    QuitCondStmtTo(IR_builder, q_block);
+
+    if (q_block->hasNPredecessorsOrMore(1)) {
+        SetCurBlockTo(q_block);
+    }
+
+    return {};
+}
+
+DEF_GEN(kWhileStmt) {
+    if (!cur_func_)
+        throw_code_gen_exception(node, "cannot declare while statement outside a function");
+    auto cond_node = getNChildSafe(node, 0);
+    auto body_node = getNChildSafe(node, 1);
+
+    auto loop_begin = llvm::BasicBlock::Create(context, "whl_begin");
+    auto loop_body = llvm::BasicBlock::Create(context, "whl_body");
+    auto loop_end = llvm::BasicBlock::Create(context, "whl_end");
+
+    IR_builder.CreateBr(loop_begin);
+//    cur_func_->getBasicBlockList().push_back(c_block);
+//    IR_builder.SetInsertPoint(c_block);
+    SetCurBlockTo(loop_begin);
+    auto cond = CastToBool(GenExpression(cond_node).GetVariable());
+    if (!cond)
+        throw_code_gen_exception(node, "expression cannot become a while-condition");
+
+    IR_builder.CreateCondBr(cond, loop_body, loop_end);
+
+    SetCurBlockTo(loop_body);
+    {
+        LoopGuard g(loop_begin, loop_end);
+        CallGenerator(body_node);
+    }
+
+    QuitCondStmtTo(IR_builder, loop_begin);
+    SetCurBlockTo(loop_end);
 }
 
 void CodeGenerator::AddTypeDefTreeInfo(const char *name, const AstNode *pNode) {

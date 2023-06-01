@@ -35,6 +35,7 @@ static inline bool IsNumeric(llvm::Value *v) {
 extern CodeGenerator::pValue CallGenerator(const AstNode *node);
 
 void CodeGenerator::InitBinaryOperators() {
+    LOAD_BINARY_OP(",", Comma);
     LOAD_BINARY_OP("+", Plus);
     LOAD_BINARY_OP("-", Sub);
     LOAD_BINARY_OP("*", Mult);
@@ -45,6 +46,14 @@ void CodeGenerator::InitBinaryOperators() {
     LOAD_BINARY_OP("|", BitOr);
     LOAD_BINARY_OP("&", BitAnd);
     LOAD_BINARY_OP("^", BitXor);
+    LOAD_BINARY_OP("&&", LogAnd);
+    LOAD_BINARY_OP("||", LogOr);
+    LOAD_BINARY_OP(">", GreaterThan);
+    LOAD_BINARY_OP(">=", GreaterEq);
+    LOAD_BINARY_OP("<", LessThan);
+    LOAD_BINARY_OP("<=", LessEq);
+    LOAD_BINARY_OP("==", Eq);
+    LOAD_BINARY_OP("!=", NEq);
 }
 
 void CodeGenerator::InitUnaryOperators() {
@@ -154,22 +163,9 @@ Symbol CodeGenerator::GenExpression(const AstNode *node, bool r_value) {
     }
 }
 
-inline static bool IsPtrOperation(llvm::Value *&lhs, llvm::Value *&rhs) {
-    if (lhs->getType()->isPointerTy() && rhs->getType()->isIntegerTy())
-        return true;
-    if (lhs->getType()->isIntegerTy() && rhs->getType()->isPointerTy()) {
-        std::swap(lhs, rhs);
-        return true;
-    } else return false;
-}
-
-inline static bool IsSameTypePtr(llvm::Value *lhs, llvm::Value *rhs) {
-    return lhs->getType()->isPointerTy() && rhs->getType()->isPointerTy()
-           && lhs->getType() == rhs->getType();
-}
 
 llvm::Value *CodeGenerator::RunAdd(llvm::Value *lhs, llvm::Value *rhs) {
-    if (IsPtrOperation(lhs, rhs)) {
+    if (TypeFactory::IsPtrOperation(lhs, rhs)) {
         auto type = lhs->getType()->getNonOpaquePointerElementType();
         return IR_builder.CreateGEP(type, lhs, rhs);
     }
@@ -179,11 +175,11 @@ llvm::Value *CodeGenerator::RunAdd(llvm::Value *lhs, llvm::Value *rhs) {
 }
 
 llvm::Value *CodeGenerator::RunSub(llvm::Value *lhs, llvm::Value *rhs) {
-    if (IsPtrOperation(lhs, rhs)) {
+    if (TypeFactory::IsPtrOperation(lhs, rhs)) {
         auto type = lhs->getType()->getNonOpaquePointerElementType();
         return IR_builder.CreateGEP(type, lhs, IR_builder.CreateNeg(rhs));
     }
-    if (IsSameTypePtr(lhs, rhs)) {
+    if (TypeFactory::IsSameTypePtr(lhs, rhs)) {
         auto type = lhs->getType()->getNonOpaquePointerElementType();
         return IR_builder.CreatePtrDiff(type, lhs, rhs);
     }

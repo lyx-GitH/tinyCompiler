@@ -9,6 +9,8 @@ inline bool IsSigned(llvm::Value *v) {
 }
 
 llvm::Value *CodeGenerator::CastToBool(llvm::Value *value) {
+    if (!value)
+        return value;
     if (value->getType()->isIntegerTy() && value->getType()->getIntegerBitWidth() == 1)
         return value;
 
@@ -99,17 +101,19 @@ llvm::Value *CodeGenerator::AlignType(llvm::Value *v, llvm::Type *t) {
 
 llvm::Value *CodeGenerator::CastToRightValue(llvm::Value *left_value) {
     assert(left_value);
-    auto type = left_value->getType()->getNonOpaquePointerElementType();
-    if (type->isArrayTy()) {
-        return IR_builder.CreatePointerCast(left_value, type->getArrayElementType()->getPointerTo());
-    } else return IR_builder.CreateLoad(type, left_value);
+    //For array types, return the pointer to its first element
+    if (left_value->getType()->getNonOpaquePointerElementType()->isArrayTy())
+        return IR_builder.CreatePointerCast(left_value,
+                                            left_value->getType()->getNonOpaquePointerElementType()->getArrayElementType()->getPointerTo());
+    else
+        return IR_builder.CreateLoad(left_value->getType()->getNonOpaquePointerElementType(), left_value);
 }
 
-llvm::Value *CodeGenerator::CastToRightValue(llvm::Function *func) {
-//    llvm::Value *p = IR_builder.CreateAlloca(func->getType(), nullptr);
-    return IR_builder.CreateLoad(func->getType(), func);
-
-}
+//llvm::Value *CodeGenerator::CastToRightValue(llvm::Function *func) {
+////    llvm::Value *p = IR_builder.CreateAlloca(func->getType(), nullptr);
+//    return IR_builder.CreateLoad(func->getType(), func);
+//
+//}
 
 
 

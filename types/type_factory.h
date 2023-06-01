@@ -10,6 +10,7 @@
 #include <map>
 #include <llvm/IR/Type.h>
 #include <concepts>
+#include <llvm/IR/Value.h>
 
 static std::map<uint64_t, std::shared_ptr<char>> blocks;
 static const int BLOCK_SIZE = 64;
@@ -113,6 +114,28 @@ public:
             return true;
         return false;
 
+    }
+
+    static llvm::Type *GetNonArrayType(llvm::Type *type) {
+        if (type->isArrayTy()) {
+            auto ele_type = type->getArrayElementType();
+            return (llvm::Type *) ele_type->getPointerTo();
+        }
+        return type;
+    }
+
+    inline static bool IsPtrOperation(llvm::Value *&lhs, llvm::Value *&rhs) {
+        if (lhs->getType()->isPointerTy() && rhs->getType()->isIntegerTy())
+            return true;
+        if (lhs->getType()->isIntegerTy() && rhs->getType()->isPointerTy()) {
+            std::swap(lhs, rhs);
+            return true;
+        } else return false;
+    }
+
+    inline static bool IsSameTypePtr(llvm::Value *lhs, llvm::Value *rhs) {
+        return lhs->getType()->isPointerTy() && rhs->getType()->isPointerTy()
+               && lhs->getType() == rhs->getType();
     }
 
 };

@@ -321,7 +321,7 @@ unaries : postfix
     | SS unaries                               {$$ = createUnaryOpTree("--_", $2); $$->type_ = KUAsign; }
     | uop factor                               {$$ = $1; addChild($$, $2); }
     | SIZE_OF unaries                          {$$ = createUnaryOpTree("sizeof", $2);}
-    | SIZE_OF LB type_name RB                   {$$ = createUnaryOpTree("sizeof", $3);}
+    | SIZE_OF LB type_name_cast RB                   {$$ = createUnaryOpTree("sizeof", $3);}
     ;
 
 postfix : single                                {$$ = $1;}
