@@ -89,7 +89,7 @@ ID {LITERAL}+{ID_C}*
 
 "switch"    {MOVE; return SWITCH; }
 "case"      {MOVE; return CASE;}
-"defualt"   {MOVE; return DEFAULT; }
+"default"   {printf("get default\n"); MOVE; return DEFAULT; }
 
 "goto"      {MOVE; NODE(kGoto); return GOTO;}
 "break"     {MOVE; NODE(kBreak); return BREAK;}

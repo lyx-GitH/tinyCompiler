@@ -19,8 +19,11 @@ void SyntaxTreePrinter::PrintTreeLow(pAstNode node, std::ostream &out) {
     out << GetSyntaxNodeTypeStr(node->type_) << "(" << node->line_no_ << "," << node->col_no_ << ")";
     out << "\\n";
     out << "id(" << node->id_ << ")";
-    if (node->val_ != nullptr) {
+    if (node->val_ != nullptr && node->type_ != kStrLiteral) {
         out << ",val(" << node->val_ << ")";
+    } else if(node->type_ == kStrLiteral) {
+        std::string view = std::string{node->val_ + 1, strlen(node->val_) - 2};
+        out << ",val(" << view << ")";
     }
     out << "\"];" << std::endl;
 

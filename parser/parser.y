@@ -66,6 +66,7 @@
 %type <ast_node> expression expression1 expression2 expression3 expression4 expression5 expression6 expression7 expression8
 %type <ast_node> expression9 expression10 expression11
 %type <ast_node> uop aop
+%type <ast_node> case_stat case_list
 
 %start program_unit
 %%
@@ -209,8 +210,6 @@ stat						: labeled_stat
 							;
 
 labeled_stat				: ID T2 stat                    {$$ = createLabledStmt($1, $3);}                    
-							| CASE expression10 T2 stat     {$$ = createBinaryTreeNode(kCase, $2, $4); }
-							| DEFAULT T2 stat
 							;
 
 exp_stat					: expression SEMI               {$$ = createExprTree($1);}
@@ -229,7 +228,17 @@ stat_list					: stat              {$$ = $1;}
 
 selection_stat				: IF LB expression RB stat 									%prec "then"    {$$ = createTrinaryTreeNode(kIfStmt, $3, $5, NULL); }
 							| IF LB expression RB stat ELSE stat                                        {$$ = createTrinaryTreeNode(kIfStmt, $3, $5, $7); }
-							| SWITCH LB expression RB stat                                              {$$ = createBinaryTreeNode(kSwitchStmt, $3, $5); }
+							| SWITCH LB expression RB LSCOPE case_list RSCOPE                           {$$ = createBinaryTreeNode(kSwitchStmt, $3, $6); }
+							;
+
+case_list					: case_stat								{$$ = $1;}
+							| case_list case_stat					{addNext($1, $2); }
+							;
+
+case_stat					: CASE expression10 T2 stat_list				{$$ = createBinaryTreeNode(kCase, $2, $4); }
+							| DEFAULT T2 stat_list							{$$ = createLableThroughName("default", $3); }
+							| CASE expression10 T2							{$$ =createBinaryTreeNode(kCase, $2, NULL);}
+							| DEFAULT  T2									{$$ = createLableThroughName("default", NULL);}
 							;
 
 iteration_stat				: WHILE LB expression RB stat                                   {$$ = createBinaryTreeNode(kWhileStmt, createExprTree($3), $5); }

@@ -6,7 +6,7 @@
 
 std::string CodeGenerator::cur_struct_name{};
 
-std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::generators{};
+std::array <CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::generators{};
 
 llvm::LLVMContext CodeGenerator::context{};
 
@@ -24,11 +24,11 @@ llvm::Function *CodeGenerator::global{nullptr};
 
 const AstNode *CodeGenerator::cur_node{nullptr};
 
-std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
+std::vector <CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
 
-std::vector<CodeGenerator::TypeTable> CodeGenerator::symbol_type_stack_{};
+std::vector <CodeGenerator::TypeTable> CodeGenerator::symbol_type_stack_{};
 
-std::vector<CodeGenerator::LoopScope> CodeGenerator::loop_stack{};
+std::vector <CodeGenerator::LoopScope> CodeGenerator::loop_stack{};
 
 std::map<std::string, const AstNode *> CodeGenerator::type_aliases_map{};
 
@@ -38,23 +38,23 @@ CodeGenerator::UnionTypeTable CodeGenerator::union_type_table{};
 
 CodeGenerator::BlockTable CodeGenerator::block_table{};
 
-std::set<std::string> CodeGenerator::defined_functions{};
+std::set <std::string> CodeGenerator::defined_functions{};
 
 bool CodeGenerator::cur_init_{false};
 
 bool CodeGenerator::en_warn{true};
 
-std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::binary_gen_left{};
+std::array <CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::binary_gen_left{};
 
-std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::binary_gen_right{};
+std::array <CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::binary_gen_right{};
 
-std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::unary_gen_left{};
+std::array <CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::unary_gen_left{};
 
-std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::unary_gen_right{};
+std::array <CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::unary_gen_right{};
 
-std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::assign_gen_left{};
+std::array <CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::assign_gen_left{};
 
-std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::assign_gen_right{};
+std::array <CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::assign_gen_right{};
 
 std::string convert_to_raw(const char *s, std::size_t len);
 
@@ -128,7 +128,7 @@ CodeGenerator::pValue CallGenerator(const AstNode *node) {
 }
 
 void CodeGenerator::Optimize(const std::string &opt_level) {
-    static std::map<std::string, llvm::OptimizationLevel> optimizer = {
+    static std::map <std::string, llvm::OptimizationLevel> optimizer = {
             {"O0", llvm::OptimizationLevel::O0},
             {"O1", llvm::OptimizationLevel::O1},
             {"O2", llvm::OptimizationLevel::O2},
@@ -261,155 +261,155 @@ void CodeGenerator::Generate() {
 
 
 DEF_GEN(kRoot) {
-    {
-        ScopeGuard guard;
+        {
+                ScopeGuard guard;
         auto sub_blocks = node->child_;
         while (sub_blocks) {
             CallGenerator(sub_blocks);
             sub_blocks = sub_blocks->next_;
         }
-    }
-    return {};
+        }
+        return {};
 }
 
 DEF_GEN(kId) {
-    auto p_symbol = GetSymbol(node->val_);
-    if (!p_symbol)
+        auto p_symbol = GetSymbol(node->val_);
+        if (!p_symbol)
         throw_code_gen_exception(node, "unidentified id");
-    cur_node = GetSymbolTypeTree(node->val_);
-    return *p_symbol;
+        cur_node = GetSymbolTypeTree(node->val_);
+        return *p_symbol;
 }
 
 DEF_GEN(kFuncDef) {
-    ASSERT_TYPE(node, kFuncDef);
+        ASSERT_TYPE(node, kFuncDef);
 
-    auto func_decl_node = getNChildSafe(node, 0);
-    auto func_body_node = getNChildSafe(node, 1);
-    ASSERT_TYPE(func_decl_node, kFuncDecl);
-    ASSERT_TYPE(func_body_node, kScope);
+        auto func_decl_node = getNChildSafe(node, 0);
+        auto func_body_node = getNChildSafe(node, 1);
+        ASSERT_TYPE(func_decl_node, kFuncDecl);
+        ASSERT_TYPE(func_body_node, kScope);
 
-    auto f = CallGenerator(func_decl_node).GetFunction();
-    printf("fn:\n");
-    f->print(llvm::outs());
+        auto f = CallGenerator(func_decl_node).GetFunction();
+        printf("fn:\n");
+        f->print(llvm::outs());
 
-    defined_functions.insert(f->getName().str());
-    {
-        ScopeGuard scope_guard;
-        auto func_block = llvm::BasicBlock::Create(context, f->getName() + "_entry", f);
-        IR_builder.SetInsertPoint(func_block);
-        FuncGuard func_guard(f);
+        defined_functions.insert(f->getName().str());
         {
-            auto params = func_decl_node->child_->child_->next_;
-            ASSERT_TYPE(params, kFuncParams);
-            auto cur = params->child_;
+            ScopeGuard scope_guard;
+            auto func_block = llvm::BasicBlock::Create(context, f->getName() + "_entry", f);
+            IR_builder.SetInsertPoint(func_block);
+            FuncGuard func_guard(f);
+            {
+                auto params = func_decl_node->child_->child_->next_;
+                ASSERT_TYPE(params, kFuncParams);
+                auto cur = params->child_;
 
-            int arg_idx = 0;
-            en_warn = false;
-            for (auto arg_it = f->arg_begin(); arg_it < f->arg_end(); arg_it++, arg_idx++, cur = cur->next_) {
-                if (!cur)
-                    throw_code_gen_exception(cur, "too few arguments");
-                ASSERT_TYPE(cur, kVarDecl);
-                std::string var_name{cur->child_->next_->val_};
-                const AstNode *var_type_tree = cur->child_;
-                auto alloc_inst = AllocFunctionArg(f, arg_it->getType(), cur->child_->next_->val_);
-                IR_builder.CreateStore(arg_it, alloc_inst);
-                SetSymbol(var_name, alloc_inst);
-                SetSymbolTypeTree(var_name, var_type_tree);
-            }
-            if (cur) {
-                throw_code_gen_exception(cur, "too many arguments");
-            }
-            en_warn = true;
-
-            CallGenerator(func_body_node);
-
-            if (!IR_builder.GetInsertBlock()->getTerminator()) {
-                // No returns yet!
-                auto ret_type = f->getReturnType();
-                if (ret_type->isVoidTy()) {
-                    IR_builder.CreateRetVoid();
-                } else {
-                    IR_builder.CreateRet(llvm::UndefValue::get(ret_type));
+                int arg_idx = 0;
+                en_warn = false;
+                for (auto arg_it = f->arg_begin(); arg_it < f->arg_end(); arg_it++, arg_idx++, cur = cur->next_) {
+                    if (!cur)
+                        throw_code_gen_exception(cur, "too few arguments");
+                    ASSERT_TYPE(cur, kVarDecl);
+                    std::string var_name{cur->child_->next_->val_};
+                    const AstNode *var_type_tree = cur->child_;
+                    auto alloc_inst = AllocFunctionArg(f, arg_it->getType(), cur->child_->next_->val_);
+                    IR_builder.CreateStore(arg_it, alloc_inst);
+                    SetSymbol(var_name, alloc_inst);
+                    SetSymbolTypeTree(var_name, var_type_tree);
                 }
-            }
+                if (cur) {
+                    throw_code_gen_exception(cur, "too many arguments");
+                }
+                en_warn = true;
 
+                CallGenerator(func_body_node);
+
+                if (!IR_builder.GetInsertBlock()->getTerminator()) {
+                    // No returns yet!
+                    auto ret_type = f->getReturnType();
+                    if (ret_type->isVoidTy()) {
+                        IR_builder.CreateRetVoid();
+                    } else {
+                        IR_builder.CreateRet(llvm::UndefValue::get(ret_type));
+                    }
+                }
+
+            }
         }
-    }
-    return {};
+        return {};
 }
 
 DEF_GEN(kVarDecl) {
-    auto var_type_node = getNChildSafe(node, 0);
-    auto var_id_node = getNChildSafe(node, 1);
-    assert(var_type_node);
-    assert(var_id_node);
-    auto type = CallGenerator(var_type_node).GetType();
-    auto name = var_id_node->val_;
+        auto var_type_node = getNChildSafe(node, 0);
+        auto var_id_node = getNChildSafe(node, 1);
+        assert(var_type_node);
+        assert(var_id_node);
+        auto type = CallGenerator(var_type_node).GetType();
+        auto name = var_id_node->val_;
 
-    if (type->isVoidTy())
+        if (type->isVoidTy())
         throw_code_gen_exception(var_type_node, "cannot declare a void variable");
 
-    if (type->isFunctionTy() && cur_init_) {
-        throw_code_gen_exception(var_type_node, "cannot initialize a function");
-    }
+        if (type->isFunctionTy() && cur_init_) {
+            throw_code_gen_exception(var_type_node, "cannot initialize a function");
+        }
 
-    if (GetLocalSymbol(name))
+        if (GetLocalSymbol(name))
         throw_code_gen_exception(var_id_node, "duplicate symbol");
 
-    if (en_warn && !cur_init_ && TypeFactory::IsConst(type))
+        if (en_warn && !cur_init_ && TypeFactory::IsConst(type))
         show_code_gen_warning(node, "uninitialized const variable");
 //        throw_code_gen_exception(var_id_node, "uninitialized const variable");
 
-    if (cur_init_)
-        return {type}; // semantics checks are done, if this is a child node, the parent will do the rest.
+        if (cur_init_)
+        return { type }; // semantics checks are done, if this is a child node, the parent will do the rest.
 
-    if (!cur_func_) {
-        // this var is a global var.
-        // this is a global with an undefined value
-        auto value = llvm::UndefValue::get(type);
-        auto glob_var = new llvm::GlobalVariable(
-                module,
-                type,
-                false,
-                llvm::Function::ExternalLinkage,
-                value,
-                std::string{name}
-        );
-        Symbol s{glob_var};
-        SetSymbol(name, s);
-        SetSymbolTypeTree(cur_struct_name + name, var_type_node);
-    } else {
-        // this var is a local var
-        auto block_builder = llvm::IRBuilder<>(&cur_func_->getEntryBlock(), cur_func_->getEntryBlock().begin());
-        auto alloc = block_builder.CreateAlloca(type, nullptr, name);
-        SetSymbol(name, alloc);
-        SetSymbolTypeTree(name, var_type_node);
-        return {alloc};
-    }
+        if (!cur_func_) {
+            // this var is a global var.
+            // this is a global with an undefined value
+            auto value = llvm::UndefValue::get(type);
+            auto glob_var = new llvm::GlobalVariable(
+                    module,
+                    type,
+                    false,
+                    llvm::Function::ExternalLinkage,
+                    value,
+                    std::string{name}
+            );
+            Symbol s{glob_var};
+            SetSymbol(name, s);
+            SetSymbolTypeTree(cur_struct_name + name, var_type_node);
+        } else {
+            // this var is a local var
+            auto block_builder = llvm::IRBuilder<>(&cur_func_->getEntryBlock(), cur_func_->getEntryBlock().begin());
+            auto alloc = block_builder.CreateAlloca(type, nullptr, name);
+            SetSymbol(name, alloc);
+            SetSymbolTypeTree(name, var_type_node);
+            return {alloc};
+        }
 //    return type;
 }
 
 DEF_GEN(kFuncDecl) {
-    auto func_node = getNChildSafe(node, 0);
-    auto name_node = getNChildSafe(node, 1);
-    ASSERT_TYPE(func_node, kFuncType);
-    ASSERT_TYPE(name_node, kId);
-    auto func_type = (llvm::FunctionType *) (CallGenerator(func_node).GetType());
-    auto prev_symbol = GetSymbol(name_node->val_);
-    if (!prev_symbol) {
-        auto f = llvm::Function::Create(func_type, llvm::GlobalValue::ExternalLinkage, std::string{name_node->val_},
-                                        module);
-        SetFunction(name_node->val_, f);
-        return f;
-    } else if (prev_symbol->IsFunction()) {
-        return *prev_symbol;
-    } else throw_code_gen_exception(name_node, "duplicated symbol");
+        auto func_node = getNChildSafe(node, 0);
+        auto name_node = getNChildSafe(node, 1);
+        ASSERT_TYPE(func_node, kFuncType);
+        ASSERT_TYPE(name_node, kId);
+        auto func_type = (llvm::FunctionType *) (CallGenerator(func_node).GetType());
+        auto prev_symbol = GetSymbol(name_node->val_);
+        if (!prev_symbol) {
+            auto f = llvm::Function::Create(func_type, llvm::GlobalValue::ExternalLinkage, std::string{name_node->val_},
+                                            module);
+            SetFunction(name_node->val_, f);
+            return f;
+        } else if (prev_symbol->IsFunction()) {
+            return *prev_symbol;
+        } else throw_code_gen_exception(name_node, "duplicated symbol");
 
 }
 
 DEF_GEN(kVarInit) {
-    {
-        VarInitGuard g;
+        {
+                VarInitGuard g;
         auto var_decl_node = getNChildSafe(node, 0);
         auto expr_node = getNChildSafe(node, 1);
         assert(expr_node);
@@ -417,17 +417,17 @@ DEF_GEN(kVarInit) {
         CallGenerator(var_decl_node);// this would do semantic checks.
 
         if (!cur_func_)
-            SwapBtwGlobal();
+        SwapBtwGlobal();
         auto init_value_sym = GenExpression(expr_node);
         if (!cur_func_)
-            SwapBtwGlobal();
+        SwapBtwGlobal();
 
         auto type = CallGenerator(getNChildSafe(var_decl_node, 0)).GetType();
-        auto name = std::string{getNChildSafe(var_decl_node, 1)->val_};
+        auto name = std::string{ getNChildSafe(var_decl_node, 1)->val_ };
         auto initialzer = CastToType(type, init_value_sym.GetVariable());
 
         if (!initialzer)
-            throw_code_gen_exception(expr_node, "cannot convert expression to target type");
+        throw_code_gen_exception(expr_node, "cannot convert expression to target type");
 
         if (cur_func_) {
             auto alloca = AllocFunctionArg(cur_func_, type, name);
@@ -451,7 +451,7 @@ DEF_GEN(kVarInit) {
 
 
         return {};
-    }
+        }
 
 }
 
@@ -507,7 +507,7 @@ void CodeGenerator::CollectArgs(pAstNode node, std::vector<llvm::Value *> &colle
     }
 }
 
-void CodeGenerator::CollecCases(pAstNode node, std::vector<pAstNode> &collector, AstNode *&default_node) {
+void CodeGenerator::CollecCases(pAstNode node, std::vector <pAstNode> &collector, AstNode *&default_node) {
     if (!node)
         return;
 
@@ -525,6 +525,9 @@ void CodeGenerator::CollecCases(pAstNode node, std::vector<pAstNode> &collector,
         default_node = node;
         collector.push_back(nullptr);
         CollecCases(node->child_->next_, collector, default_node);
+        CollecCases(node->next_, collector, default_node);
+    } else {
+        CollecCases(node->child_, collector, default_node);
         CollecCases(node->next_, collector, default_node);
     }
 
@@ -544,120 +547,120 @@ llvm::Value *CodeGenerator::AllocFunctionArg(llvm::Function *f, llvm::Type *t, c
 
 
 DEF_GEN(kFuncType) {
-    ASSERT_TYPE(node, kFuncType);
-    auto ret_node = getNChildSafe(node, 0);
-    auto ret_type = CallGenerator(ret_node).GetType();
-    std::vector<llvm::Type *> param_types;
-    bool is_vargs = false;
-    CollectArgTypes(ret_node->next_, param_types);
-    // a nullptr is a placeholder for va_args
-    if (!param_types.empty() && param_types.back() == nullptr) {
-        is_vargs = true;
-        param_types.pop_back();
-    }
+        ASSERT_TYPE(node, kFuncType);
+        auto ret_node = getNChildSafe(node, 0);
+        auto ret_type = CallGenerator(ret_node).GetType();
+        std::vector<llvm::Type *> param_types;
+        bool is_vargs = false;
+        CollectArgTypes(ret_node->next_, param_types);
+        // a nullptr is a placeholder for va_args
+        if (!param_types.empty() && param_types.back() == nullptr) {
+            is_vargs = true;
+            param_types.pop_back();
+        }
 
 
-    auto type = TypeFactory::Get<llvm::FunctionType>(ret_type, param_types, is_vargs);
-    return pValue{type};
+        auto type = TypeFactory::Get<llvm::FunctionType>(ret_type, param_types, is_vargs);
+        return pValue{ type };
 }
 
 DEF_GEN(kType) {
-    ASSERT_TYPE(node, kType);
-    return Symbol{GetType(node->val_)};
+        ASSERT_TYPE(node, kType);
+        return Symbol{ GetType(node->val_) };
 }
 
 DEF_GEN(kTypeAlias) {
-    ASSERT_TYPE(node, kTypeAlias);
-    assert(type_aliases_map.contains(node->val_));
-    return Symbol{GetType(node->val_)};
+        ASSERT_TYPE(node, kTypeAlias);
+        assert(type_aliases_map.contains(node->val_));
+        return Symbol{ GetType(node->val_) };
 }
 
 DEF_GEN(kPtrType) {
-    auto ptr_to_type = getNChildSafe(node, 0);
-    assert(ptr_to_type);
-    auto ptr_to_symbol = CallGenerator(ptr_to_type);
-    return pValue{TypeFactory::Get<llvm::PointerType>(ptr_to_symbol.GetType(), 0U)};
+        auto ptr_to_type = getNChildSafe(node, 0);
+        assert(ptr_to_type);
+        auto ptr_to_symbol = CallGenerator(ptr_to_type);
+        return pValue{ TypeFactory::Get<llvm::PointerType>(ptr_to_symbol.GetType(), 0U) };
 }
 
 DEF_GEN(kArrType) {
-    auto ele_type = getNChildSafe(node, 0);
-    auto len = getNChildSafe(node, 1);
-    assert(ele_type);
-    assert(len);
-    auto type_symbol = CallGenerator(ele_type);
-    if (len->type_ == kDemNumber && strcmp(len->val_, "*") == 0) {
-        return pValue{TypeFactory::Get<llvm::PointerType>(type_symbol.GetType(), 0U)};
-    } else {
-        uint64_t len_i = solveConstantExpr(len);
-        return pValue{TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), len_i)};
-    }
+        auto ele_type = getNChildSafe(node, 0);
+        auto len = getNChildSafe(node, 1);
+        assert(ele_type);
+        assert(len);
+        auto type_symbol = CallGenerator(ele_type);
+        if (len->type_ == kDemNumber && strcmp(len->val_, "*") == 0) {
+            return pValue{TypeFactory::Get<llvm::PointerType>(type_symbol.GetType(), 0U)};
+        } else {
+            uint64_t len_i = solveConstantExpr(len);
+            return pValue{TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), len_i)};
+        }
 }
 
 DEF_GEN(kTypeFeature) {
-    auto type_node = getNChildSafe(node, 0);
-    assert(type_node && IS_TYPE(type_node->type_));
-    auto type = CallGenerator(type_node);
-    auto qualifiers = type_node->next_;
-    while (qualifiers && strcmp(qualifiers->val_, "const") != 0) {
-        qualifiers = qualifiers->next_;
-    }
-    if (qualifiers) {
-        auto t = TypeFactory::GetConstTypeOf(type.GetType());
-        return t;
-    } else return type;
+        auto type_node = getNChildSafe(node, 0);
+        assert(type_node && IS_TYPE(type_node->type_));
+        auto type = CallGenerator(type_node);
+        auto qualifiers = type_node->next_;
+        while (qualifiers && strcmp(qualifiers->val_, "const") != 0) {
+            qualifiers = qualifiers->next_;
+        }
+        if (qualifiers) {
+            auto t = TypeFactory::GetConstTypeOf(type.GetType());
+            return t;
+        } else return type;
 }
 
 DEF_GEN(kTypeDef) {
-    ASSERT_TYPE(node, kTypeDef);
-    auto real_type_node = getNChildSafe(node, 0);
-    cur_node = GetExactTypeTree(real_type_node);
-    auto real_type = CallGenerator(real_type_node).GetType();
-    auto alias_name = getNChildSafe(node, 1)->val_;
-    AddTypeAlias(alias_name, real_type);
-    AddTypeDefTreeInfo(alias_name, cur_node);
-    return {};
+        ASSERT_TYPE(node, kTypeDef);
+        auto real_type_node = getNChildSafe(node, 0);
+        cur_node = GetExactTypeTree(real_type_node);
+        auto real_type = CallGenerator(real_type_node).GetType();
+        auto alias_name = getNChildSafe(node, 1)->val_;
+        AddTypeAlias(alias_name, real_type);
+        AddTypeDefTreeInfo(alias_name, cur_node);
+        return {};
 }
 
 // Const Literals
 DEF_GEN(kDemNumber) {
-    assert(node && IS_NUMBER(node->type_));
-    auto i = strtoll(node->val_, nullptr, 0);
-    auto s = Symbol{llvm::ConstantInt::get(GetType("int"), i), true};
+        assert(node && IS_NUMBER(node->type_));
+        auto i = strtoll(node->val_, nullptr, 0);
+        auto s = Symbol{ llvm::ConstantInt::get(GetType("int"), i), true };
 //    assert(s.GetVariable()->getType() == GetType("int") );
-    return s;
+        return s;
 
 }
 
 DEF_GEN(kHexNumber) {
-    ASSERT_TYPE(node, kOctNumber);
-    return GEN_NAME(kDemNumber)(node);
+        ASSERT_TYPE(node, kOctNumber);
+        return GEN_NAME(kDemNumber)(node);
 }
 
 DEF_GEN(kOctNumber) {
-    ASSERT_TYPE(node, kOctNumber);
-    return GEN_NAME(kDemNumber)(node);
+        ASSERT_TYPE(node, kOctNumber);
+        return GEN_NAME(kDemNumber)(node);
 }
 
 DEF_GEN(kStrLiteral) {
-    ASSERT_TYPE(node, kStrLiteral);
+        ASSERT_TYPE(node, kStrLiteral);
 //    std::string content{node->val_ + 1, strlen(node->val_) - 2};
-    std::string content{convert_to_raw(node->val_ + 1, strlen(node->val_) - 2)};
-    return {IR_builder.CreateGlobalStringPtr(content), true};
+        std::string content{ convert_to_raw(node->val_ + 1, strlen(node->val_) - 2) };
+        return { IR_builder.CreateGlobalStringPtr(content), true };
 }
 
 DEF_GEN(kFloatNumber) {
-    auto f = atof(node->val_);
-    return {llvm::ConstantFP::get(GetType("double"), f), true};
+        auto f = atof(node->val_);
+        return { llvm::ConstantFP::get(GetType("double"), f), true };
 }
 
 DEF_GEN(kCharLiteral) {
-    std::string content{convert_to_raw(node->val_ + 1, strlen(node->val_) - 2)};
-    return {llvm::ConstantInt::get(GetType("char"), content[0]), true};
+        std::string content{ convert_to_raw(node->val_ + 1, strlen(node->val_) - 2) };
+        return { llvm::ConstantInt::get(GetType("char"), content[0]), true };
 }
 
 DEF_GEN(kExpr) {
-    // TODO: modify this
-    return CallGenerator(node->child_);
+        // TODO: modify this
+        return CallGenerator(node->child_);
 }
 
 // Const end
@@ -695,30 +698,30 @@ llvm::Type *CodeGenerator::GetType(const std::string &name) {
 }
 
 DEF_GEN(kScope) {
-    ASSERT_TYPE(node, kScope);
-    {
-        ScopeGuard guard;
-        auto stats = node->child_;
-        while (stats) {
-            CallGenerator(stats);
-            stats = stats->next_;
+        ASSERT_TYPE(node, kScope);
+        {
+            ScopeGuard guard;
+            auto stats = node->child_;
+            while (stats) {
+                CallGenerator(stats);
+                stats = stats->next_;
+            }
         }
-    }
 }
 
 DEF_GEN(kFuncCall) {
-    llvm::Function *f = nullptr;
-    auto func_name_node = getNChildSafe(node, 0)->child_;
-    auto args_node = getNChildSafe(node, 1);
-    std::vector<llvm::Value *> args;
-    CollectArgs(args_node, args);
+        llvm::Function * f = nullptr;
+        auto func_name_node = getNChildSafe(node, 0)->child_;
+        auto args_node = getNChildSafe(node, 1);
+        std::vector<llvm::Value *> args;
+        CollectArgs(args_node, args);
 
 
-    auto f_v = GenExpression(func_name_node, false);
-    if (f_v.IsFunction()) {
-        f = f_v.GetFunction();
-    } else {
-        //TODO: finish IR gen for variable function call
+        auto f_v = GenExpression(func_name_node, false);
+        if (f_v.IsFunction()) {
+            f = f_v.GetFunction();
+        } else {
+            //TODO: finish IR gen for variable function call
 //        auto f0 = GenExpression(func_name_node, false).GetVariable();
 //        if (f0->getType()->isSized()) {
 //            // non-sized, this is a right-value
@@ -727,117 +730,117 @@ DEF_GEN(kFuncCall) {
 //        } else {
 //            return IR_builder.CreateCall((llvm::FunctionType *) (f0->getType()->getPointerElementType()), f0, args);
 //        }
-    }
-
-
-    if (!f->isVarArg()) {
-        std::size_t i = 0;
-        for (auto arg_it = f->arg_begin(); arg_it != f->arg_end(); ++arg_it, ++i) {
-            if (i >= args.size())
-                throw_code_gen_exception(node, "too few arguments in function call");
-
-            auto casted = CastToType(arg_it->getType(), args[i]);
-            if (!casted)
-                throw_code_gen_exception(node, "unqualified type");
-
-            args[i] = casted;
         }
-        if (i != args.size())
-            throw_code_gen_exception(node, "too many arguments in function call");
-    }
-    return IR_builder.CreateCall(f, args);
+
+
+        if (!f->isVarArg()) {
+            std::size_t i = 0;
+            for (auto arg_it = f->arg_begin(); arg_it != f->arg_end(); ++arg_it, ++i) {
+                if (i >= args.size())
+                    throw_code_gen_exception(node, "too few arguments in function call");
+
+                auto casted = CastToType(arg_it->getType(), args[i]);
+                if (!casted)
+                    throw_code_gen_exception(node, "unqualified type");
+
+                args[i] = casted;
+            }
+            if (i != args.size())
+                throw_code_gen_exception(node, "too many arguments in function call");
+        }
+        return IR_builder.CreateCall(f, args);
 }
 
 DEF_GEN(kStructType) {
-    std::vector<llvm::Type *> member_types;
-    std::vector<std::string> member_names;
-    auto id_node = getNChildSafe(node, 0);
-    assert(id_node);
+        std::vector < llvm::Type * > member_types;
+        std::vector<std::string> member_names;
+        auto id_node = getNChildSafe(node, 0);
+        assert(id_node);
 
-    std::string struct_name;
+        std::string struct_name;
 
-    if (id_node->type_ == kNULL) {
-        struct_name.assign("struct-" + std::to_string(struct_type_table.size()));
-    } else if (id_node->type_ == kId) {
-        struct_name.assign("struct-" + std::string{id_node->val_});
-    } else
+        if (id_node->type_ == kNULL) {
+            struct_name.assign("struct-" + std::to_string(struct_type_table.size()));
+        } else if (id_node->type_ == kId) {
+            struct_name.assign("struct-" + std::string{id_node->val_});
+        } else
         assert(false);
 
-    auto supposed_type = GetSymbol(struct_name);
-    if (supposed_type) {
-        assert(supposed_type->IsType() && supposed_type->GetType()->isStructTy());
-        return supposed_type->GetType();
-    }
+        auto supposed_type = GetSymbol(struct_name);
+        if (supposed_type) {
+            assert(supposed_type->IsType() && supposed_type->GetType()->isStructTy());
+            return supposed_type->GetType();
+        }
 
-    auto decl_list_node = id_node->next_;
-    if (!decl_list_node || decl_list_node->type_ == kNULL) {
-        auto it = GetSymbol(id_node->val_);
-        if (!it || !it->GetType()->isStructTy())
-            throw_code_gen_exception(id_node, "invalid struct type id");
-        else return *it;
-    }
+        auto decl_list_node = id_node->next_;
+        if (!decl_list_node || decl_list_node->type_ == kNULL) {
+            auto it = GetSymbol(id_node->val_);
+            if (!it || !it->GetType()->isStructTy())
+                throw_code_gen_exception(id_node, "invalid struct type id");
+            else return *it;
+        }
 
-    auto struct_type = TypeFactory::Get(llvm::StructType::create(context, struct_name));
-    SetType(struct_name, struct_type);
+        auto struct_type = TypeFactory::Get(llvm::StructType::create(context, struct_name));
+        SetType(struct_name, struct_type);
 
-    for (auto cur = decl_list_node; cur; cur = cur->next_) {
-        ASSERT_TYPE(cur, kVarDecl);
-        auto type = CallGenerator(cur->child_).GetType();
-        if (type->isVoidTy())
-            throw_code_gen_exception(cur, "cannot declare a void type variable");
-        member_types.push_back(type);
-        member_names.emplace_back(cur->child_->next_->val_);
-        auto mem_id_name = struct_name + std::string{cur->child_->next_->val_};
-        SetSymbolTypeTree(mem_id_name, cur->child_);
-    }
-
-
-    struct_type->setBody(member_types);
+        for (auto cur = decl_list_node; cur; cur = cur->next_) {
+            ASSERT_TYPE(cur, kVarDecl);
+            auto type = CallGenerator(cur->child_).GetType();
+            if (type->isVoidTy())
+                throw_code_gen_exception(cur, "cannot declare a void type variable");
+            member_types.push_back(type);
+            member_names.emplace_back(cur->child_->next_->val_);
+            auto mem_id_name = struct_name + std::string{cur->child_->next_->val_};
+            SetSymbolTypeTree(mem_id_name, cur->child_);
+        }
 
 
-    StructMemberMap member_map;
-    for (std::size_t i = 0; i < member_names.size(); i++) {
-        StructMemberType mem{i, member_types[i]};
-        member_map.emplace(member_names[i], mem);
-    }
-    struct_type_table.insert(std::make_pair(struct_name, std::move(member_map)));
+        struct_type->setBody(member_types);
 
-    return struct_type;
+
+        StructMemberMap member_map;
+        for (std::size_t i = 0; i < member_names.size(); i++) {
+            StructMemberType mem{i, member_types[i]};
+            member_map.emplace(member_names[i], mem);
+        }
+        struct_type_table.insert(std::make_pair(struct_name, std::move(member_map)));
+
+        return struct_type;
 }
 
 DEF_GEN(kCast) {
-    auto type_node = getNChildSafe(node, 0);
-    assert(IS_TYPE(type_node->type_));
-    auto type = CallGenerator(type_node).GetType();
-    auto expr_node = getNChildSafe(node, 1);
-    assert(expr_node);
-    auto expr_value = GenExpression(expr_node).GetVariable();
-    return CastToType(type, expr_value);
+        auto type_node = getNChildSafe(node, 0);
+        assert(IS_TYPE(type_node->type_));
+        auto type = CallGenerator(type_node).GetType();
+        auto expr_node = getNChildSafe(node, 1);
+        assert(expr_node);
+        auto expr_value = GenExpression(expr_node).GetVariable();
+        return CastToType(type, expr_value);
 }
 
 DEF_GEN(kSubScript) {
-    auto arr_node = getNChildSafe(node, 0);
-    auto idx_node = getNChildSafe(node, 1);
-    assert(arr_node);
-    assert(idx_node);
-    auto array = GenExpression(arr_node).GetVariable();
-    auto left_cur_node = cur_node;
-    auto idx = GenExpression(idx_node).GetVariable();
-    if (!array->getType()->isPointerTy() || !idx->getType()->isIntegerTy()) {
-        throw_code_gen_exception(node, "incompatible type for subscript");
-    }
-    cur_node = left_cur_node;
-    CurNodeStepDown();
+        auto arr_node = getNChildSafe(node, 0);
+        auto idx_node = getNChildSafe(node, 1);
+        assert(arr_node);
+        assert(idx_node);
+        auto array = GenExpression(arr_node).GetVariable();
+        auto left_cur_node = cur_node;
+        auto idx = GenExpression(idx_node).GetVariable();
+        if (!array->getType()->isPointerTy() || !idx->getType()->isIntegerTy()) {
+            throw_code_gen_exception(node, "incompatible type for subscript");
+        }
+        cur_node = left_cur_node;
+        CurNodeStepDown();
 
-    return IR_builder.CreateGEP(array->getType()->getNonOpaquePointerElementType(), array, idx);
+        return IR_builder.CreateGEP(array->getType()->getNonOpaquePointerElementType(), array, idx);
 }
 
 DEF_GEN(kAssign) {
-    return GenExpression(node);
+        return GenExpression(node);
 }
 
 DEF_GEN(KUAsign) {
-    return GenExpression(node);
+        return GenExpression(node);
 }
 
 DEF_GEN(kUnionType) {
@@ -849,36 +852,36 @@ DEF_GEN(kEnumType) {
 }
 
 DEF_GEN(kRet) {
-    if (!cur_func_)
+        if (!cur_func_)
         throw_code_gen_exception(node, "return statement out of function");
-    if (!node->child_) {
-        if (!cur_func_->getReturnType()->isVoidTy())
-            throw_code_gen_exception(node, "return type unmatched");
-        else {
-            IR_builder.CreateRetVoid();
-            return {};
+        if (!node->child_) {
+            if (!cur_func_->getReturnType()->isVoidTy())
+                throw_code_gen_exception(node, "return type unmatched");
+            else {
+                IR_builder.CreateRetVoid();
+                return {};
+            }
         }
-    }
 
-    auto ret_value = GenExpression(node->child_).GetVariable();
-    ret_value = CastToType(cur_func_->getReturnType(), ret_value);
-    if (!ret_value)
+        auto ret_value = GenExpression(node->child_).GetVariable();
+        ret_value = CastToType(cur_func_->getReturnType(), ret_value);
+        if (!ret_value)
         throw_code_gen_exception(node, "return type unmatched");
-    return IR_builder.CreateRet(ret_value);
+        return IR_builder.CreateRet(ret_value);
 }
 
 DEF_GEN(kBreak) {
-    if (!cur_func_ || CodeGenerator::loop_stack.empty())
+        if (!cur_func_ || CodeGenerator::loop_stack.empty())
         throw_code_gen_exception(node, "break statement out of function");
-    auto loop_end = loop_stack.back().second;
-    return IR_builder.CreateBr(loop_end);
+        auto loop_end = loop_stack.back().second;
+        return IR_builder.CreateBr(loop_end);
 }
 
 DEF_GEN(kCont) {
-    if (!cur_func_ || CodeGenerator::loop_stack.empty())
+        if (!cur_func_ || CodeGenerator::loop_stack.empty())
         throw_code_gen_exception(node, "break statement out of function");
-    auto loop_begin = loop_stack.back().first;
-    return IR_builder.CreateBr(loop_begin);
+        auto loop_begin = loop_stack.back().first;
+        return IR_builder.CreateBr(loop_begin);
 }
 
 void CodeGenerator::GotoBlock(llvm::BasicBlock *block) {
@@ -891,258 +894,289 @@ inline void CodeGenerator::SetCurBlockTo(llvm::BasicBlock *block) {
     IR_builder.SetInsertPoint(block);
 }
 
-inline pAstNode GetCaseStmtByCase(AstNode *node) {
-    if (node->type_ == kLabeledStmt)
-        return GetCaseStmtByCase(node->child_);
+pAstNode GetCaseStmtByCase(AstNode *node) {
     if (node->type_ == kCase)
-        return GetCaseStmtByCase(node->child_->next_);
-    return node;
+        return nullptr;
+    else return node;
 }
 
 inline pAstNode GetCaseStmt(const AstNode *case_value_node) {
 
     if (auto stmt_node = case_value_node->next_) {
-        return GetCaseStmtByCase(stmt_node);
+        if (stmt_node->type_ == kCase)
+            return nullptr;
+        else if (stmt_node->type_ == kLabeledStmt && strcmp(stmt_node->val_, "default") == 0)
+            return GetCaseStmtByCase(stmt_node->child_);
+        else return stmt_node;
     } else return nullptr;
 }
 
 
 DEF_GEN(kIfStmt) {
-    if (!cur_func_)
+        if (!cur_func_)
         throw_code_gen_exception(node, "cannot declare if statement outside a function");
-    auto cond_node = getNChildSafe(node, 0);
-    auto true_node = getNChildSafe(node, 1);
-    auto false_node = getNChildSafe(node, 2);
-    llvm::Value *cond = CastToBool(GenExpression(cond_node).GetVariable());
-    if (!cond)
+        auto cond_node = getNChildSafe(node, 0);
+        auto true_node = getNChildSafe(node, 1);
+        auto false_node = getNChildSafe(node, 2);
+        llvm::Value *cond = CastToBool(GenExpression(cond_node).GetVariable());
+        if (!cond)
         throw_code_gen_exception(cond_node, "expression cannot become a if-condition");
 
-    auto t_block = llvm::BasicBlock::Create(context, "if-true:");
-    auto f_block = llvm::BasicBlock::Create(context, "if-false");
-    auto q_block = llvm::BasicBlock::Create(context, "if-quit");
+        auto t_block = llvm::BasicBlock::Create(context, "if-true:");
+        auto f_block = llvm::BasicBlock::Create(context, "if-false");
+        auto q_block = llvm::BasicBlock::Create(context, "if-quit");
 
-    IR_builder.CreateCondBr(cond, t_block, f_block);
-
-
-    SetCurBlockTo(t_block);
-    CallGenerator(true_node);
-    GotoBlock(q_block);
+        IR_builder.CreateCondBr(cond, t_block, f_block);
 
 
-    SetCurBlockTo(f_block);
-    CallGenerator(false_node);
-    GotoBlock(q_block);
+        SetCurBlockTo(t_block);
+        CallGenerator(true_node);
+        GotoBlock(q_block);
 
-    if (q_block->hasNPredecessorsOrMore(1)) {
-        SetCurBlockTo(q_block);
-    }
 
-    return {};
+        SetCurBlockTo(f_block);
+        CallGenerator(false_node);
+        GotoBlock(q_block);
+
+        if (q_block->hasNPredecessorsOrMore(1)) {
+            SetCurBlockTo(q_block);
+        }
+
+        return {};
+}
+
+inline bool IsDefault(pAstNode node) {
+    return node->type_ == kLabeledStmt && strcmp(node->val_, "default") == 0;
 }
 
 DEF_GEN(kSwitchStmt) {
-    auto match_node = getNChildSafe(node, 0);
-    auto cases_node = getNChildSafe(node, 1);
+        auto match_node = getNChildSafe(node, 0);
+        auto cases_node = getNChildSafe(node, 1);
 
-    auto eq_node = createAstNode(AstNodeType::kBinOp, "==", 2);
+        auto matcher = GenExpression(match_node).GetVariable();
+        if (!matcher->getType()->isIntegerTy())
+        throw_code_gen_exception(match_node, "switch statement only accepts integer types");
 
-    std::vector<AstNode *> case_values;
-    std::vector<AstNode *> case_stmts;
-    AstNode *default_node = nullptr;
-    AstNode *default_stmt = nullptr;
-    CollecCases(cases_node, case_values, default_node);
-    int default_idx = -1;
-    for (int i = 0; i < case_values.size(); i++) {
-        if (case_values[i])
-            case_stmts.push_back(GetCaseStmt(case_values[i]));
-        else {
-            default_idx = i;
-            default_stmt = GetCaseStmtByCase(default_node);
-            case_stmts.push_back(default_stmt);
-        }
-    }
-    if(default_idx >=0) {
-
-    }
-
-
-
-
-    // block vectors for 1) case IR gen, and 2) cmp IR gen
-    std::vector<llvm::BasicBlock *> case_blocks;
-    std::vector<llvm::BasicBlock *> cmp_blocks;
-
-    for (int i = 0; i < case_values.size(); i++)
-        case_blocks.push_back(llvm::BasicBlock::Create(context, "case-" + std::to_string(i)));
-    //Create an extra block for SwitchEnd
-    case_blocks.push_back(llvm::BasicBlock::Create(context, "switch-end"));
-    cmp_blocks.push_back(IR_builder.GetInsertBlock());
-
-    for (int i = 1; i < case_values.size(); i++)
-        cmp_blocks.push_back(llvm::BasicBlock::Create(context, "cmp-" + std::to_string(i)));
-    cmp_blocks.push_back(case_blocks.back());
-    //Generate branches
-    for (int i = 0; i < case_values.size(); i++) {
-        if (i > 0) {
-            SetCurBlockTo(cmp_blocks[i]);
-        }
-        if (case_values[i]) {
-            addChild(eq_node, match_node);
-            addChild(eq_node, case_values[i]);
-            auto cond = GenExpression(eq_node).GetVariable();
-            IR_builder.CreateCondBr(cond, case_blocks[i], cmp_blocks[i + 1]);
-            eq_node->child_ = nullptr;
-        } else                                    //Default
-            IR_builder.CreateBr(case_blocks[i]);
-    }
-    //Generate code for each case statement
-    {
-        ScopeGuard g;
+        std::vector<AstNode *> case_values;
+        std::vector<AstNode *> case_stmts;
+        AstNode *default_node = nullptr;
+        AstNode *default_stmt = nullptr;
+        llvm::BasicBlock *default_block = nullptr;
+        CollecCases(cases_node, case_values, default_node);
+        int default_idx = -1;
         for (int i = 0; i < case_values.size(); i++) {
-            SetCurBlockTo(case_blocks[i]);
-            LoopGuard lg{case_blocks[i + 1], case_blocks.back()};
-            {
-                GenExpression(case_stmts[i]);
+            if (case_values[i])
+                case_stmts.push_back(GetCaseStmt(case_values[i]));
+            else {
+                default_idx = i;
+                default_stmt = GetCaseStmtByCase(default_node);
+                case_stmts.push_back(default_stmt);
             }
         }
-    }
-    //Finish "SwitchEnd" block
-    if (case_blocks.back()->hasNPredecessorsOrMore(1)) {
-        SetCurBlockTo(case_blocks.back());
-    }
+
+        if (default_idx >= 0) {
+            assert(default_stmt && default_node);
+            case_values.erase(case_values.begin() + default_idx);
+            case_stmts.erase(case_stmts.begin() + default_idx);
+        }
 
 
-    free(eq_node); // do not call freeAstNode(), or it would kill the entire tree
-    return {};
+        // block vectors for 1) case IR gen, and 2) cmp IR gen
+        std::vector<llvm::BasicBlock *> case_blocks;
+        std::vector<llvm::BasicBlock *> cmp_blocks;
+
+        for (int i = 0; i < case_values.size(); i++)
+        case_blocks.push_back(llvm::BasicBlock::Create(context, "case-" + std::to_string(i)));
+        case_blocks.push_back(llvm::BasicBlock::Create(context, "switch-end"));
+
+        cmp_blocks.push_back(IR_builder.GetInsertBlock());
+        for (int i = 1; i < case_values.size(); i++)
+        cmp_blocks.push_back(llvm::BasicBlock::Create(context, "cmp-" + std::to_string(i)));
+        if (default_node) {
+            default_block = llvm::BasicBlock::Create(context, "default");
+            cmp_blocks.push_back(default_block);
+        }
+        cmp_blocks.push_back(case_blocks.back());
+
+        for (int i = 0; i < case_values.size(); i++) {
+            if (i > 0) {
+                SetCurBlockTo(cmp_blocks[i]);
+            }
+            if (case_values[i]) {
+                auto to_match = GenExpression(case_values[i]).GetVariable();
+                if (!to_match->getType()->isIntegerTy())
+                    throw_code_gen_exception(case_values[i], "switch statement only accepts integer types");
+                auto cond = IR_builder.CreateICmpEQ(matcher, to_match);
+                IR_builder.CreateCondBr(cond, case_blocks[i], cmp_blocks[i + 1]);
+            } else                                    //Default
+                IR_builder.CreateBr(case_blocks[i]);
+        }
+
+        {
+            ScopeGuard g;
+            for (int i = 0; i < case_values.size(); i++) {
+                SetCurBlockTo(case_blocks[i]);
+                LoopGuard lg{case_blocks[i + 1], case_blocks.back()};
+                {
+//                CallGenerator(case_stmts[i]);
+                    auto head = case_stmts[i];
+                    while (head && head->type_ != kCase && !IsDefault(head)) {
+                        CallGenerator(head);
+                        head = head->next_;
+                    }
+                    GotoBlock(case_blocks[i + 1]);
+                }
+            }
+            if (default_node) {
+                SetCurBlockTo(default_block);
+                LoopGuard lg{case_blocks.back(), case_blocks.back()};
+                {
+                    auto head = default_stmt;
+                    while (head && head->type_ != kCase){
+                        CallGenerator(head);
+                        head = head->next_;
+                    }
+
+                    GotoBlock(case_blocks[default_idx]); // in case the default sentence is in the middle
+                }
+            }
+        }
+        //Finish "SwitchEnd" block
+        if (case_blocks.back()->hasNPredecessorsOrMore(1)) {
+            SetCurBlockTo(case_blocks.back());
+        }
+
+
+        return {};
 }
 
 DEF_GEN(kWhileStmt) {
-    if (!cur_func_)
+        if (!cur_func_)
         throw_code_gen_exception(node, "cannot declare while statement outside a function");
-    auto cond_node = getNChildSafe(node, 0);
-    auto body_node = getNChildSafe(node, 1);
+        auto cond_node = getNChildSafe(node, 0);
+        auto body_node = getNChildSafe(node, 1);
 
-    auto loop_begin = llvm::BasicBlock::Create(context, "whl_begin");
-    auto loop_body = llvm::BasicBlock::Create(context, "whl_body");
-    auto loop_end = llvm::BasicBlock::Create(context, "whl_end");
+        auto loop_begin = llvm::BasicBlock::Create(context, "whl_begin");
+        auto loop_body = llvm::BasicBlock::Create(context, "whl_body");
+        auto loop_end = llvm::BasicBlock::Create(context, "whl_end");
 
-    IR_builder.CreateBr(loop_begin);
+        IR_builder.CreateBr(loop_begin);
 //    cur_func_->getBasicBlockList().push_back(c_block);
 //    IR_builder.SetInsertPoint(c_block);
-    SetCurBlockTo(loop_begin);
-    auto cond = CastToBool(GenExpression(cond_node).GetVariable());
-    if (!cond)
+        SetCurBlockTo(loop_begin);
+        auto cond = CastToBool(GenExpression(cond_node).GetVariable());
+        if (!cond)
         throw_code_gen_exception(node, "expression cannot become a while-condition");
 
-    IR_builder.CreateCondBr(cond, loop_body, loop_end);
+        IR_builder.CreateCondBr(cond, loop_body, loop_end);
 
-    SetCurBlockTo(loop_body);
-    {
-        LoopGuard g(loop_begin, loop_end);
-        CallGenerator(body_node);
-    }
+        SetCurBlockTo(loop_body);
+        {
+            LoopGuard g(loop_begin, loop_end);
+            CallGenerator(body_node);
+        }
 
-    GotoBlock(loop_begin);
-    SetCurBlockTo(loop_end);
-    return {};
+        GotoBlock(loop_begin);
+        SetCurBlockTo(loop_end);
+        return {};
 }
 
 DEF_GEN(kDoWhileStmt) {
-    if (!cur_func_)
+        if (!cur_func_)
         throw_code_gen_exception(node, "cannot declare for statement outside a function");
-    auto loop_body_node = getNChildSafe(node, 0);
-    auto loop_cond_node = getNChildSafe(node, 1);
+        auto loop_body_node = getNChildSafe(node, 0);
+        auto loop_cond_node = getNChildSafe(node, 1);
 
-    llvm::BasicBlock *loop_body = llvm::BasicBlock::Create(context, "dw_body");
-    llvm::BasicBlock *loop_cond = llvm::BasicBlock::Create(context, "dw_cond");
-    llvm::BasicBlock *loop_end = llvm::BasicBlock::Create(context, "dw_end");
+        llvm::BasicBlock *loop_body = llvm::BasicBlock::Create(context, "dw_body");
+        llvm::BasicBlock *loop_cond = llvm::BasicBlock::Create(context, "dw_cond");
+        llvm::BasicBlock *loop_end = llvm::BasicBlock::Create(context, "dw_end");
 
-    IR_builder.CreateBr(loop_body);
-    SetCurBlockTo(loop_body);
-    {
-        LoopGuard f(loop_cond, loop_end);
-        CallGenerator(loop_body_node);
-    }
-    GotoBlock(loop_cond);
+        IR_builder.CreateBr(loop_body);
+        SetCurBlockTo(loop_body);
+        {
+            LoopGuard f(loop_cond, loop_end);
+            CallGenerator(loop_body_node);
+        }
+        GotoBlock(loop_cond);
 
-    SetCurBlockTo(loop_cond);
-    auto cond = CastToBool(GenExpression(loop_cond_node).GetVariable());
+        SetCurBlockTo(loop_cond);
+        auto cond = CastToBool(GenExpression(loop_cond_node).GetVariable());
 
-    if (!cond) {
-        throw_code_gen_exception(node, "expression cannot become a do-while-condition");
-    }
+        if (!cond) {
+            throw_code_gen_exception(node, "expression cannot become a do-while-condition");
+        }
 
-    IR_builder.CreateCondBr(cond, loop_body, loop_end);
-    SetCurBlockTo(loop_end);
-    return {};
+        IR_builder.CreateCondBr(cond, loop_body, loop_end);
+        SetCurBlockTo(loop_end);
+        return {};
 }
 
 DEF_GEN(kForStmt) {
-    auto for_init_node = getNChildSafe(node, 0);
-    auto for_cond_node = getNChildSafe(node, 1);
-    auto for_update_node = getNChildSafe(node, 2);
-    auto for_body_node = getNChildSafe(node, 3);
+        auto for_init_node = getNChildSafe(node, 0);
+        auto for_cond_node = getNChildSafe(node, 1);
+        auto for_update_node = getNChildSafe(node, 2);
+        auto for_body_node = getNChildSafe(node, 3);
 
-    if (for_init_node->type_ != kNULL)
+        if (for_init_node->type_ != kNULL)
         GenExpression(for_init_node);
 
-    auto loop_begin = llvm::BasicBlock::Create(context, "for_begin");
-    auto loop_body = llvm::BasicBlock::Create(context, "for_body");
-    auto loop_update = llvm::BasicBlock::Create(context, "for_update");
-    auto loop_end = llvm::BasicBlock::Create(context, "for_end");
+        auto loop_begin = llvm::BasicBlock::Create(context, "for_begin");
+        auto loop_body = llvm::BasicBlock::Create(context, "for_body");
+        auto loop_update = llvm::BasicBlock::Create(context, "for_update");
+        auto loop_end = llvm::BasicBlock::Create(context, "for_end");
 
-    GotoBlock(loop_begin);
-    SetCurBlockTo(loop_begin);
+        GotoBlock(loop_begin);
+        SetCurBlockTo(loop_begin);
 
-    llvm::Value *cond = IR_builder.getInt1(true);
-    if (for_cond_node->type_ != kNULL)
+        llvm::Value *cond = IR_builder.getInt1(true);
+        if (for_cond_node->type_ != kNULL)
         cond = CastToBool(GenExpression(for_cond_node).GetVariable());
-    if (!cond)
+        if (!cond)
         throw_code_gen_exception(node, "expression cannot become a for-condition");
 
-    IR_builder.CreateCondBr(cond, loop_body, loop_end);
+        IR_builder.CreateCondBr(cond, loop_body, loop_end);
 
-    SetCurBlockTo(loop_body);
-    {
-        LoopGuard g{loop_update, loop_end};
-        CallGenerator(for_body_node);
-    }
+        SetCurBlockTo(loop_body);
+        {
+            LoopGuard g{loop_update, loop_end};
+            CallGenerator(for_body_node);
+        }
 
-    GotoBlock(loop_update);
-    SetCurBlockTo(loop_update);
-    if (for_update_node->type_ != kNULL)
+        GotoBlock(loop_update);
+        SetCurBlockTo(loop_update);
+        if (for_update_node->type_ != kNULL)
         GenExpression(for_update_node);
-    IR_builder.CreateBr(loop_begin);
+        IR_builder.CreateBr(loop_begin);
 
-    SetCurBlockTo(loop_end);
-    return {};
+        SetCurBlockTo(loop_end);
+        return {};
 }
 
 DEF_GEN(kGoto) {
-    if (!cur_func_)
+        if (!cur_func_)
         throw_code_gen_exception(node, "cannot declare for statement outside a function");
-    auto label_name = std::string{node->child_->val_};
-    auto label_block = GetBlock(label_name);
-    if (!label_block) {
-        label_block = llvm::BasicBlock::Create(context, label_name);
-        block_table[label_name] = label_block;
-    }
+        auto label_name = std::string{ node->child_->val_ };
+        auto label_block = GetBlock(label_name);
+        if (!label_block) {
+            label_block = llvm::BasicBlock::Create(context, label_name);
+            block_table[label_name] = label_block;
+        }
 
-    GotoBlock(label_block);
-    return {};
+        GotoBlock(label_block);
+        return {};
 }
 
 DEF_GEN(kLabeledStmt) {
-    auto label_name = std::string{node->val_};
-    auto label_block = GetBlock(label_name);
-    if (!label_block) {
-        label_block = llvm::BasicBlock::Create(context, label_name);
-        block_table[label_name] = label_block;
-    }
-    GotoBlock(label_block);
-    SetCurBlockTo(label_block);
-    CallGenerator(node->child_);
-    return {};
+        auto label_name = std::string{ node->val_ };
+        auto label_block = GetBlock(label_name);
+        if (!label_block) {
+            label_block = llvm::BasicBlock::Create(context, label_name);
+            block_table[label_name] = label_block;
+        }
+        GotoBlock(label_block);
+        SetCurBlockTo(label_block);
+        CallGenerator(node->child_);
+        return {};
 }
 
 void CodeGenerator::AddTypeDefTreeInfo(const char *name, const AstNode *pNode) {

@@ -364,6 +364,12 @@ pAstNode createLabledStmt(pAstNode lableId, pAstNode stat) {
     return lableId;
 }
 
+pAstNode createLableThroughName(const char* name, pAstNode stat){
+    pAstNode node = createAstNode(kLabeledStmt, name, strlen(name));
+    addChild(node, stat);
+    return node;
+}
+
 pAstNode createTrinaryTreeNode(enum AstNodeType type, pAstNode left, pAstNode mid,
                                pAstNode right) {
     pAstNode node = createAstNode(type, NULL, 0);

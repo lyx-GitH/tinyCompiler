@@ -199,6 +199,8 @@ pAstNode extractType(pAstNode keywords_list);
 
 pAstNode maintainTypeSpecs(pAstNode root);
 
+pAstNode createLableThroughName(const char* name, pAstNode stat);
+
 pAstNode createLabledStmt(pAstNode lableId, pAstNode stat);
 
 pAstNode createEnumerator(pAstNode id, pAstNode value);
