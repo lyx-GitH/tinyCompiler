@@ -415,11 +415,11 @@ DEF_GEN(kFuncDecl) {
 
 }
 
-int GetListLen(const AstNode* node) {
+int GetListLen(const AstNode *node) {
     int l = 0;
-    while(node) {
+    while (node) {
         ++l;
-        node=node->next_;
+        node = node->next_;
     }
     return l;
 }
@@ -431,7 +431,7 @@ DEF_GEN(kVarInit) {
         auto expr_node = getNChildSafe(node, 1);
         auto is_init_list = expr_node->type_ == kInitList;
 
-        if(is_init_list){
+        if (is_init_list) {
             cur_init_ = false;
             cur_init_list_size = GetListLen(expr_node->child_);
             auto alloc_inst = CallGenerator(var_decl_node).GetVariable();
@@ -441,7 +441,6 @@ DEF_GEN(kVarInit) {
             return {};
         }
 
-        auto init_value_sym = is_init_list ? Symbol{} : GenExpression(expr_node);
 
         assert(expr_node);
         ASSERT_TYPE(var_decl_node, kVarDecl);
@@ -450,6 +449,7 @@ DEF_GEN(kVarInit) {
         if (!cur_func_)
             SwapBtwGlobal();
 
+        auto init_value_sym = is_init_list ? Symbol{} : GenExpression(expr_node);
         auto is_const_init_val = is_const_expr(expr_node);
         if (!cur_func_)
             SwapBtwGlobal();
@@ -489,7 +489,6 @@ DEF_GEN(kVarInit) {
     }
 
 }
-
 
 
 void CodeGenerator::CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &collector) {
@@ -620,23 +619,23 @@ DEF_GEN(kPtrType) {
 
 DEF_GEN(kArrType) {
     static int rec_level = 0;
-    ++ rec_level;
+    ++rec_level;
     auto ele_type = getNChildSafe(node, 0);
     auto len = getNChildSafe(node, 1);
     assert(ele_type);
     assert(len);
     auto type_symbol = CallGenerator(ele_type);
     if (len->type_ == kDemNumber && strcmp(len->val_, "*") == 0) {
-        if(cur_init_list_size < 0)
+        if (cur_init_list_size < 0)
             throw_code_gen_exception(node, "needs an initializer list");
-        if(rec_level != 1)
+        if (rec_level != 1)
             throw_code_gen_exception(node, "does not allow empty subscript here");
         --rec_level;
         return TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), cur_init_list_size);
     } else {
-        if(!is_const_expr(len))
+        if (!is_const_expr(len))
             throw_code_gen_exception(len, "cannot dynamically alloc a array currently");
-        auto len_constant = (llvm::ConstantInt*) GenExpression(len).GetVariable();
+        auto len_constant = (llvm::ConstantInt *) GenExpression(len).GetVariable();
         uint64_t len_i = len_constant->getValue().getLimitedValue();
         --rec_level;
         return pValue{TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), len_i)};
@@ -945,7 +944,7 @@ DEF_GEN(kUnionType) {
     }
 
 
-    union_type->setBody(std::vector<llvm::Type*>{max_type});
+    union_type->setBody(std::vector<llvm::Type *>{max_type});
 
     StructMemberMap member_map;
     for (std::size_t i = 0; i < member_names.size(); i++) {
@@ -962,7 +961,34 @@ DEF_GEN(kEnumType) {
     uint32_t enum_value = 0;
     if (enum_list && enum_list->type_ != kNULL) {
         while (enum_list) {
-            CallGenerator(enum_list);
+            std::string enum_name;
+            llvm::ConstantInt *initializer;
+            const AstNode *type_tree;
+            if (enum_list->type_ == kVarInit) {
+                auto expr_node = enum_list->child_->next_;
+                if (!is_const_expr(expr_node))
+                    throw_code_gen_exception(expr_node, "enum type cannot must be a constant at compile time");
+                initializer = (llvm::ConstantInt *) (CastToType(IR_builder.getInt32Ty(),
+                                                                GenExpression(expr_node).GetVariable()));
+                enum_value = initializer->getLimitedValue() + 1;
+                enum_name.assign(enum_list->child_->child_->next_->val_);
+                type_tree = enum_list->child_->child_;
+            } else if (enum_list->type_ == kVarDecl) {
+                initializer = IR_builder.getInt32(enum_value++);
+                enum_name.assign(enum_list->child_->next_->val_);
+                type_tree = enum_list->child_;
+            } else
+                assert(false);
+            auto global_var = new llvm::GlobalVariable(
+                    module,
+                    IR_builder.getInt32Ty(),
+                    true,
+                    llvm::Function::ExternalLinkage,
+                    (llvm::Constant *) initializer,
+                    enum_name
+            );
+            SetSymbol(enum_name, global_var);
+            SetSymbolTypeTree(enum_name, type_tree);
             enum_list = enum_list->next_;
         }
     }

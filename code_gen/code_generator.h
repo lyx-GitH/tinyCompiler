@@ -55,7 +55,6 @@
 #include "llvm/IR/LegacyPassManager.h"
 
 #include "symbol.h"
-#include "init_list.h"
 #include "../types/type_factory.h"
 #include "../types/type_checks.h"
 #include "../parser/tc_parser.h"
