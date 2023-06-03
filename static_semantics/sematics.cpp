@@ -40,6 +40,8 @@ inline bool is_constant_node(pAstNode node) {
 int is_const_expr(pAstNode node) {
     if (!node)
         return false;
+    if(node->type_ == kInitList)
+        return true;
     if (is_constant_node(node))
         return true;
     if (node->type_ == kExpr)

@@ -145,9 +145,9 @@ void CodeGenerator::Optimize(const std::string &opt_level) {
     llvm::FunctionAnalysisManager FAM;
     llvm::CGSCCAnalysisManager CGAM;
     llvm::ModuleAnalysisManager MAM;
-    //Create the new pass manager builder.
+
     llvm::PassBuilder PB;
-    //Register all the basic analyses with the managers.
+
     PB.registerModuleAnalyses(MAM);
     PB.registerCGSCCAnalyses(CGAM);
     PB.registerFunctionAnalyses(FAM);
@@ -416,10 +416,13 @@ DEF_GEN(kFuncDecl) {
 }
 
 int GetListLen(const AstNode *node) {
+    if(node->type_ != kInitList)
+        return -1;
+    auto s_node = node->child_;
     int l = 0;
-    while (node) {
+    while (s_node) {
         ++l;
-        node = node->next_;
+        s_node = s_node->next_;
     }
     return l;
 }
@@ -430,16 +433,19 @@ DEF_GEN(kVarInit) {
         auto var_decl_node = getNChildSafe(node, 0);
         auto expr_node = getNChildSafe(node, 1);
         auto is_init_list = expr_node->type_ == kInitList;
+        cur_init_list_size = GetListLen(expr_node);
 
-        if (is_init_list) {
-            cur_init_ = false;
-            cur_init_list_size = GetListLen(expr_node->child_);
-            auto alloc_inst = CallGenerator(var_decl_node).GetVariable();
-            InitVariableUsingInitList(alloc_inst, expr_node, node);
-            cur_init_list_size = -1;
-            cur_init_ = true;
-            return {};
-        }
+//        if (is_init_list) {
+//            cur_init_ = false;
+//            cur_init_list_size = GetListLen(expr_node->child_);
+//            auto alloc_inst = CallGenerator(var_decl_node).GetVariable();
+////            SwapBtwGlobal();
+//            InitVariableUsingInitList(alloc_inst, expr_node, node);
+////            SwapBtwGlobal();
+//            cur_init_list_size = -1;
+//            cur_init_ = true;
+//            return {};
+//        }
 
 
         assert(expr_node);
@@ -457,7 +463,9 @@ DEF_GEN(kVarInit) {
         auto type = CallGenerator(getNChildSafe(var_decl_node, 0)).GetType();
         auto name = std::string{getNChildSafe(var_decl_node, 1)->val_};
         auto type_tree = GetExactTypeTree(var_decl_node->child_);
-        auto initializer = CastToType(type, init_value_sym.GetVariable());
+        auto initializer = is_init_list ? InitVariableUsingInitList(type, expr_node, expr_node) : CastToType(type,
+                                                                                                             init_value_sym.GetVariable());
+
 
         if (!initializer)
             throw_code_gen_exception(expr_node, "cannot convert expression to target type");
@@ -570,6 +578,8 @@ void CodeGenerator::CollecCases(pAstNode node, std::vector<pAstNode> &collector,
 
 
 void CodeGenerator::SwapBtwGlobal() {
+    if (cur_func_)
+        return;
     auto cur_block = IR_builder.GetInsertBlock();
     IR_builder.SetInsertPoint(global_entry);
     global_entry = cur_block;

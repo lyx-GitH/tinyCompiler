@@ -319,11 +319,13 @@ private:
 
     static void CollecCases(pAstNode node, std::vector<pAstNode> &collector, AstNode *&default_node);
 
-    static void InitVariableUsingInitList(llvm::Value *left_value, const AstNode *init_list, const AstNode* where);
+    static llvm::Constant *InitVariableUsingInitList(llvm::Type *type, const AstNode *init_list, const AstNode *where);
 
-    static void InitStructUsingInitList(llvm::Value *struct_inst, const AstNode *init_list, const AstNode* where);
+    static llvm::Constant *
+    InitStructUsingInitList(llvm::StructType *struct_type, const AstNode *init_list, const AstNode *where);
 
-    static void InitArrayUsingInitList(llvm::Value *array_inst, const AstNode *init_list, const AstNode* where);
+    static llvm::Constant *
+    InitArrayUsingInitList(llvm::ArrayType *arr_type, const AstNode *init_list, const AstNode *where);
 
     static void CollectInitListValues(const AstNode *init_list_head);
 
@@ -728,13 +730,9 @@ private:
         if (cur_node && cur_node->type_ == kTypeFeature)
             throw_code_gen_exception(node, "cannot assign value to const variables");
         auto right_node = getNChildSafe(node, 1);
-        if (right_node->type_ == kInitList) {
-            InitStructUsingInitList(left.GetVariable(), right_node, node);
-            return left.GetVariable();
-        } else {
-            auto right = GenExpression(getNChildSafe(node, 1), true);
-            return AssignValue(left.GetVariable(), right.GetVariable(), node);
-        }
+        auto right = GenExpression(getNChildSafe(node, 1), true);
+        return AssignValue(left.GetVariable(), right.GetVariable(), node);
+
     }
 
 
