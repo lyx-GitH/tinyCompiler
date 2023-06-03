@@ -619,6 +619,8 @@ DEF_GEN(kPtrType) {
 }
 
 DEF_GEN(kArrType) {
+    static int rec_level = 0;
+    ++ rec_level;
     auto ele_type = getNChildSafe(node, 0);
     auto len = getNChildSafe(node, 1);
     assert(ele_type);
@@ -627,14 +629,16 @@ DEF_GEN(kArrType) {
     if (len->type_ == kDemNumber && strcmp(len->val_, "*") == 0) {
         if(cur_init_list_size < 0)
             throw_code_gen_exception(node, "needs an initializer list");
-        if(type_symbol.GetType()->isArrayTy())
+        if(rec_level != 1)
             throw_code_gen_exception(node, "does not allow empty subscript here");
+        --rec_level;
         return TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), cur_init_list_size);
     } else {
         if(!is_const_expr(len))
             throw_code_gen_exception(len, "cannot dynamically alloc a array currently");
         auto len_constant = (llvm::ConstantInt*) GenExpression(len).GetVariable();
         uint64_t len_i = len_constant->getValue().getLimitedValue();
+        --rec_level;
         return pValue{TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), len_i)};
     }
 }

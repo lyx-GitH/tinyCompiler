@@ -18,7 +18,7 @@ extern int yydebug;
 
 
 int main(int argc, char **argv) {
-    auto src_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.c";
+    auto src_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/test_files/b_plus_tree.c";
     auto vis_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/ast.dot";
     auto obj_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.o";
     auto exe_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.out";

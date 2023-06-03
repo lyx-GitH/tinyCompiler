@@ -65,7 +65,7 @@ void CodeGenerator::InitArrayUsingInitList(llvm::Value *array_inst, const AstNod
 
     uint32_t mem_idx = 0;
     uint32_t mem_size = array_type->getNumElements();
-    while (list_head) {
+    while (list_head && mem_idx < mem_size) {
         auto mem_inst = GetArrayMemAt(IR_builder, CastToRightValue(array_inst), mem_idx);
         InitVariableUsingInitList(mem_inst, list_head, where);
         mem_idx++;

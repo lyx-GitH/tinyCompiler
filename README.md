@@ -33,3 +33,17 @@ The syntax tree. inherited from the well-known ZJU project called *miniSQL*
 
 ### About *visualizer*
 This part can Visualize a ast in Type of ```dot``` language. Also inherited from *miniSQL*
+
+## What can TinyCompiler Do?
+
+This compiler supports ***almost*** all common C89 features, ***except***
+- ***define*** statements, as well as ```#ifdef``` ```#endif``` etc.
+- Bit field in struct
+- complex initializer list, like: ```{.x =100, .y=200}```
+- mem-related qualifiers, like ```static```, ```extern```, ```register``` etc.
+
+This compiler ***especially supports***
+- include statement
+- initializer list, like ```int a[] = {1, 2, 3}```
+- function pointers as arguments
+- constant-type assignment checks
