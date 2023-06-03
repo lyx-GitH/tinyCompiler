@@ -492,7 +492,7 @@ DEF_GEN(kVarInit) {
             SetSymbolTypeTree(name, type_tree);
         }
 
-
+        cur_init_list_size = -1;
         return {};
     }
 
