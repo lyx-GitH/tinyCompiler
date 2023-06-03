@@ -12,7 +12,11 @@ extern "C" {
 #include "../ast/ast.h"
 #include "../types/type_checks.h"
 
+void semantics_init();
+
 int is_const_expr(pAstNode node);
+
+int64_t eval_const_expr(pAstNode node);
 
 void assert_valid_typedefs(pAstNode declares);
 

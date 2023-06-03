@@ -55,6 +55,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 
 #include "symbol.h"
+#include "init_list.h"
 #include "../types/type_factory.h"
 #include "../types/type_checks.h"
 #include "../parser/tc_parser.h"
@@ -229,6 +230,7 @@ private:
     static llvm::BasicBlock *global_entry;
     static llvm::Function *global;
     static llvm::Function *cur_func_;
+    static int cur_init_list_size;
     static bool cur_init_;
     static bool en_warn;
     static std::vector<SymbolTable> symbol_table_stack_;
@@ -318,6 +320,13 @@ private:
 
     static void CollecCases(pAstNode node, std::vector<pAstNode> &collector, AstNode *&default_node);
 
+    static void InitVariableUsingInitList(llvm::Value *left_value, const AstNode *init_list, const AstNode* where);
+
+    static void InitStructUsingInitList(llvm::Value *struct_inst, const AstNode *init_list, const AstNode* where);
+
+    static void InitArrayUsingInitList(llvm::Value *array_inst, const AstNode *init_list, const AstNode* where);
+
+    static void CollectInitListValues(const AstNode *init_list_head);
 
     static void SwapBtwGlobal();
 
@@ -719,8 +728,14 @@ private:
         auto left = GenExpression(getNChildSafe(node, 0), false);
         if (cur_node && cur_node->type_ == kTypeFeature)
             throw_code_gen_exception(node, "cannot assign value to const variables");
-        auto right = GenExpression(getNChildSafe(node, 1), true);
-        return AssignValue(left.GetVariable(), right.GetVariable(), node);
+        auto right_node = getNChildSafe(node, 1);
+        if (right_node->type_ == kInitList) {
+            InitStructUsingInitList(left.GetVariable(), right_node, node);
+            return left.GetVariable();
+        } else {
+            auto right = GenExpression(getNChildSafe(node, 1), true);
+            return AssignValue(left.GetVariable(), right.GetVariable(), node);
+        }
     }
 
 

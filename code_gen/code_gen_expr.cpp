@@ -157,7 +157,7 @@ Symbol CodeGenerator::GenExpression(const AstNode *node, bool r_value) {
                 return CodeGenerator::RGenMemOf(node);
             else return CodeGenerator::LGenMemOf(node);
         }
-        default:{
+        default: {
             printf("%s\n", GetSyntaxNodeTypeStr(node->type_));
             assert(false && "Not Implemented yet");
         }
@@ -244,13 +244,21 @@ Symbol CodeGenerator::LGenMemOf(const AstNode *node) {
         throw_code_gen_exception(node, R"(operator '.' or '->' must be applied to structures)");
     }
     auto name = struct_id->getType()->getNonOpaquePointerElementType()->getStructName().str();
-    assert(struct_type_table.contains(name));
+    bool is_struct = struct_type_table.contains(name);
+    bool is_union = union_type_table.contains(name);
+    if (!is_union && !is_struct)
+        throw_code_gen_exception(node, "unrecognized type");
 
-    auto members = struct_type_table[name];
+    auto members = is_struct ? struct_type_table[name] : union_type_table[name];
     cur_node = GetSymbolTypeTree(name + mem_name);
 
     if (!members.contains(mem_name)) {
         throw_code_gen_exception(node, "unrecognized member name");
+    }
+
+    if (is_union) {
+        auto type = members[mem_name].second;
+        return IR_builder.CreatePointerCast(struct_id, type->getPointerTo());
     }
 
     auto mem_idx = members[mem_name].first;

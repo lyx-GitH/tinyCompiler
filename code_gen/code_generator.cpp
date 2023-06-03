@@ -3,6 +3,7 @@
 //
 
 #include "code_generator.h"
+#include "../static_semantics/sematics.h"
 
 std::string CodeGenerator::cur_struct_name{};
 
@@ -42,6 +43,8 @@ std::set<std::string> CodeGenerator::defined_functions{};
 
 bool CodeGenerator::cur_init_{false};
 
+int CodeGenerator::cur_init_list_size{-1};
+
 bool CodeGenerator::en_warn{true};
 
 std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::binary_gen_left{};
@@ -76,6 +79,7 @@ void CodeGenerator::InitGenerators() {
     LOAD_GEN(kArrType);
     LOAD_GEN(kStructType);
     LOAD_GEN(kUnionType);
+    LOAD_GEN(kEnumType);
 
     LOAD_GEN(kVarInit);
     LOAD_GEN(kVarDecl);
@@ -378,6 +382,7 @@ DEF_GEN(kVarDecl) {
         Symbol s{glob_var};
         SetSymbol(name, s);
         SetSymbolTypeTree(cur_struct_name + name, var_type_node);
+        return glob_var;
     } else {
         // this var is a local var
         auto block_builder = llvm::IRBuilder<>(&cur_func_->getEntryBlock(), cur_func_->getEntryBlock().begin());
@@ -410,46 +415,73 @@ DEF_GEN(kFuncDecl) {
 
 }
 
+int GetListLen(const AstNode* node) {
+    int l = 0;
+    while(node) {
+        ++l;
+        node=node->next_;
+    }
+    return l;
+}
+
 DEF_GEN(kVarInit) {
     {
         VarInitGuard g;
         auto var_decl_node = getNChildSafe(node, 0);
         auto expr_node = getNChildSafe(node, 1);
+        auto is_init_list = expr_node->type_ == kInitList;
+
+        if(is_init_list){
+            cur_init_ = false;
+            cur_init_list_size = GetListLen(expr_node->child_);
+            auto alloc_inst = CallGenerator(var_decl_node).GetVariable();
+            InitVariableUsingInitList(alloc_inst, expr_node, node);
+            cur_init_list_size = -1;
+            cur_init_ = true;
+            return {};
+        }
+
+        auto init_value_sym = is_init_list ? Symbol{} : GenExpression(expr_node);
+
         assert(expr_node);
         ASSERT_TYPE(var_decl_node, kVarDecl);
         CallGenerator(var_decl_node);// this would do semantic checks.
 
         if (!cur_func_)
             SwapBtwGlobal();
-        auto init_value_sym = GenExpression(expr_node);
+
+        auto is_const_init_val = is_const_expr(expr_node);
         if (!cur_func_)
             SwapBtwGlobal();
 
         auto type = CallGenerator(getNChildSafe(var_decl_node, 0)).GetType();
         auto name = std::string{getNChildSafe(var_decl_node, 1)->val_};
-        auto initialzer = CastToType(type, init_value_sym.GetVariable());
+        auto type_tree = GetExactTypeTree(var_decl_node->child_);
+        auto initializer = CastToType(type, init_value_sym.GetVariable());
 
-        if (!initialzer)
+        if (!initializer)
             throw_code_gen_exception(expr_node, "cannot convert expression to target type");
 
         if (cur_func_) {
             auto alloca = AllocFunctionArg(cur_func_, type, name);
-            IR_builder.CreateStore(initialzer, alloca);
+            IR_builder.CreateStore(initializer, alloca);
             SetSymbol(name, alloca);
-            SetSymbolTypeTree(name, var_decl_node->child_);
+            SetSymbolTypeTree(name, type_tree);
         } else {
-
+            auto is_const_type = type_tree->type_ == kTypeFeature;
+            if (is_const_type && !is_const_init_val)
+                throw_code_gen_exception(node, "cannot assign non-compile-time constant value to global constant");
             auto global_var = new llvm::GlobalVariable(
                     module,
                     type,
-                    TypeFactory::IsConst(type),
+                    is_const_type,
                     llvm::Function::ExternalLinkage,
-                    (llvm::Constant *) initialzer,
+                    (llvm::Constant *) initializer,
                     name
             );
             Symbol s{global_var};
             SetSymbol(name, s);
-            SetSymbolTypeTree(name, var_decl_node->child_);
+            SetSymbolTypeTree(name, type_tree);
         }
 
 
@@ -457,6 +489,8 @@ DEF_GEN(kVarInit) {
     }
 
 }
+
+
 
 void CodeGenerator::CollectArgTypes(pAstNode node, std::vector<llvm::Type *> &collector) {
     ASSERT_TYPE(node, kFuncParams);
@@ -591,9 +625,16 @@ DEF_GEN(kArrType) {
     assert(len);
     auto type_symbol = CallGenerator(ele_type);
     if (len->type_ == kDemNumber && strcmp(len->val_, "*") == 0) {
-        return pValue{TypeFactory::Get<llvm::PointerType>(type_symbol.GetType(), 0U)};
+        if(cur_init_list_size < 0)
+            throw_code_gen_exception(node, "needs an initializer list");
+        if(type_symbol.GetType()->isArrayTy())
+            throw_code_gen_exception(node, "does not allow empty subscript here");
+        return TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), cur_init_list_size);
     } else {
-        uint64_t len_i = solveConstantExpr(len);
+        if(!is_const_expr(len))
+            throw_code_gen_exception(len, "cannot dynamically alloc a array currently");
+        auto len_constant = (llvm::ConstantInt*) GenExpression(len).GetVariable();
+        uint64_t len_i = len_constant->getValue().getLimitedValue();
         return pValue{TypeFactory::Get<llvm::ArrayType>(type_symbol.GetType(), len_i)};
     }
 }
@@ -849,11 +890,79 @@ DEF_GEN(KUAsign) {
 }
 
 DEF_GEN(kUnionType) {
+    std::vector<llvm::Type *> member_types;
+    std::vector<std::string> member_names;
+    auto id_node = getNChildSafe(node, 0);
+    assert(id_node);
 
+    std::string union_name;
+
+    if (id_node->type_ == kNULL) {
+        union_name.assign("union-" + std::to_string(struct_type_table.size()));
+    } else if (id_node->type_ == kId) {
+        union_name.assign("union-" + std::string{id_node->val_});
+    } else
+        assert(false);
+
+    auto supposed_type = GetSymbol(union_name);
+    if (supposed_type) {
+        assert(supposed_type->IsType() && supposed_type->GetType()->isStructTy());
+        return supposed_type->GetType();
+    }
+
+    auto decl_list_node = id_node->next_;
+    if (!decl_list_node || decl_list_node->type_ == kNULL) {
+        auto it = GetSymbol(id_node->val_);
+        if (!it || !it->GetType()->isStructTy())
+            throw_code_gen_exception(id_node, "invalid struct type id");
+        else return *it;
+    }
+
+    auto union_type = TypeFactory::Get(llvm::StructType::create(context, union_name));
+    SetType(union_name, union_type);
+
+    uint64_t max_type_size = 0;
+    llvm::Type *max_type = nullptr;
+
+    for (auto cur = decl_list_node; cur; cur = cur->next_) {
+        ASSERT_TYPE(cur, kVarDecl);
+        auto type = CallGenerator(cur->child_).GetType();
+        if (type->isVoidTy())
+            throw_code_gen_exception(cur, "cannot declare a void type variable");
+        member_types.push_back(type);
+        member_names.emplace_back(cur->child_->next_->val_);
+        auto mem_id_name = union_name + std::string{cur->child_->next_->val_};
+        SetSymbolTypeTree(mem_id_name, cur->child_);
+        auto size = data_layout.getTypeAllocSize(type);
+        if (size > max_type_size) {
+            max_type_size = size;
+            max_type = type;
+        }
+    }
+
+
+    union_type->setBody(std::vector<llvm::Type*>{max_type});
+
+    StructMemberMap member_map;
+    for (std::size_t i = 0; i < member_names.size(); i++) {
+        StructMemberType mem{i, member_types[i]};
+        member_map.emplace(member_names[i], mem);
+    }
+    union_type_table.insert(std::make_pair(union_name, std::move(member_map)));
+
+    return union_type;
 }
 
 DEF_GEN(kEnumType) {
-
+    auto enum_list = node->child_->next_;
+    uint32_t enum_value = 0;
+    if (enum_list && enum_list->type_ != kNULL) {
+        while (enum_list) {
+            CallGenerator(enum_list);
+            enum_list = enum_list->next_;
+        }
+    }
+    return IR_builder.getInt32Ty();
 }
 
 DEF_GEN(kRet) {
@@ -1009,6 +1118,7 @@ DEF_GEN(kSwitchStmt) {
         }
         if (case_values[i]) {
             auto to_match = GenExpression(case_values[i]).GetVariable();
+            to_match = CastToType(matcher->getType(), to_match);
             if (!to_match->getType()->isIntegerTy())
                 throw_code_gen_exception(case_values[i], "switch statement only accepts integer types");
             auto cond = IR_builder.CreateICmpEQ(matcher, to_match);

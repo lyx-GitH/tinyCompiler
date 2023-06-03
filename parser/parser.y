@@ -3,7 +3,7 @@
   #include <stdio.h>
   #include "parser.h"
   #include "../exceptions/parser_error.h"
-  #include "../sematics/sematics.h"
+  #include "../static_semantics/sematics.h"
   #include "../types/type_checks.h"
   #define YYDEBUG 1
   #define CDEBUG 1

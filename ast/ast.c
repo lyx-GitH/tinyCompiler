@@ -41,7 +41,7 @@ void assignType(pAstNode dec_list, pAstNode type) {
 
 size_t safe_strlen(char *s) { return s == NULL ? 0 : strlen(s); }
 
-pAstNode copyNode(const struct AstNode* target) {
+pAstNode copyNode(const struct AstNode *target) {
     if (target == NULL) return NULL;
     pAstNode new_node =
             createAstNode(target->type_, target->val_, safe_strlen(target->val_));
@@ -80,7 +80,7 @@ void addNext(pAstNode target, pAstNode next) {
     n->next_ = next;
 }
 
-void merge(pAstNode prev, pAstNode next){
+void merge(pAstNode prev, pAstNode next) {
     addChild(prev, next->child_);
     next->child_ = NULL;
     freeAstNode(next);
@@ -343,19 +343,19 @@ pAstNode maintainTypeSpecs(pAstNode root) {
     // }
 
     // return top;
-    if(root && IS_TYPE(root->type_)) {
-        if(root->next_) {
+    if (root && IS_TYPE(root->type_)) {
+        if (root->next_) {
             pAstNode node = createAstNode(kTypeFeature, NULL, 0);
             addChild(node, root);
             return node;
-        }else {
+        } else {
             return root;
         }
     } else {
         pAstNode node = createAstNode(kType, "int", 3);
         addChild(node, root);
         return node;
-    } 
+    }
 }
 
 pAstNode createLabledStmt(pAstNode lableId, pAstNode stat) {
@@ -364,7 +364,7 @@ pAstNode createLabledStmt(pAstNode lableId, pAstNode stat) {
     return lableId;
 }
 
-pAstNode createLableThroughName(const char* name, pAstNode stat){
+pAstNode createLableThroughName(const char *name, pAstNode stat) {
     pAstNode node = createAstNode(kLabeledStmt, name, strlen(name));
     addChild(node, stat);
     return node;
@@ -392,7 +392,9 @@ pAstNode createEnumerator(pAstNode id, pAstNode value) {
     pAstNode const_int_type = createBinaryTreeNode(kTypeFeature, createAstNode(kType, "int", 3),
                                                    createAstNode(kTypeQualifier, "const", 5));
     pAstNode var_dec = createBinaryTreeNode(kVarDecl, const_int_type, id);
-    return createBinaryTreeNode(kVarInit, var_dec, value);
+    if (value)
+        return createBinaryTreeNode(kVarInit, var_dec, value);
+    else return var_dec;
 }
 
 pAstNode createForStmt(pAstNode exp1, pAstNode exp2, pAstNode exp3, pAstNode stmt) {
@@ -408,7 +410,7 @@ pAstNode createTypeDefTree(pAstNode decl_tree) {
 
 }
 
-pAstNode getNChildSafe(struct AstNode const* node, int n) {
+pAstNode getNChildSafe(struct AstNode const *node, int n) {
     if (!node)
         return NULL;
     assert(n >= 0);
@@ -421,9 +423,9 @@ pAstNode getNChildSafe(struct AstNode const* node, int n) {
 
 uint64_t solveConstantExpr(const struct AstNode *node) {
     assert(node);
-    if(node->type_ == kExpr) {
+    if (node->type_ == kExpr) {
         return solveConstantExpr(node->child_);
-    } else if(IS_NUMBER(node->type_)) {
+    } else if (IS_NUMBER(node->type_)) {
         return strtoll(node->val_, NULL, 0);
     } else {
 
