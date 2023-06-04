@@ -50,6 +50,7 @@ void TCParser::Visualize(bool to_file, const std::string &out_file_path) {
         auto fs = std::ofstream{out_file_path};
         printer.PrintTree(static_cast<std::ostream &>(fs));
     }
+    std::cout << "dump ast to " + out_file_path << std::endl;
 }
 
 pAstNode TCParser::getSyntaxTree() const {

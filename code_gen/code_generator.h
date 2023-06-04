@@ -172,7 +172,7 @@ public:
         system(cmd.c_str());
     }
 
-    void DumpIR(std::string &&file_name);
+    void DumpIR(std::string &file_name);
 
     class ScopeGuard {
     public:

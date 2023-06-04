@@ -8,3 +8,8 @@ fi
 cd build
 cmake ..
 make -j8 && echo done
+cd ..
+
+pwd
+
+ln -sf ./build/tinyCompiler ./tcc

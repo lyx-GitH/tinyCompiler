@@ -186,7 +186,7 @@ void CodeGenerator::GenObjectCode(const std::string &file_name) {
     llvm::raw_fd_ostream Dest(file_name, ec, llvm::sys::fs::OF_None);
 
     if (ec)
-        throw std::runtime_error("Could not open file: " + ec.message());
+        throw std::runtime_error("Could not open file: " + ec.message() + file_name);
 
     auto FileType = llvm::CGFT_ObjectFile;
     llvm::legacy::PassManager PM;
@@ -200,7 +200,7 @@ void CodeGenerator::GenObjectCode(const std::string &file_name) {
     printf("Dump object to %s\n", file_name.c_str());
 }
 
-void CodeGenerator::DumpIR(std::string &&file_name) {
+void CodeGenerator::DumpIR(std::string &file_name) {
     if (file_name.empty()) {
         file_name.assign("IR");
     }
@@ -211,6 +211,7 @@ void CodeGenerator::DumpIR(std::string &&file_name) {
 
     if (!llvm::verifyModule(module, &Out))
         Out << "No errors.\n";
+    std::cout << "Dump IR to " << file_name << std::endl;
 }
 
 
@@ -293,8 +294,6 @@ DEF_GEN(kFuncDef) {
     ASSERT_TYPE(func_body_node, kScope);
 
     auto f = CallGenerator(func_decl_node).GetFunction();
-    printf("fn:\n");
-    f->print(llvm::outs());
 
     defined_functions.insert(f->getName().str());
     {

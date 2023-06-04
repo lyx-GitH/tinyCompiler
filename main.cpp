@@ -6,6 +6,7 @@
 #include "lexer/tcLexer.h"
 #include "parser/tc_parser.h"
 #include "code_gen/code_generator.h"
+#include "compiler/tiny_compiler.h"
 
 
 extern "C" {
@@ -18,18 +19,9 @@ extern int yydebug;
 
 
 int main(int argc, char **argv) {
-    auto src_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/test_files/init_list.c";
-    auto vis_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/ast.dot";
-    auto obj_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.o";
-    auto exe_path = "/Users/liuyuxuan/CLionProjects/tinyCompiler/test/src.out";
+    TinyCompiler tinyCompiler(argc, argv);
+    tinyCompiler.Config();
+    tinyCompiler.Run();
 
-    yydebug = 0; // set this to 1 to enable debugging
-    auto parser = CodeGenerator(src_path);
-    parser.Parse();
-    parser.Visualize(true, vis_path);
-    parser.Generate();
-    parser.PrintIR();
-    std::cout << "end gen" << std::endl;
-    parser.GenObjectCode(obj_path);
     return 0;
 }

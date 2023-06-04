@@ -11,9 +11,12 @@
 
 class TinyCompiler {
 public:
-    TinyCompiler(std::string file_name) : file_name_(std::move(file_name)), parser_(file_name_){};
+    TinyCompiler(int argc, char** argv) : argc_(argc), argv_(argv) {}
 
-    void Compile();
+    void Run();
+
+    void Config();
+
 
     [[nodiscard]] auto &GetConfig() {
         return config;
@@ -21,12 +24,20 @@ public:
 
 private:
     struct {
-        bool dump_ir = true;
+        bool dump_ir{};
+        std::string ir_path{};
+        bool visualize_ast{};
+        std::string ast_path{};
+
+        std::string src_path{};
+        std::string obj_path{};
 
     } config;
-    std::string file_name_;
-    TCParser parser_;
-//    CodeGenerator code_generator_;
+    void PrintArgInfo();
+    std::pair<bool, std::string> TryGetArg(std::map<std::string, int>& args_info, const char* arg_name, const char* default_value);
+    int argc_;
+    char** argv_;
+
 
 };
 
