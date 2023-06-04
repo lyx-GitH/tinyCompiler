@@ -53,6 +53,9 @@ void TinyCompiler::Config() {
 
     auto obj_info = TryGetArg(args_info, "-o", "a.o");
     config.obj_path = obj_info.first ? obj_info.second : "a.o";
+
+    config.opt_level = FindOptLevel(args_info);
+    config.opt = !config.opt_level.empty();
     if (args_info.size() > 1) {
         std::cout << "unrecognized argument pattern!" << std::endl;
         for (const auto &arg: args_info) {
@@ -75,7 +78,11 @@ void TinyCompiler::Run() {
     if (config.visualize_ast)
         parser.Visualize(true, config.ast_path);
 
+
     parser.Generate();
+    if (config.opt)
+        parser.Optimize(config.opt_level);
+
     if (config.dump_ir)
         parser.DumpIR(config.ir_path);
 
@@ -92,4 +99,14 @@ void TinyCompiler::PrintArgInfo() {
     exit(0);
 }
 
+std::string TinyCompiler::FindOptLevel(std::map<std::string, int> &args_info) {
+    std::string opt_level{};
+    for (const auto &it: args_info) {
+        if (it.first.starts_with("-O")) {
+            opt_level = it.first;
+        }
+    }
+    args_info.erase(opt_level);
+    return opt_level;
+}
 

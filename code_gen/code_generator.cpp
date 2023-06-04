@@ -132,6 +132,7 @@ CodeGenerator::pValue CallGenerator(const AstNode *node) {
 }
 
 void CodeGenerator::Optimize(const std::string &opt_level) {
+    std::cout << "begin optimization level "  << opt_level << std::endl;
     static std::map<std::string, llvm::OptimizationLevel> optimizer = {
             {"O0", llvm::OptimizationLevel::O0},
             {"O1", llvm::OptimizationLevel::O1},
