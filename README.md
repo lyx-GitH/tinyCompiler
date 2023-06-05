@@ -7,6 +7,10 @@
 ## How to run
 - run ```run.sh``` and it would do the rest of the work.
 
+## NOTICE
+**Those bizzare template functions in ./types/typefactory.h have meen mostly abandoned, since they cause countless bugs**
+(They are previously desiged to do const-type checks)
+
 ## Features
 ### What do TinyCompiler ***NOT*** support?
 This compiler supports ***almost*** all common C89 features, ***except***
