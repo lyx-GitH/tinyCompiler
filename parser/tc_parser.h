@@ -6,6 +6,7 @@
 #define TINYCOMPILER_TC_PARSER_H
 
 #include <utility>
+#include <filesystem>
 
 extern "C" {
 #include "parser.h"
@@ -17,7 +18,10 @@ extern "C" {
 
 class TCParser {
 public:
-    explicit TCParser(std::string file_path) : file_path_(std::move(file_path)), ast_root_{nullptr}, is_ok_{false} {}
+    explicit TCParser(std::string file_path) : ast_root_{nullptr}, is_ok_{false} {
+        file_path_ = std::filesystem::absolute(file_path);
+    }
+
     ~TCParser() { ; }
 
     void Parse();
@@ -29,8 +33,7 @@ public:
     pAstNode releaseSyntaxTree();
 
 
-
-    [[nodiscard]] bool isParseOK() const{
+    [[nodiscard]] bool isParseOK() const {
         return is_ok_;
     }
 

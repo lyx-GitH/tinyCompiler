@@ -31,14 +31,14 @@ llvm::Value *CodeGenerator::CastToBool(llvm::Value *value) {
 
 }
 
-llvm::Value *CodeGenerator::CastToType(llvm::Type *type, llvm::Value *value, bool is_init_list) {
+llvm::Value *CodeGenerator::CastToType(llvm::Type *type, llvm::Value *value, bool is_init_list, bool enable_warning) {
     if (is_init_list)
         return value;
 
     if (TypeFactory::IsActuallySameType(type, value->getType())) {
         return value;
-    } else {
-        std::cout << "warning: implicit type conversion is conducted" << std::endl;
+    } else if(enable_warning){
+        show_code_gen_warning(cur_ast, "implicit type-casting is under way");
     }
 
     if (type->isPointerTy() && type->getPointerElementType() == value->getType() && value->getType()->isFunctionTy())

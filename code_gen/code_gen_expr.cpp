@@ -192,7 +192,7 @@ llvm::Value *CodeGenerator::RunSub(llvm::Value *lhs, llvm::Value *rhs) {
 }
 
 Symbol CodeGenerator::AssignValue(llvm::Value *lhs, llvm::Value *rhs, const AstNode *node) {
-    rhs = CastToType(lhs->getType()->getNonOpaquePointerElementType(), rhs);
+    rhs = CastToType(lhs->getType()->getNonOpaquePointerElementType(), rhs, false, true);
     if (!rhs) {
         throw_code_gen_exception(node, "incompatible assignment");
     }

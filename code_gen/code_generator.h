@@ -214,6 +214,21 @@ public:
         }
     };
 
+    class AstGuard {
+    public:
+        AstGuard(const AstNode *node) {
+            node_ = cur_ast;
+            cur_ast = node;
+        }
+
+        ~AstGuard() {
+            cur_ast = node_;
+        }
+
+    private:
+        const AstNode *node_;
+    };
+
     inline void PrintIR() {
         module.print(llvm::outs(), nullptr);
         if (llvm::verifyModule(module, &llvm::outs()) == 0)
@@ -334,7 +349,7 @@ private:
 
     static llvm::Value *AllocFunctionArg(llvm::Function *f, llvm::Type *t, const std::string &name);
 
-    static llvm::Value *CastToType(llvm::Type *type, llvm::Value *value, bool is_init_list = false);
+    static llvm::Value *CastToType(llvm::Type *type, llvm::Value *value, bool is_init_list = false, bool enable_warning= false);
 
     static llvm::Value *CastToBool(llvm::Value *value);
 
@@ -359,6 +374,8 @@ private:
     static void SetCurBlockTo(llvm::BasicBlock *block);
 
     static const AstNode *cur_node;
+
+    static const AstNode *cur_ast;
 
     static inline void CurNodeStepDown() {
         if (!cur_node)

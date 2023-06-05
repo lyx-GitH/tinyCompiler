@@ -25,6 +25,8 @@ llvm::Function *CodeGenerator::global{nullptr};
 
 const AstNode *CodeGenerator::cur_node{nullptr};
 
+const AstNode *CodeGenerator::cur_ast{nullptr};
+
 std::vector<CodeGenerator::SymbolTable> CodeGenerator::symbol_table_stack_{};
 
 std::vector<CodeGenerator::TypeTable> CodeGenerator::symbol_type_stack_{};
@@ -128,6 +130,7 @@ void CodeGenerator::InitBasicTypes() {
 }
 
 CodeGenerator::pValue CallGenerator(const AstNode *node) {
+    CodeGenerator::AstGuard g(node);
     if (!node || node->type_ == kNULL)
         return {};
     else return CALL_GEN(node);
