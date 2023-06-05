@@ -45,6 +45,8 @@ bool CodeGenerator::cur_init_{false};
 
 int CodeGenerator::cur_init_list_size{-1};
 
+llvm::Type *CodeGenerator::cur_init_type{nullptr};
+
 bool CodeGenerator::en_warn{true};
 
 std::array<CodeGenerator::GenFunc, MAX_GEN_NUM> CodeGenerator::binary_gen_left{};
@@ -132,7 +134,7 @@ CodeGenerator::pValue CallGenerator(const AstNode *node) {
 }
 
 void CodeGenerator::Optimize(const std::string &opt_level) {
-    std::cout << "begin optimization level "  << opt_level << std::endl;
+    std::cout << "begin optimization level " << opt_level << std::endl;
     static std::map<std::string, llvm::OptimizationLevel> optimizer = {
             {"O0", llvm::OptimizationLevel::O0},
             {"O1", llvm::OptimizationLevel::O1},
@@ -416,7 +418,7 @@ DEF_GEN(kFuncDecl) {
 }
 
 int GetListLen(const AstNode *node) {
-    if(node->type_ != kInitList)
+    if (node->type_ != kInitList)
         return -1;
     auto s_node = node->child_;
     int l = 0;
@@ -435,19 +437,6 @@ DEF_GEN(kVarInit) {
         auto is_init_list = expr_node->type_ == kInitList;
         cur_init_list_size = GetListLen(expr_node);
 
-//        if (is_init_list) {
-//            cur_init_ = false;
-//            cur_init_list_size = GetListLen(expr_node->child_);
-//            auto alloc_inst = CallGenerator(var_decl_node).GetVariable();
-////            SwapBtwGlobal();
-//            InitVariableUsingInitList(alloc_inst, expr_node, node);
-////            SwapBtwGlobal();
-//            cur_init_list_size = -1;
-//            cur_init_ = true;
-//            return {};
-//        }
-
-
         assert(expr_node);
         ASSERT_TYPE(var_decl_node, kVarDecl);
         CallGenerator(var_decl_node);// this would do semantic checks.
@@ -456,27 +445,28 @@ DEF_GEN(kVarInit) {
             SwapBtwGlobal();
 
         auto init_value_sym = is_init_list ? Symbol{} : GenExpression(expr_node);
-        auto is_const_init_val = is_const_expr(expr_node);
+
         if (!cur_func_)
             SwapBtwGlobal();
 
         auto type = CallGenerator(getNChildSafe(var_decl_node, 0)).GetType();
         auto name = std::string{getNChildSafe(var_decl_node, 1)->val_};
         auto type_tree = GetExactTypeTree(var_decl_node->child_);
-        auto initializer = is_init_list ? InitVariableUsingInitList(type, expr_node, expr_node) : CastToType(type,
-                                                                                                             init_value_sym.GetVariable());
-
+        auto initializer = is_init_list ? InitVariableUsingInitList(type, expr_node, expr_node) :
+                           CastToType(type, init_value_sym.GetVariable());
+        cur_init_type = is_init_list ? nullptr : initializer->getType();
+        bool is_const_type = type_tree->type_ == kTypeFeature;
+        bool is_const_init_val = (llvm::dyn_cast<llvm::Constant>(initializer) != nullptr);
 
         if (!initializer)
             throw_code_gen_exception(expr_node, "cannot convert expression to target type");
 
         if (cur_func_) {
             auto alloca = AllocFunctionArg(cur_func_, type, name);
-            IR_builder.CreateStore(initializer, alloca);
+            IR_builder.CreateStore(CastToType(type, initializer, is_init_list), alloca);
             SetSymbol(name, alloca);
             SetSymbolTypeTree(name, type_tree);
         } else {
-            auto is_const_type = type_tree->type_ == kTypeFeature;
             if (is_const_type && !is_const_init_val)
                 throw_code_gen_exception(node, "cannot assign non-compile-time constant value to global constant");
             auto global_var = new llvm::GlobalVariable(
@@ -484,7 +474,7 @@ DEF_GEN(kVarInit) {
                     type,
                     is_const_type,
                     llvm::Function::ExternalLinkage,
-                    (llvm::Constant *) initializer,
+                    (llvm::Constant *) CastToType(type, initializer, is_init_list),
                     name
             );
             Symbol s{global_var};
@@ -611,7 +601,12 @@ DEF_GEN(kFuncType) {
 
 DEF_GEN(kType) {
     ASSERT_TYPE(node, kType);
-    return Symbol{GetType(node->val_)};
+    if (strcmp("auto", node->val_) == 0) {
+        if (!cur_init_type)
+            throw_code_gen_exception(node, "auto not allowed here");
+        return cur_init_type;
+    } else
+        return Symbol{GetType(node->val_)};
 }
 
 DEF_GEN(kTypeAlias) {
@@ -765,6 +760,12 @@ DEF_GEN(kScope) {
     }
 }
 
+inline bool IsFuncVarL(llvm::Type *type) {
+    return type->isPointerTy()
+           && type->getPointerElementType()->isPointerTy()
+           && type->getPointerElementType()->getPointerElementType()->isFunctionTy();
+}
+
 DEF_GEN(kFuncCall) {
     llvm::Function *f = nullptr;
     auto func_name_node = getNChildSafe(node, 0)->child_;
@@ -779,13 +780,14 @@ DEF_GEN(kFuncCall) {
     } else {
         //TODO: finish IR gen for variable function call
         auto func_var = f_v.GetVariable();
-        printf("func-var's type is : ");
-        func_var->getType()->print(llvm::outs(), true);
-        printf("\n");
-        if (!func_var->getType()->isPointerTy() || !func_var->getType()->getPointerElementType()->isFunctionTy())
-            throw_code_gen_exception(node, "invalid callee type");
+        if (!func_var->getType()->isPointerTy() || !func_var->getType()->getPointerElementType()->isFunctionTy()) {
+            if (!IsFuncVarL(func_var->getType()))
+                throw_code_gen_exception(node, "\ninvalid callee type, neither a function nor a function pointer");
+            else func_var = CastToRightValue(func_var);
+        }
+        assert(func_var->getType()->getPointerElementType()->isFunctionTy());
 
-        return IR_builder.CreateCall((llvm::FunctionType *) (func_var->getType()->getPointerElementType()),
+        return IR_builder.CreateCall(llvm::dyn_cast<llvm::FunctionType>(func_var->getType()->getPointerElementType()),
                                      func_var,
                                      args);
 

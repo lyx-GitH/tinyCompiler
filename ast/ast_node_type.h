@@ -64,7 +64,7 @@ enum AstNodeType {
     kBreak,
     kCont,
 
-    kTypeAlias
+    kTypeAlias,
 };
 
 #define IS_NUMBER(TYPE) ((TYPE) >> 2 == 1)

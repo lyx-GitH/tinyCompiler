@@ -17,13 +17,13 @@ CodeGenerator::InitVariableUsingInitList(llvm::Type *type, const AstNode *init_l
             return InitVariableUsingInitList(type, init_list->child_, where);
         else {
             if (init_list) {
-                if (!is_const_expr((AstNode *) init_list))
-                    throw_code_gen_exception(where, "cannot init static value with non-static value");
                 auto value = GenExpression(init_list).GetVariable();
+                if (llvm::dyn_cast<llvm::Constant>(value) == nullptr)
+                    throw_code_gen_exception(where, "cannot use non-constant value in init list");
                 value = CastToType(type, value);
                 return (llvm::Constant *) value;
             } else {
-                auto zero = llvm::ConstantInt::get(type, 0);
+                auto zero = llvm::Constant::getNullValue(type);
                 return zero;
             }
         }

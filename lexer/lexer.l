@@ -43,6 +43,12 @@ ID {LITERAL}+{ID_C}*
     return TYPE;
 }
 
+"auto" {
+    MOVE;
+    NODE(kType);
+    return TYPE;
+}
+
 "const" {
     MOVE;
     NODE(kTypeQualifier);

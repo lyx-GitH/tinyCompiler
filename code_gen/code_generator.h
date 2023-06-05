@@ -230,6 +230,7 @@ private:
     static llvm::Function *global;
     static llvm::Function *cur_func_;
     static int cur_init_list_size;
+    static llvm::Type *cur_init_type;
     static bool cur_init_;
     static bool en_warn;
     static std::vector<SymbolTable> symbol_table_stack_;
@@ -333,7 +334,7 @@ private:
 
     static llvm::Value *AllocFunctionArg(llvm::Function *f, llvm::Type *t, const std::string &name);
 
-    static llvm::Value *CastToType(llvm::Type *type, llvm::Value *value);
+    static llvm::Value *CastToType(llvm::Type *type, llvm::Value *value, bool is_init_list = false);
 
     static llvm::Value *CastToBool(llvm::Value *value);
 
@@ -360,8 +361,8 @@ private:
     static const AstNode *cur_node;
 
     static inline void CurNodeStepDown() {
-        assert(cur_node && cur_node->child_);
-
+        if (!cur_node)
+            return;
         if (cur_node->type_ == kTypeFeature) {
             cur_node = cur_node->child_->child_;
         } else cur_node = cur_node->child_;

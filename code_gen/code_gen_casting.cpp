@@ -31,7 +31,9 @@ llvm::Value *CodeGenerator::CastToBool(llvm::Value *value) {
 
 }
 
-llvm::Value *CodeGenerator::CastToType(llvm::Type *type, llvm::Value *value) {
+llvm::Value *CodeGenerator::CastToType(llvm::Type *type, llvm::Value *value, bool is_init_list) {
+    if (is_init_list)
+        return value;
 
     if (TypeFactory::IsActuallySameType(type, value->getType())) {
         return value;
