@@ -456,7 +456,7 @@ DEF_GEN(kVarInit) {
         auto name = std::string{getNChildSafe(var_decl_node, 1)->val_};
         auto type_tree = GetExactTypeTree(var_decl_node->child_);
         auto initializer = is_init_list ? InitVariableUsingInitList(type, expr_node, expr_node) :
-                           CastToType(type, init_value_sym.GetVariable());
+                           CastToType(type, init_value_sym.GetVariable(), false, true);
         cur_init_type = is_init_list ? nullptr : initializer->getType();
         bool is_const_type = type_tree->type_ == kTypeFeature;
         bool is_const_init_val = (llvm::dyn_cast<llvm::Constant>(initializer) != nullptr);

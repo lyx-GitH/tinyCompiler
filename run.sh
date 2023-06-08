@@ -13,3 +13,4 @@ cd ..
 pwd
 
 ln -sf ./build/tinyCompiler ./tcc
+figlet -f slant "TCC" | lolcat
