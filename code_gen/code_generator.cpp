@@ -769,6 +769,24 @@ inline bool IsFuncVarL(llvm::Type *type) {
            && type->getPointerElementType()->getPointerElementType()->isFunctionTy();
 }
 
+void CodeGenerator::CheckFuncCall(const AstNode *node, llvm::FunctionType *f_type,
+                                  std::vector<llvm::Value *> &arguments) {
+    if (!f_type->isVarArg()) {
+        std::size_t i = 0;
+        for (; i < f_type->getNumParams(); i++) {
+            if (i >= arguments.size())
+                throw_code_gen_exception(node, "too few arguments in function call");
+            auto casted = CastToType(f_type->getParamType(i), arguments[i]);
+            if (!casted)
+                throw_code_gen_exception(node, "unqualified type");
+            arguments[i] = casted;
+        }
+
+        if (i != arguments.size())
+            throw_code_gen_exception(node, "too many arguments in function call");
+    }
+}
+
 DEF_GEN(kFuncCall) {
     llvm::Function *f = nullptr;
     auto func_name_node = getNChildSafe(node, 0)->child_;
@@ -780,8 +798,9 @@ DEF_GEN(kFuncCall) {
     auto f_v = GenExpression(func_name_node, false);
     if (f_v.IsFunction()) {
         f = f_v.GetFunction();
+        CheckFuncCall(node, f->getFunctionType(), args);
+        return IR_builder.CreateCall(f, args);
     } else {
-        //TODO: finish IR gen for variable function call
         auto func_var = f_v.GetVariable();
         if (!func_var->getType()->isPointerTy() || !func_var->getType()->getPointerElementType()->isFunctionTy()) {
             if (!IsFuncVarL(func_var->getType()))
@@ -790,29 +809,12 @@ DEF_GEN(kFuncCall) {
         }
         assert(func_var->getType()->getPointerElementType()->isFunctionTy());
 
+        CheckFuncCall(node, llvm::dyn_cast<llvm::FunctionType>(func_var->getType()->getPointerElementType()), args);
+
         return IR_builder.CreateCall(llvm::dyn_cast<llvm::FunctionType>(func_var->getType()->getPointerElementType()),
                                      func_var,
                                      args);
-
     }
-
-
-    if (!f->isVarArg()) {
-        std::size_t i = 0;
-        for (auto arg_it = f->arg_begin(); arg_it != f->arg_end(); ++arg_it, ++i) {
-            if (i >= args.size())
-                throw_code_gen_exception(node, "too few arguments in function call");
-
-            auto casted = CastToType(arg_it->getType(), args[i]);
-            if (!casted)
-                throw_code_gen_exception(node, "unqualified type");
-
-            args[i] = casted;
-        }
-        if (i != args.size())
-            throw_code_gen_exception(node, "too many arguments in function call");
-    }
-    return IR_builder.CreateCall(f, args);
 }
 
 DEF_GEN(kStructType) {

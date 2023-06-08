@@ -373,6 +373,8 @@ private:
 
     static void SetCurBlockTo(llvm::BasicBlock *block);
 
+    static void CheckFuncCall(const AstNode* node, llvm::FunctionType* f_type, std::vector<llvm::Value*>& arguments);
+
     static const AstNode *cur_node;
 
     static const AstNode *cur_ast;
